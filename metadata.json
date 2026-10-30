@@ -1,0 +1,6 @@
+{
+  "name": "Astro Sivam — Creative Studio",
+  "description": "A premium creative studio for astrosivam.com: a warm ivory and antique gold design system, export-ready assets, poster and festival design, panchangam, service posts and publishing tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

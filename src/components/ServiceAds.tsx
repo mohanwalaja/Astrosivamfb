@@ -1,0 +1,228 @@
+import React, { useState } from "react";
+import { Download, Info, Languages, Megaphone, ScrollText } from "lucide-react";
+import type { Service } from "../types";
+import { getDeity } from "../data/deities";
+import { AD_RULES, adsFor, referencePlates, SERVICE_LOCALES } from "../data/serviceAds";
+import { AD_LAYOUT_MAP, AD_LAYOUTS } from "../lib/serviceAds";
+import { AdCanvas, exportAd, type AdScene } from "./AdCanvas";
+import { Button, Callout, CopyButton, Panel, SectionLabel, Segmented, useToast } from "./ui";
+
+type Role = "ad" | "edu";
+type Lang = "en" | "ta" | "hi";
+
+const LANGUAGES: Array<{ value: Lang; label: string }> = [
+  { value: "en", label: "English" },
+  { value: "ta", label: "தமிழ்" },
+  { value: "hi", label: "हिन्दी" },
+];
+
+/** The painters take a style register; the reference plates are always quiet. */
+const styleFor = (layout: string) => (layout.startsWith("edu") ? "mono" : layout === "ad-statement" ? "mono" : "gopuram");
+
+export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
+  const [role, setRole] = useState<Role>("ad");
+  const [lang, setLang] = useState<Lang>("en");
+  const toast = useToast();
+
+  const ads = adsFor(service.id);
+  const references = referencePlates(service.id);
+  const locale = SERVICE_LOCALES[service.id];
+
+  const art = (id?: string) => (id ? getDeity(id as Parameters<typeof getDeity>[0])?.file ?? null : null);
+
+  const adsScenes: Array<{ id: string; name: string; purpose: string; use: string; scene: AdScene }> = ads.map((ad) => ({
+    id: ad.id,
+    name: AD_LAYOUT_MAP[ad.layout].name,
+    purpose: AD_LAYOUT_MAP[ad.layout].purpose,
+    use: ad.use,
+    scene: {
+      layout: ad.layout,
+      theme: ad.theme,
+      style: styleFor(ad.layout),
+      copy: ad.copy,
+      lang,
+      price: service.price,
+      url: service.url.replace(/^https?:\/\//, ""),
+      motif: service.motif,
+      art: art(ad.art),
+    },
+  }));
+
+  const referenceScenes: Array<{ id: string; name: string; purpose: string; use: string; scene: AdScene }> = references.map((plate) => ({
+    id: plate.id,
+    name: AD_LAYOUT_MAP[plate.layout].name,
+    purpose: AD_LAYOUT_MAP[plate.layout].purpose,
+    use: plate.source,
+    scene: {
+      layout: plate.layout,
+      theme: plate.theme,
+      style: "mono",
+      copy: {
+        kicker: plate.kicker,
+        headline: plate.headline,
+        subline: "",
+        cta: "",
+        facts: plate.facts,
+        step: plate.step,
+        body: plate.body,
+        source: plate.source,
+      },
+      lang: "en",
+      price: "",
+      url: "",
+      motif: service.motif,
+      art: null,
+    },
+  }));
+
+  const cards = role === "ad" ? adsScenes : referenceScenes;
+
+  const download = async (card: (typeof cards)[number]) => {
+    const ok = await exportAd(card.scene, `astrosivam_ad_${card.id}.png`);
+    toast(ok ? `${card.id} exported — 1080 px PNG` : "The browser could not render the plate", ok ? "success" : "error");
+  };
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="min-w-0 space-y-4">
+        <Panel>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Segmented
+              label="Content type"
+              value={role}
+              onChange={setRole}
+              options={[
+                { value: "ad", label: "Advertising", count: adsScenes.length },
+                { value: "edu", label: "Reference plates", count: referenceScenes.length },
+              ]}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Languages className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+              <Segmented
+                label="Language"
+                value={lang}
+                onChange={setLang}
+                options={LANGUAGES.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                  lang: item.value === "en" ? undefined : item.value,
+                }))}
+              />
+            </div>
+          </div>
+
+          <p className="mt-3 text-[11.5px] leading-relaxed text-[#A2937D]">
+            {role === "ad"
+              ? "One report, one action, one price read from the service record. The headline stays in English; the line beneath it follows the language you pick."
+              : "Reference plates teach one idea and sell nothing. The copy is quoted from this service's own explainer, the source is printed on the plate, and no price or action ever appears."}
+          </p>
+        </Panel>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {cards.map((card) => (
+            <Panel key={card.id} padded={false} className="overflow-hidden">
+              <AdCanvas input={card.scene} previewWidth={360} />
+              <div className="border-t border-line p-3.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-[12px] font-semibold text-cream">{card.name}</div>
+                    <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-gold">
+                      {role === "ad" ? `${AD_LAYOUT_MAP[card.scene.layout].width} × ${AD_LAYOUT_MAP[card.scene.layout].height}` : "1080 × 1080"}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />}
+                    onClick={() => void download(card)}
+                  >
+                    PNG
+                  </Button>
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-[#B4A58F]">{card.purpose}</p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[#A2937D]">{card.use}</p>
+              </div>
+            </Panel>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <Panel>
+          <SectionLabel right={<span className="text-[10px] text-[#A2937D]">{AD_LAYOUTS.length} compositions</span>}>
+            The system
+          </SectionLabel>
+          <div className="space-y-2">
+            {AD_LAYOUTS.map((layout) => (
+              <div key={layout.key} className="flex items-start gap-2">
+                <span
+                  className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8.5px] font-bold ${
+                    layout.role === "ad" ? "bg-gold/20 text-gold-soft" : "bg-[rgba(143,191,165,0.16)] text-[#C7E5D5]"
+                  }`}
+                >
+                  {layout.role === "ad" ? <Megaphone className="h-2.5 w-2.5" aria-hidden="true" /> : <ScrollText className="h-2.5 w-2.5" aria-hidden="true" />}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[11.5px] font-medium text-cream">{layout.name}</div>
+                  <div className="text-[10.5px] leading-snug text-[#A2937D]">{layout.bestFor}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel>
+          <SectionLabel>Copy rules</SectionLabel>
+          <ul className="space-y-1.5">
+            {AD_RULES.map((rule) => (
+              <li key={rule} className="flex gap-2 text-[11px] leading-relaxed text-[#B4A58F]">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gold/70" />
+                {rule}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+
+        <Panel>
+          <SectionLabel>Language coverage</SectionLabel>
+          <p className="text-[11px] leading-relaxed text-[#B4A58F]">
+            {locale ? (
+              <>
+                This service ships one prepared Tamil and one prepared Hindi line, both shown beneath the English headline. Service names, prices and
+                the reference plates stay in English.
+              </>
+            ) : (
+              <>This service has no localised line yet, so the language switch leaves the plate in English rather than inventing a translation.</>
+            )}
+          </p>
+          {locale ? (
+            <div className="mt-2 space-y-1">
+              <div lang="ta" className="font-tamil text-[12.5px] text-cream">
+                {locale.tamil}
+              </div>
+              <div lang="hi" className="font-hindi text-[12.5px] text-cream">
+                {locale.hindi}
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.12em] text-[#A2937D]">
+                {locale.review === "source" ? "From the service record" : "Prepared copy · needs a native read"}
+              </div>
+            </div>
+          ) : null}
+        </Panel>
+
+        <Callout tone="quiet" icon={<Info className="h-3.5 w-3.5" aria-hidden="true" />} title="Price and action are never typed">
+          Both come from the service record, so a price change in the data moves every plate at once. The action button always points at{" "}
+          {service.url.replace(/^https?:\/\//, "")}.
+        </Callout>
+
+        <Panel>
+          <SectionLabel>Copy the plate text</SectionLabel>
+          <div className="flex flex-wrap gap-2">
+            <CopyButton text={ads[0]?.copy.headline ?? ""} label="Headline" compact />
+            <CopyButton text={service.url} label="URL" compact />
+            <CopyButton text={locale ? `${locale.tamil}\n${locale.hindi}` : ""} label="Tamil + Hindi" compact />
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
+};
