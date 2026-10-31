@@ -550,7 +550,7 @@ function setup_page(string $error = ''): never
           <small>→ Facebook Login → Settings → Valid OAuth Redirect URIs (must match exactly)</small>
         </div>
         <p>After saving the Meta app settings and this installer, open the deployed site, sign in, go to <strong>Publish</strong>, and select <strong>Connect Meta account</strong>. Choose the Facebook Page that owns the linked Instagram Business or Creator account.</p>
-        <small>If the site was already installed without Meta credentials, do not rerun this one-time installer. Add the same values to the private <code>hosting/config.local.php</code> on the PHP host instead. Never add credentials to frontend files or the Node <code>.env</code> for a production Meta connection.</small>
+        <small>After the first login is created, use the protected <code>/setup/meta</code> page to add or update Meta settings without editing PHP files. Never add credentials to frontend files or the Node <code>.env</code> for a production Meta connection.</small>
       </div>
     </details>
     <button type="submit" class="main">Create secure configuration →</button>
@@ -574,6 +574,136 @@ function copyVal(id){
 </html>
 HTML;
     echo str_replace('<!--SETUP_ERROR-->', $errorHtml, $html);
+    exit;
+}
+
+function save_meta_api_config(array $settings): void
+{
+    global $storageDirectory;
+    $configPath = __DIR__ . '/config.local.php';
+    $localConfig = [];
+    if (is_file($configPath)) {
+        $loaded = require $configPath;
+        if (!is_array($loaded)) throw new RuntimeException('The private PHP config is not a valid array.');
+        $localConfig = $loaded;
+    }
+    // Preserve unrelated local settings and the session/token-encryption key.
+    // Login username/password are included only as validated settings; never rotate
+    // do not rotate AUTH_SESSION_SECRET here, because doing so would invalidate stored tokens.
+    foreach (['AUTH_USERNAME', 'AUTH_PASSWORD', 'META_APP_ID', 'META_APP_SECRET', 'META_REDIRECT_URI', 'META_GRAPH_VERSION', 'SITE_BASE_URL'] as $key) {
+        if (array_key_exists($key, $settings)) $localConfig[$key] = $settings[$key];
+    }
+    if (!is_dir($storageDirectory) && !mkdir($storageDirectory, 0700, true) && !is_dir($storageDirectory)) {
+        throw new RuntimeException('Could not create private storage for the configuration update.');
+    }
+    $temporary = $storageDirectory . '/config-meta-' . bin2hex(random_bytes(8)) . '.tmp';
+    $contents = "<?php\n// Private site and Meta settings saved by the authenticated setup page.\nreturn " . var_export($localConfig, true) . ";\n";
+    if (file_put_contents($temporary, $contents, LOCK_EX) === false) {
+        @unlink($temporary);
+        throw new RuntimeException('Could not write the private Meta configuration.');
+    }
+    @chmod($temporary, 0600);
+    if (!rename($temporary, $configPath)) {
+        @unlink($temporary);
+        throw new RuntimeException('Could not install the private Meta configuration.');
+    }
+    @chmod($configPath, 0600);
+}
+
+function meta_api_setup_page(string $csrf, array $config, string $error = '', bool $saved = false, array $values = []): never
+{
+    header('Content-Type: text/html; charset=utf-8');
+    header('Cache-Control: private, no-store');
+    header('X-Robots-Tag: noindex, nofollow');
+    $escape = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $appId = (string) ($values['app_id'] ?? ($config['META_APP_ID'] ?? ''));
+    $loginUsername = (string) ($values['login_username'] ?? ($config['AUTH_USERNAME'] ?? ''));
+    $siteBase = rtrim((string) ($values['site_base_url'] ?? ($config['SITE_BASE_URL'] ?? 'https://suite.astrosivam.com')), '/');
+    $graphVersion = (string) ($values['graph_version'] ?? ($config['META_GRAPH_VERSION'] ?? 'v26.0'));
+    $secretIsSet = !empty($config['META_APP_SECRET']);
+    $redirect = valid_site_origin($siteBase) ? $siteBase . '/api/meta/callback' : '';
+    $domain = valid_site_origin($siteBase) ? strtolower((string) parse_url($siteBase, PHP_URL_HOST)) : '';
+    $message = $error !== ''
+        ? '<div class="alert error" role="alert">' . $escape($error) . '</div>'
+        : ($saved ? '<div class="alert success" role="status">Meta settings and the suite login username were saved to the private PHP config. New login credentials apply to future sign-ins; already-authenticated sessions remain active until logout or normal timeout. Copy the generated values below into the Meta app dashboard, then reconnect.</div>' : '');
+    $secretHint = $secretIsSet
+        ? 'An App Secret is already saved on this server. Leave this blank to keep it, or enter a replacement if you rotated it.'
+        : 'Required before Connect can work. It is written only to config.local.php and is never shown again.';
+    $html = <<<'HTML'
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark">
+<title>Meta API and suite login setup · Astro Sivam</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:20px;background:#161011;color:#f7f1e4;font:14px/1.55 system-ui,sans-serif}
+main{max-width:900px;margin:20px auto;padding:26px;border:1px solid rgba(231,206,164,.25);border-radius:18px;background:#1d1618;box-shadow:0 24px 80px -40px #000}
+.eyebrow{color:#e3ca99;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}h1{margin:8px 0;font:500 26px Georgia,serif}h2{margin:18px 0 8px;color:#e3ca99;font-size:13px}
+p,li{color:#c7b9a3;font-size:12px;line-height:1.6}p{margin:8px 0}.alert{margin:14px 0;padding:11px 13px;border-radius:9px;font-size:12px}.error{border:1px solid #d8826f;background:rgba(216,130,111,.1);color:#f2b7a9}.success{border:1px solid #6b9878;background:rgba(93,149,112,.1);color:#c8e3cf}
+.notice{margin:14px 0;padding:12px 14px;border:1px solid rgba(199,154,60,.24);border-radius:10px;background:rgba(199,154,60,.07);color:#eddcb8;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;margin:13px 0 6px;color:#c7b9a3;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}input{width:100%;min-height:42px;padding:9px 11px;border:1px solid rgba(231,206,164,.18);border-radius:8px;background:#140f10;color:#fff;font:inherit}input:focus{outline:2px solid #c79a3c;outline-offset:1px}small{display:block;margin-top:5px;color:#948772;font-size:10.5px;line-height:1.5}
+.values{display:grid;grid-template-columns:1fr 1fr;gap:10px}.value{min-width:0;padding:10px;border:1px solid rgba(231,206,164,.13);border-radius:9px;background:#171112}.value label{margin:0 0 6px;color:#A2937D}.copyline{display:flex;gap:6px;align-items:center}.copyline code{min-width:0;flex:1;overflow-wrap:anywhere;color:#eddcb8;font:11px/1.5 ui-monospace,monospace}.copyline button{padding:6px 8px;border:1px solid rgba(231,206,164,.2);border-radius:6px;background:#2a1f14;color:#e3ca99;cursor:pointer;font-size:10px}
+.perms{padding:10px 12px;border:1px solid rgba(231,206,164,.13);border-radius:9px;background:#171112;color:#eddcb8;font:11px/1.8 ui-monospace,monospace;overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 14px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;cursor:pointer}.primary{border:1px solid #eddcb8;background:linear-gradient(180deg,#e8ce96,#bd9138);color:#241706}.secondary{border:1px solid rgba(231,206,164,.2);background:#241b1c;color:#e3ca99}
+a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba(231,206,164,.1);color:#948772;font-size:10.5px;line-height:1.6}
+@media(max-width:620px){main{padding:20px 16px}.grid,.values{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+</head>
+<body><main>
+  <div class="eyebrow">Astro Sivam · Private setup</div>
+  <h1>Meta API and suite login setup</h1>
+  <p>Enter your Meta app credentials and the public HTTPS address for this site. The PHP host saves the credentials privately. The App Secret is never returned to the browser after saving, and user/Page tokens are obtained later through Meta's Connect flow.</p>
+  {{MESSAGE}}
+  <div class="notice"><strong>Important:</strong> This saves the website's server settings. It cannot create a Meta developer app, add products, grant permissions, or approve App Review. Complete those items in <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer">Meta for Developers</a> using the copyable values below.</div>
+  <form method="post" action="/setup/meta" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{CSRF}}">
+    <div class="grid">
+      <div><label for="meta_app_id">Meta App ID</label><input id="meta_app_id" name="meta_app_id" value="{{APP_ID}}" inputmode="numeric" pattern="[0-9]{1,32}" required placeholder="Numeric ID from App settings → Basic"><small>Meta for Developers → My Apps → your app → App settings → Basic. This is not your Page ID or Instagram ID.</small></div>
+      <div><label for="meta_app_secret">Meta App Secret</label><input id="meta_app_secret" name="meta_app_secret" type="password" autocomplete="new-password" placeholder="Paste the Secret from App settings → Basic"><small>{{SECRET_HINT}}</small></div>
+      <div><label for="site_base_url">Public site HTTPS origin</label><input id="site_base_url" name="site_base_url" type="url" value="{{SITE_BASE}}" required placeholder="https://suite.astrosivam.com"><small>Origin only — no path, query, or trailing slash. Must be the same public host visitors use.</small></div>
+      <div><label for="graph_version">Meta Graph API version</label><input id="graph_version" name="graph_version" value="{{GRAPH_VERSION}}" pattern="v[0-9]{1,2}\.[0-9]+" required placeholder="v26.0"><small>Use the version supported by your Meta app. Current project default: v26.0.</small></div>
+    </div>
+    <h2>Suite login</h2>
+    <p>Set the username and, if you want to change it, a new login password here with the Meta settings. Leave both new-password fields blank to keep the current password. The password is never re-displayed; new credentials apply to future sign-ins, while active sessions remain until logout or timeout.</p>
+    <div class="grid">
+      <div><label for="login_username">Login username</label><input id="login_username" name="login_username" value="{{LOGIN_USERNAME}}" maxlength="64" required autocomplete="username"><small>This username is used to sign in to the suite.</small></div>
+      <div><label for="login_password">New login password</label><input id="login_password" name="login_password" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Leave blank to keep current password"><small>Use 8 to 1,024 characters. Leave blank unless changing it.</small></div>
+      <div><label for="login_password_confirm">Confirm new login password</label><input id="login_password_confirm" name="login_password_confirm" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Re-enter the new password"><small>Must match the new password above.</small></div>
+    </div>
+    <div class="actions"><button type="submit" class="primary">Save Meta API and login settings</button><a class="secondary" href="/#facebook">Back to studio</a></div>
+  </form>
+
+  <h2>Copy these generated values into the Meta app</h2>
+  <div class="values">
+    <div class="value"><label>App Domains</label><div class="copyline"><code id="val-domain">{{DOMAIN}}</code><button type="button" onclick="copyValue('val-domain',this)">Copy</button></div></div>
+    <div class="value"><label>Valid OAuth Redirect URI</label><div class="copyline"><code id="val-redirect">{{REDIRECT}}</code><button type="button" onclick="copyValue('val-redirect',this)">Copy</button></div></div>
+    <div class="value"><label>Data Deletion Callback URL</label><div class="copyline"><code id="val-deletion">{{DELETION}}</code><button type="button" onclick="copyValue('val-deletion',this)">Copy</button></div></div>
+    <div class="value"><label>Privacy Policy URL</label><div class="copyline"><code id="val-privacy">https://astrosivam.com/privacy-policy</code><button type="button" onclick="copyValue('val-privacy',this)">Copy</button></div></div>
+    <div class="value"><label>App Category</label><div class="copyline"><code id="val-category">Lifestyle</code><button type="button" onclick="copyValue('val-category',this)">Copy</button></div></div>
+  </div>
+  <h2>Permissions requested by Connect</h2>
+  <div class="perms">pages_show_list · pages_read_engagement · pages_manage_posts · instagram_basic · instagram_content_publish</div>
+  <p>Add <strong>Facebook Login for Web</strong> and <strong>Instagram API with Facebook Login</strong> (not the separate Instagram Login flow). In Facebook Login settings, enable Web OAuth/client OAuth if those toggles are shown and paste the exact callback above into <strong>Valid OAuth Redirect URIs</strong>. During Development mode, test with an app Admin/Developer/Tester who can manage the Facebook Page. Broader use may require Meta review/Advanced Access.</p>
+  <div class="foot">The callback is always derived as <code>SITE_BASE_URL + /api/meta/callback</code>. If you change the domain, update App Domains and Valid OAuth Redirect URIs in Meta too. Never paste an access token here; use <strong>Connect Meta account</strong> after saving to authorize the Page. For app creation and troubleshooting, follow the project's Fresh Facebook + Instagram API setup guide.</div>
+</main>
+<script>
+function copyValue(id,button){const el=document.getElementById(id);if(!el)return;const text=el.textContent;if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>{const old=button.textContent;button.textContent="Copied";setTimeout(()=>button.textContent=old,1200);});}else{const range=document.createRange();range.selectNodeContents(el);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);document.execCommand("copy");selection.removeAllRanges();}}
+(function(){const base=document.getElementById("site_base_url");function sync(){try{const url=new URL((base.value||"").trim());if(url.protocol!=="https:")return;const origin=url.origin;document.getElementById("val-domain").textContent=url.hostname;document.getElementById("val-redirect").textContent=origin+"/api/meta/callback";document.getElementById("val-deletion").textContent=origin+"/api/meta/data-deletion";}catch(_){}}base.addEventListener("input",sync);sync();})();
+</script></body></html>
+HTML;
+    $replace = [
+        '{{MESSAGE}}' => $message,
+        '{{CSRF}}' => $escape($csrf),
+        '{{APP_ID}}' => $escape($appId),
+        '{{LOGIN_USERNAME}}' => $escape($loginUsername),
+        '{{SECRET_HINT}}' => $escape($secretHint),
+        '{{SITE_BASE}}' => $escape($siteBase),
+        '{{GRAPH_VERSION}}' => $escape($graphVersion),
+        '{{DOMAIN}}' => $escape($domain),
+        '{{REDIRECT}}' => $escape($redirect),
+        '{{DELETION}}' => $escape(valid_site_origin($siteBase) ? $siteBase . '/api/meta/data-deletion' : ''),
+    ];
+    echo strtr($html, $replace);
     exit;
 }
 
@@ -1057,6 +1187,82 @@ if ($uriPath === '/api/meta/callback' && $method === 'GET') meta_callback();
 if (!$authenticated) {
     if (str_starts_with($uriPath, '/api/')) json_response(['error' => 'Authentication required'], 401);
     header('Location: /login', true, 302); exit;
+}
+
+if ($uriPath === '/setup/meta' && $method === 'GET') {
+    meta_api_setup_page($csrf, $config, '', ($_GET['saved'] ?? '') === '1');
+}
+
+if ($uriPath === '/setup/meta' && $method === 'POST') {
+    $suppliedCsrf = is_string($_POST['csrf'] ?? null) ? (string) $_POST['csrf'] : '';
+    $expectedCsrf = (string) ($_SESSION['csrf_token'] ?? '');
+    if ($suppliedCsrf === '' || $expectedCsrf === '' || !hash_equals($expectedCsrf, $suppliedCsrf)) {
+        http_response_code(403);
+        meta_api_setup_page($csrf, $config, 'The security token expired. Reload this page and try again.');
+    }
+    $appId = is_string($_POST['meta_app_id'] ?? null) ? trim((string) $_POST['meta_app_id']) : '';
+    $secretInput = is_string($_POST['meta_app_secret'] ?? null) ? trim((string) $_POST['meta_app_secret']) : '';
+    $siteBase = is_string($_POST['site_base_url'] ?? null) ? rtrim(trim((string) $_POST['site_base_url']), '/') : '';
+    $graphVersion = is_string($_POST['graph_version'] ?? null) ? trim((string) $_POST['graph_version']) : '';
+    $loginUsername = is_string($_POST['login_username'] ?? null) ? trim((string) $_POST['login_username']) : '';
+    $newLoginPassword = is_string($_POST['login_password'] ?? null) ? (string) $_POST['login_password'] : '';
+    $newLoginPasswordConfirm = is_string($_POST['login_password_confirm'] ?? null) ? (string) $_POST['login_password_confirm'] : '';
+    $values = ['app_id' => $appId, 'site_base_url' => $siteBase, 'graph_version' => $graphVersion, 'login_username' => $loginUsername];
+    if ($loginUsername === '' || strlen($loginUsername) > 64 || preg_match('/[\\x00-\\x1F\\x7F]/', $loginUsername)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Enter a login username of 1 to 64 characters.', false, $values);
+    }
+    if ($newLoginPassword === '' && $newLoginPasswordConfirm !== '') {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Leave both new-password fields blank to keep the current password.', false, $values);
+    }
+    if ($newLoginPassword !== '' && (strlen($newLoginPassword) < 8 || strlen($newLoginPassword) > 1024)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Use a new login password between 8 and 1,024 characters.', false, $values);
+    }
+    if ($newLoginPassword !== '' && !hash_equals($newLoginPassword, $newLoginPasswordConfirm)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'The new login password fields do not match.', false, $values);
+    }
+    if ($appId === '' || !preg_match('/^[0-9]{1,32}$/', $appId)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Enter the numeric Meta App ID from App settings → Basic.', false, $values);
+    }
+    if (!valid_site_origin($siteBase)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Enter the public HTTPS site origin only, without a path, query, or credentials.', false, $values);
+    }
+    if (!preg_match('/^v[0-9]{1,2}\.[0-9]+$/', $graphVersion)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Use a Graph API version in the format v26.0.', false, $values);
+    }
+    if ($secretInput !== '' && (strlen($secretInput) > 512 || preg_match('/[\x00-\x20\x7F]/', $secretInput))) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'The App Secret contains invalid whitespace or is too long. Copy it again from Meta.', false, $values);
+    }
+    $currentAppId = (string) ($config['META_APP_ID'] ?? '');
+    $currentAppSecret = (string) ($config['META_APP_SECRET'] ?? '');
+    if ($secretInput === '' && ($currentAppSecret === '' || !hash_equals($currentAppId, $appId))) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Enter the App Secret for this App ID. A saved Secret can be retained only when keeping the same App ID.', false, $values);
+    }
+    try {
+        $settings = [
+            'AUTH_USERNAME' => $loginUsername,
+            'META_APP_ID' => $appId,
+            'META_APP_SECRET' => $secretInput !== '' ? $secretInput : $currentAppSecret,
+            'META_REDIRECT_URI' => $siteBase . '/api/meta/callback',
+            'META_GRAPH_VERSION' => $graphVersion,
+            'SITE_BASE_URL' => $siteBase,
+        ];
+        if ($newLoginPassword !== '') $settings['AUTH_PASSWORD'] = $newLoginPassword;
+        save_meta_api_config($settings);
+    } catch (Throwable $error) {
+        error_log('Meta API setup save failed: ' . $error->getMessage());
+        http_response_code(500);
+        meta_api_setup_page($csrf, $config, 'Could not save the private config. Check that the PHP storage folder is writable.', false, $values);
+    }
+    header('Location: /setup/meta?saved=1', true, 303); exit;
 }
 
 try {

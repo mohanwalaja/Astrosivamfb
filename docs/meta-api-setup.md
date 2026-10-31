@@ -62,7 +62,7 @@ For this example, assume the final site address is `https://suite.astrosivam.com
 
    The callback must match `META_REDIRECT_URI` character-for-character: HTTPS, same hostname, exact path, no trailing slash or query string. The setup installer displays copy buttons for the URLs based on the site address you enter.
 
-5. Complete any other required Basic settings Meta marks in the dashboard, then save.
+5. Choose the closest app **Category** available (the setup page suggests **Lifestyle** for this project), complete any other required Basic settings Meta marks, then save.
 
 ## 4. Make the required permissions available
 
@@ -95,7 +95,9 @@ Make sure the website address in the installer is the **same origin** used in Me
 
 ### If the site is already installed
 
-Do **not** rerun the one-time installer. In cPanel File Manager, open the deployed `hosting/config.local.php` and add/update these values, keeping the existing login settings:
+Do **not** rerun the one-time installer. Sign in to the deployed PHP site and open `https://suite.astrosivam.com/setup/meta`. This protected setup page lets you configure the Meta App ID, App Secret, site HTTPS origin, Graph API version, and the suite's login username in one place. You can also set a new login password there; leave both new-password fields blank to keep the current password. The password is never shown again, and the new credentials apply to future sign-ins; already-authenticated sessions remain active until logout or normal timeout. The callback URI is generated from the site origin; the page also gives copy buttons for App Domains, the Data Deletion callback, the Privacy Policy URL, and the five requested permissions. If the same App ID is already saved, leave the App Secret blank to keep it; changing the App ID requires its matching Secret.
+
+Saving this page writes the values to private `hosting/config.local.php` and preserves `AUTH_SESSION_SECRET` so encrypted Page tokens remain readable. It does **not** modify Meta's developer dashboard for you. Copy the generated values into the Meta app's Basic and Facebook Login settings, then reconnect from **Publish**. If the setup page cannot save because the PHP host has locked down writes, use cPanel File Manager and preserve the rest of `config.local.php`:
 
 ```php
 'META_APP_ID'        => 'your-numeric-app-id',

@@ -17,6 +17,7 @@ const PHP = read("hosting/index.php");
 const STATUS = read("src/components/MetaStatus.tsx");
 const PUBLISHER = read("src/components/Publisher.tsx");
 const SUITE = read("src/components/FacebookSuite.tsx");
+const HTACCESS = read("hosting/.htaccess");
 
 test("the status payload is read back from the Graph API, not stored assumptions", () => {
   assert.match(PHP, /function meta_probe_page\(/, "the page probe must exist");
@@ -124,6 +125,45 @@ test("first-time setup does not pin a previous Meta app ID", () => {
   assert.match(setup, /name="meta_app_id"[^>]+placeholder="Your numeric App ID"/);
   assert.match(setup, /name="meta_app_secret"[^>]+type="password"/);
   assert.match(setup, /SITE_BASE_URL \+ \/api\/meta\/callback/);
+});
+
+test("post-install Meta and login setup is authenticated, CSRF protected, and keeps secrets private", () => {
+  const authGate = PHP.indexOf("if (!$authenticated)");
+  const setupRoute = PHP.indexOf("if ($uriPath === '/setup/meta' && $method === 'GET')");
+  assert.ok(authGate >= 0 && setupRoute > authGate, "API setup routes must sit behind the authenticated-session gate");
+  const routeEnd = PHP.indexOf("if ($uriPath === '/api/meta/connect'", setupRoute);
+  const routes = PHP.slice(setupRoute, routeEnd);
+  assert.match(routes, /\$_SESSION\['csrf_token'\][\s\S]*hash_equals/, "saving config must validate the session CSRF token");
+  assert.match(routes, /save_meta_api_config\(/, "the protected route must persist validated settings");
+  assert.match(routes, /login_username[\s\S]*login_password_confirm/, "login credentials can be configured beside Meta credentials");
+  assert.match(routes, /hash_equals\(\$newLoginPassword, \$newLoginPasswordConfirm\)/, "password changes require a matching confirmation");
+  assert.match(routes, /'AUTH_USERNAME' => \$loginUsername/);
+  assert.match(routes, /\$settings\['AUTH_PASSWORD'\] = \$newLoginPassword/, "blank password fields must preserve the current password");
+
+  const formStart = PHP.indexOf("function meta_api_setup_page(");
+  const loginStart = PHP.indexOf("function login_page()", formStart);
+  const form = PHP.slice(formStart, loginStart);
+  assert.match(form, /name="meta_app_secret" type="password"/, "the App Secret is entered in a password field");
+  assert.match(form, /SECRET_HINT/, "the user is told the saved secret is never displayed");
+  assert.doesNotMatch(form, /value="\{\{APP_SECRET\}\}"/, "the saved secret must never be interpolated into HTML");
+  assert.match(form, /name="login_username" value="\{\{LOGIN_USERNAME\}\}"/);
+  assert.match(form, /name="login_password" type="password"/);
+  assert.match(form, /name="login_password_confirm" type="password"/);
+  assert.doesNotMatch(form, /name="login_password"[^>]*value=/, "the stored login password must never be rendered");
+  assert.match(form, /name="site_base_url"/);
+  assert.match(form, /name="graph_version"/);
+  assert.match(form, /val-redirect/);
+  assert.match(form, /val-deletion/);
+  assert.match(STATUS, /href="\/setup\/meta"/, "the signed-in studio links to the protected setup page");
+
+  const writerStart = PHP.indexOf("function save_meta_api_config(");
+  const writer = PHP.slice(writerStart, formStart);
+  assert.match(writer, /var_export\(\$localConfig/);
+  assert.match(writer, /\['AUTH_USERNAME', 'AUTH_PASSWORD', 'META_APP_ID'/, "only the allowlisted site and Meta settings may be written");
+  assert.match(writer, /rename\(\$temporary, \$configPath\)/, "config updates are installed atomically");
+  assert.match(writer, /chmod\(\$configPath, 0600\)/, "the config file is private");
+  assert.match(writer, /do not rotate AUTH_SESSION_SECRET/, "saving Meta settings must not invalidate encrypted tokens");
+  assert.match(HTACCESS, /RewriteRule \^storage\(\?:\/\|\$\) - \[F,L\]/, "storage temp and token files are not directly served");
 });
 
 test("OAuth callback state is one-use, session-bound and expires after ten minutes", () => {
