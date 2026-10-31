@@ -301,8 +301,8 @@ eight hours; a server restart signs existing sessions out.
 - Tamil and Devanagari never get letter-spacing — it breaks shaping — and long greetings shrink then
   wrap instead of overflowing the safe area.
 - Prices verified 25 Oct 2026 against [astrosivam.com/services](https://astrosivam.com/services):
-  Birth Jathagam US$5 · ₹470 · Marriage Compatibility US$5 · ₹470 · Baby Naming US$5 · ₹470 ·
-  Subha Muhurtham US$10 · ₹940 · Daily Panjangam free. Everywhere: 1st report FREE (Beta, one per
+  Birth Jathagam — Basic/Kids 0–10/Students 11–18 US$5 · ₹470 · Bhava/Varga US$10 · ₹940 · Marriage Compatibility US$5 · ₹470 · Baby Naming US$5 · ₹470 ·
+  Subha Muhurtham US$10 · ₹940 · Daily Panjangam free. Age-gated: /birth-jathagam auto-selects Kids 0–10 or Students 11–18 from the entered birth date; adult plans are Basic/Bhava/Varga. Everywhere: 1st report FREE (Beta, one per
   customer) · 90% refund before approval (within 3 working days) · reports checked every 6 hours,
   PDF + tax invoice emailed after admin approval · 7 days of astrologer chat. NOTE: the homepage
   cards on astrosivam.com currently show different amounts (US$18/22/15/20) — this suite follows
