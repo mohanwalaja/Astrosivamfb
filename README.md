@@ -252,13 +252,15 @@ First time here? [`docs/meta-api-setup.md`](docs/meta-api-setup.md) walks throug
 your App ID and App Secret in the Meta dashboard, the one-time app settings, and the
 connect flow, step by step with screenshots-free click paths and a troubleshooting table.
 
-Create a Meta developer app, add Facebook Login for the Web, and set the exact OAuth redirect URL
-from `META_REDIRECT_URI` in the app's Valid OAuth Redirect URIs. The Facebook Page must be managed
-by the account that authorizes the app. For Instagram, switch the Instagram account to Professional
-and link it to that Facebook Page. Request the Page and Instagram publishing permissions needed by
-the app (`pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `instagram_basic`, and
-`instagram_content_publish`). Meta may require App Review/Advanced Access before people other than
-app roles can connect. The app's Graph API version is configurable in `config.local.php`.
+Create a Meta developer app, add Facebook Login for Web, and enable Instagram API with Facebook Login
+(sometimes labelled Instagram Graph API; this integration does not use the separate Instagram Login
+flow). Set the exact OAuth redirect URL from `META_REDIRECT_URI` in the app's Valid OAuth Redirect
+URIs. The Facebook Page must be managed by the account that authorizes the app. For Instagram, switch
+the Instagram account to Professional and link it to that Facebook Page. The Connect flow requests
+the Page and Instagram publishing permissions (`pages_show_list`, `pages_read_engagement`,
+`pages_manage_posts`, `instagram_basic`, and `instagram_content_publish`). Meta may require App
+Review/Advanced Access before people other than app roles can connect. The app's Graph API version
+is configurable in `config.local.php`.
 
 Instagram is stricter than Facebook, and the studio says so instead of hiding it. An Instagram
 professional account (Business or Creator) linked to that Page is required before anything can be
