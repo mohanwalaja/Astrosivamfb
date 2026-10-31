@@ -21,7 +21,7 @@ If you already have an app that you administer, skip to **Step 2**. Otherwise:
 
 1. Sign in at [Meta for Developers](https://developers.facebook.com/) with the Facebook account that manages the Page. If asked, complete Meta's developer registration and accept its terms.
 2. Open [My Apps](https://developers.facebook.com/apps/) and choose **Create app**.
-3. Follow the current creation wizard. Choose an app type/use case that supports **Facebook Login for Web** and the **Instagram API with Facebook Login** (some dashboard versions label this Instagram Graph API). If Meta asks for a business portfolio, select the portfolio that owns or manages the Page. The exact wizard wording can change.
+3. Follow the current creation wizard. For new apps, choose a business type or use case that supports **Facebook Login for Business / Unified Login** and the **Instagram API with Facebook Login**. If Meta asks for a business portfolio, select the portfolio that owns or manages the Page. The dashboard wording can change.
 4. Give the app a name and contact email, then finish **Create app**. Keep it in **Development** mode while testing.
 5. Open the new app's dashboard. In the left menu, choose **App settings → Basic** (older dashboard: **Settings → Basic**).
 6. Copy the numeric **App ID** shown on this page or at the top of the dashboard. This is the value for `META_APP_ID`; it is not the App Secret.
@@ -33,19 +33,21 @@ If you already have an app that you administer, skip to **Step 2**. Otherwise:
 | --- | --- | --- | --- |
 | App ID | Public numeric identifier for your developer app | App dashboard / App settings → Basic | PHP host configuration; safe to identify the app |
 | App Secret | Password for the app | App settings → Basic → Show | Private PHP configuration only |
+| Facebook Login Configuration ID | Identifies the permission/asset configuration (not a password or access token) | Facebook Login for Business → Configurations | `META_LOGIN_CONFIG_ID` in the setup form/PHP config |
 | User/Page access token | Authorization granted for an account/Page | Fetched by the site's **Connect Meta account** flow | Encrypted storage on the PHP host; never copy it by hand |
 
 Do not use a third-party app or an app whose Secret you do not control. If the app is missing from **My Apps**, check that you are signed in with the account that created it, switch business portfolios, or ask an existing app Admin to add you as an Admin. Do not make a duplicate app just because the dashboard is showing a permissions/review warning.
 
 ## 2. Add the login and Instagram API capabilities
 
-In the app dashboard, add/enable the products or use cases that match this integration:
+New Meta apps that use the supported Instagram business use case may require **Unified Login** through **Facebook Login for Business**. The suite supports both that configuration flow and the legacy scope-based OAuth flow.
 
-1. Add **Facebook Login** and select **Web** when asked for a platform. This project uses Meta's standard Facebook Login OAuth dialog, not a separate Instagram Login flow or a Facebook Login for Business configuration flow.
-2. Add/enable **Instagram API with Facebook Login** (some dashboard versions call it **Instagram Graph API** or offer it within an Instagram API setup wizard). Choose the Facebook Login method because the Instagram account will be discovered through its linked Facebook Page.
-3. Keep the app in **Development** mode while testing. Add the Facebook account that will test it under **App roles** (Admin, Developer, or Tester) and accept the invitation if Meta sends one. That account must also have the needed Page access.
+1. In **Facebook Login for Business → Configurations**, create a configuration for a **User access token** (this studio publishes after a user action; do not choose a System User token). Select the Facebook Page and its linked Instagram professional account/assets that the setup allows you to choose.
+2. Add the five permissions listed in Step 4 to that configuration. The PHP callback exchanges an authorization code server-side; Meta documents User access tokens as implicit by default but able to support the authorization-code grant. If the dashboard offers a response/grant choice, enable **Authorization Code**. The site sends `response_type=code` and `override_default_response_type=true`. Save the configuration and copy its numeric **Configuration ID** into `META_LOGIN_CONFIG_ID` on `/setup` or `/setup/meta`.
+3. Enable **Instagram API with Facebook Login** (some dashboards label it Instagram Graph API or make it part of the app's Unified Login use case). This app uses Facebook credentials and a Page-linked professional Instagram account; it does not use the separate Instagram Login flow.
+4. Register the exact callback from Step 3 in the app's redirect settings. Keep the app in **Development** mode while testing. Add the Facebook account under **App roles** (Admin, Developer, or Tester) and accept the invitation; that account must also have the needed Page access.
 
-If the dashboard only offers Instagram Login and not a Facebook Login option, double-check the selected API setup path; it will not match this site's Page-linked OAuth flow.
+For a new Unified Login app, the site sends `config_id` and intentionally omits the legacy `scope` parameter. Select permissions in the Meta configuration itself. Leave `META_LOGIN_CONFIG_ID` blank only for an older classic OAuth app that supports direct scopes. See Meta's [Facebook Login for Business documentation](https://developers.facebook.com/documentation/facebook-login/facebook-login-for-business) for current configuration behavior.
 
 ## 3. Set the domains and exact callback URLs
 
@@ -54,7 +56,7 @@ For this example, assume the final site address is `https://suite.astrosivam.com
 1. In **App settings → Basic**, set **App Domains** to the bare host: `suite.astrosivam.com` — no `https://`, slash, or path. Add the parent domain too only if Meta asks for it.
 2. Set the **Privacy Policy URL** to the public privacy policy for this service. This project's privacy policy is `https://astrosivam.com/privacy-policy`.
 3. If the Basic settings show **User Data Deletion**, set its callback to `https://suite.astrosivam.com/api/meta/data-deletion`. This PHP endpoint is included in the project.
-4. Open **Facebook Login → Settings**. In **Valid OAuth Redirect URIs**, add this exact URI and save it:
+4. Open the relevant **Facebook Login / Facebook Login for Business settings**. In **Valid OAuth Redirect URIs** (or the matching redirect-URI field), add this exact URI and save it:
 
    ```text
    https://suite.astrosivam.com/api/meta/callback
@@ -66,7 +68,7 @@ For this example, assume the final site address is `https://suite.astrosivam.com
 
 ## 4. Make the required permissions available
 
-The site's Connect flow asks Meta for these five permissions:
+The site needs these five permissions for Page discovery and publishing:
 
 ```text
 pages_show_list
@@ -76,15 +78,15 @@ instagram_basic
 instagram_content_publish
 ```
 
-In the app dashboard, open **App Review → Permissions and features** (the menu may be named **Use cases → Permissions and features**) and make these permissions available to the app. Meta's Standard/Advanced Access and review rules vary by permission and by app. In Development mode, use an app Admin/Developer/Tester for your initial test. Before unrelated people can use the integration, complete the applicable App Review/Advanced Access and business-verification requirements Meta shows for this app.
+For **Unified Login**, select all five permissions in the Facebook Login for Business configuration; the site sends that configuration's ID instead of a `scope` list. For an older classic OAuth app, open **App Review → Permissions and features** (sometimes **Use cases → Permissions and features**) and make the five permissions available; the site requests them as scopes. Meta's Standard/Advanced Access and review rules vary by permission and app. In Development mode, use an app Admin/Developer/Tester for the initial test. Before unrelated people can use the integration, complete applicable App Review/Advanced Access and business-verification requirements.
 
-If the Facebook dialog reports **Invalid scopes**, stop and fix the product/permission setup first; do not remove the Instagram scopes if you need Instagram publishing. The site now requests the Page and Instagram permissions together.
+If a new app reports **Invalid Scopes**, confirm it is using Unified Login, create a Facebook Login for Business configuration with the permissions above, then save that configuration's ID in the setup page. The app's new flow does not send the legacy scope list.
 
 ## 5. Save the credentials on the PHP host
 
 ### First-time installation
 
-On the already-deployed PHP site, open `https://suite.astrosivam.com/setup`. Use the one-time key from `storage/setup.key`, set the site's login, and enter the App ID and App Secret in the Meta section. The installer writes them to private `hosting/config.local.php` and derives:
+On the already-deployed PHP site, open `https://suite.astrosivam.com/setup`. Use the one-time key from `storage/setup.key`, set the site's login, and enter the App ID and App Secret in the Meta section. If the app uses Unified Login, also enter the Facebook Login for Business Configuration ID. The installer writes these to private `hosting/config.local.php` and derives:
 
 ```text
 SITE_BASE_URL     = https://suite.astrosivam.com
@@ -95,13 +97,14 @@ Make sure the website address in the installer is the **same origin** used in Me
 
 ### If the site is already installed
 
-Do **not** rerun the one-time installer. Sign in to the deployed PHP site and open `https://suite.astrosivam.com/setup/meta`. This protected setup page lets you configure the Meta App ID, App Secret, site HTTPS origin, Graph API version, and the suite's login username in one place. You can also set a new login password there; leave both new-password fields blank to keep the current password. The password is never shown again, and the new credentials apply to future sign-ins; already-authenticated sessions remain active until logout or normal timeout. The callback URI is generated from the site origin; the page also gives copy buttons for App Domains, the Data Deletion callback, the Privacy Policy URL, and the five requested permissions. If the same App ID is already saved, leave the App Secret blank to keep it; changing the App ID requires its matching Secret.
+Do **not** rerun the one-time installer. Sign in to the deployed PHP site and open `https://suite.astrosivam.com/setup/meta`. This protected setup page lets you configure the Meta App ID, App Secret, Facebook Login for Business Configuration ID, site HTTPS origin, Graph API version, and the suite's login username in one place. You can also set a new login password there; leave both new-password fields blank to keep the current password. The password is never shown again, and the new credentials apply to future sign-ins; already-authenticated sessions remain active until logout or normal timeout. The callback URI is generated from the site origin; the page also gives copy buttons for App Domains, the Data Deletion callback, the Privacy Policy URL, and the five requested permissions. If the same App ID is already saved, leave the App Secret blank to keep it; changing the App ID requires its matching Secret.
 
 Saving this page writes the values to private `hosting/config.local.php` and preserves `AUTH_SESSION_SECRET` so encrypted Page tokens remain readable. It does **not** modify Meta's developer dashboard for you. Copy the generated values into the Meta app's Basic and Facebook Login settings, then reconnect from **Publish**. If the setup page cannot save because the PHP host has locked down writes, use cPanel File Manager and preserve the rest of `config.local.php`:
 
 ```php
 'META_APP_ID'        => 'your-numeric-app-id',
 'META_APP_SECRET'    => 'your-private-app-secret',
+'META_LOGIN_CONFIG_ID' => 'your-facebook-login-business-configuration-id',
 'META_REDIRECT_URI'  => 'https://suite.astrosivam.com/api/meta/callback',
 'META_GRAPH_VERSION' => 'v26.0',
 'SITE_BASE_URL'      => 'https://suite.astrosivam.com',
@@ -125,7 +128,7 @@ No API tokens should be copied into a browser, Meta's App Secret should never be
 | --- | --- |
 | App ID is not visible / app missing from My Apps | Sign in with the personal Facebook account that created the app; switch portfolio; have an existing app Admin grant you the Admin role. |
 | **Invalid OAuth redirect URI**, URL blocked, or error 191 | Match the Facebook Login Valid OAuth Redirect URI to `SITE_BASE_URL + /api/meta/callback` exactly. Use the final HTTPS domain, not localhost, Arena preview, `www` vs non-`www`, or a trailing slash. |
-| **Invalid scopes** in the Facebook dialog | Add the Facebook Login Web and Instagram API with Facebook Login capabilities; enable all five requested permissions in the app; reconnect as an app role while testing. |
+| **Invalid Scopes** listing all five permissions | For a new app using Unified Login, create a Facebook Login for Business **User access token** configuration, select all five permissions and the Page/Instagram assets, then save its numeric Configuration ID in `/setup/meta`. The site must send `config_id` instead of `scope`; leaving the field blank uses legacy OAuth and will keep failing for a new Unified Login app. |
 | Login says the app is in development / user is not allowed | Add that Facebook account to App roles and accept the invitation. A non-role user needs the applicable review/advanced-access approval and the app must be ready for public use. |
 | Connect succeeds, but no Facebook Pages are listed | The authorizing Facebook account has no eligible Page access, `pages_show_list` was not granted, or the app/account lacks access to the Page. Use the account that manages the Page and reconnect. |
 | Page appears, but Instagram is missing | Switch Instagram to Business or Creator, link it to the same Facebook Page, make sure the authorizing Facebook user can manage both, then reconnect. |

@@ -4,7 +4,7 @@ This archive needs PHP, not Node.js, on BigRock. In cPanel Domains, confirm the 
 
 1. Make storage/ writable by PHP. Enable PHP 8.1+, cURL, OpenSSL, Fileinfo, an upload limit of at least 9 MB, and a PHP execution limit of at least five minutes for slow Meta media processing.
 2. Open https://your-domain/setup. The installer creates a private one-time key at storage/setup.key. In cPanel File Manager, view that file and paste its contents into the installer page. The setup key is removed when setup succeeds.
-3. Complete the form with your login username/password and HTTPS site origin. Leave the optional Meta App ID and Secret empty if you are not ready to connect Meta yet. The installer generates AUTH_SESSION_SECRET and writes config.local.php privately for you.
+3. Complete the form with your login username/password and HTTPS site origin. Enter Meta App ID/Secret if ready; for a new app showing Unified Login, also enter the Facebook Login for Business Configuration ID after creating a User access token configuration with the required Page/Instagram permissions (enable Authorization Code if Meta offers that option). These Meta fields may be left blank until configured. The installer generates AUTH_SESSION_SECRET and writes config.local.php privately for you.
 4. The installer redirects to /login when complete. The app and all its assets are protected by the PHP front controller.
 
 Do not upload only dist/; that is a static build and has no server-side login or publishing API. Never share storage/setup.key or config.local.php. Refer to the repository README for full Meta setup instructions.
