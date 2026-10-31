@@ -50,7 +50,7 @@ The private app password and Meta app secret reside in deployment configuration,
 
 - OAuth App ID, App Secret, authorization code and Page tokens stay on the server. Browser components do not mention `access_token` or call `graph.facebook.com`.
 - Page selection is constrained to Page IDs returned for the authenticated authorization; publish rechecks selected Page membership on the server and verifies the current Page-to-Instagram link again immediately before an Instagram post.
-- All PHP mutations (select, disconnect, publish, logout) require the session CSRF token; GET connect uses OAuth state rather than a mutation endpoint.
+- All PHP mutations (select, disconnect, publish, logout, and the authenticated `/setup/meta` settings form) require the session CSRF token; GET connect uses OAuth state rather than a mutation endpoint. The settings form never re-renders the stored App Secret or new login password, writes only validated login/Meta settings atomically with mode 0600, preserves unrelated config and `AUTH_SESSION_SECRET`, and does not invalidate encrypted Page tokens.
 - PHP callback is authenticated and session-bound. Strict PHP session mode, cookie-only sessions, session ID regeneration at login, HttpOnly cookies, and secure cookies on HTTPS are configured.
 - Upload-serving URLs use a random 128-bit basename and are intentionally public for Meta's fetch. The media route only serves recent, local JPEG/PNG files after MIME checking; upload cleanup runs after the publish attempt. The token is not put in the URL.
 - Page/user tokens for ordinary Graph reads and publishing go in an `Authorization: Bearer` header rather than the Graph URL. Graph requests use HTTPS, certificate verification, no redirects, and bounded connect/overall timeouts. Dynamic IDs are URL-encoded; Graph API version is constrained to `vN.N`.
@@ -59,13 +59,13 @@ The private app password and Meta app secret reside in deployment configuration,
 
 ## Test and verification results
 
-- Added 6 source-contract tests in `tests/meta-contract.test.ts` for OAuth state/redirect, encrypted storage and token non-disclosure, error categories, CSRF/session limits, server-side publish/upload guards, Node auth revocation, and PHP-only Meta publishing.
-- **`npm test`: 172/172 pass.**
-- **`npx tsc --noEmit`: clean.**
+- **`npx tsx --test tests/meta-contract.test.ts`: 18/18 pass**, including OAuth scopes, private config handling, setup-page authentication/CSRF, and secret non-disclosure contracts.
+- **`npm run lint`: clean.**
 - **`npm run build`: successful.**
+- Full **`npm test`: 196 passed, 7 failed**. Five failures are unrelated design/content assertions; two Node auth integration tests expect `SameSite=Strict`, while `server.ts` currently issues `SameSite=Lax`. This existing Node-host/test expectation mismatch is outside the PHP Meta setup change; neither the Node auth code nor those tests were changed here.
 - Parsed `hosting/index.php` with a PHP 8.1 grammar parser: **syntax OK**.
 - `git diff --check`: clean.
-- The sandbox has no PHP interpreter, so PHP route execution and PHP-specific behavior were not runtime-tested. Static PHP parse and source-contract tests do not substitute for deployment testing.
+- The sandbox has no PHP interpreter, so the new PHP setup route was syntax-parsed but not runtime-exercised. Static parsing and source-contract tests do not substitute for deployment testing.
 
 No call was made to a Meta API endpoint. No Meta app configuration, permission, account, token, post, or remote image was touched.
 
@@ -76,7 +76,7 @@ No call was made to a Meta API endpoint. No Meta app configuration, permission, 
 3. **Page and Instagram setup.** The Facebook Page must be returned by `/me/accounts`. For Instagram publishing, use a Business or Creator account linked to that Page. The live Page probe must return `instagram_business_account`; cached linkage alone is not enough.
 4. **Expiry and permissions.** Reconnect when Meta reports token code 190. The UI may show an OAuth user-grant expiry returned by Meta, but it cannot promise the Page token expires at the same time. Scope inspection via Meta's token-debugging endpoint is not implemented; missing grants are identified when live reads/publish calls return permission errors.
 5. **Image fetch.** `SITE_BASE_URL` must be the public HTTPS site origin; Meta needs to fetch the random temporary `/_meta-media/<name>` image URL. Test reachability from outside the host in a deliberate prelaunch test. Hosting firewalls, basic-auth proxies, WAF rules or `robots`/CDN behavior can still prevent Meta from fetching it.
-6. **Graph version.** v26.0 is the configured default based on the studio's current API reference. Confirm it remains available for the Meta app, permissions and publishing endpoints immediately before go-live; update `META_GRAPH_VERSION` in private config if Meta's schedule requires another version.
-7. **Hosting.** Confirm HTTPS, Apache rewrite and access-deny rules, PHP 8.1+, cURL/OpenSSL/Fileinfo, `upload_max_filesize` and `post_max_size` ≥ 9 MB, writable-but-private `storage/`, PHP execution time sufficient for media processing, and a private 0600 config. Check backups/logs for private data; redact/restrict query strings for `/api/meta/callback` and outbound OAuth token exchange. Rotating `AUTH_SESSION_SECRET` also changes the token-encryption key, so existing encrypted Page tokens become unreadable and must be reconnected.
+6. **Graph version.** v26.0 is the configured default based on the studio's current API reference. Confirm it remains available for the Meta app, permissions and publishing endpoints immediately before go-live; update it from the authenticated `/setup/meta` page if Meta's schedule requires another version.
+7. **Hosting.** Confirm HTTPS, Apache rewrite and access-deny rules, PHP 8.1+, cURL/OpenSSL/Fileinfo, `upload_max_filesize` and `post_max_size` ≥ 9 MB, writable-but-private `storage/`, PHP execution time sufficient for media processing, and a private 0600 config. `/setup/meta` requires the signed-in session and CSRF token; the `.htaccess` rule blocks direct web requests to `storage/`. Check backups/logs for private data; redact/restrict query strings for `/api/meta/callback` and outbound OAuth token exchange. Rotating `AUTH_SESSION_SECRET` also changes the token-encryption key, so existing encrypted Page tokens become unreadable and must be reconnected.
 8. **Quota and duplicate handling.** The 10/hour/Page throttle is a conservative application guard, not Meta's daily account quota. The integration does not query Meta publishing quota. If a final publish request times out, check the target account before retrying; a lost response can leave the outcome uncertain.
 9. **After deployment.** First use a Meta test account/Page, verify each status/error class and the public image fetch, and only then—with account owner approval—perform an explicitly confirmed test post. That live step was intentionally not performed here.

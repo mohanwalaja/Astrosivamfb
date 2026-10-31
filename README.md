@@ -248,9 +248,12 @@ The Meta App Secret and Page tokens stay on the PHP server; they are never sent 
 
 ### Configure Meta
 
-First time here? [`docs/meta-api-setup.md`](docs/meta-api-setup.md) walks through finding
-your App ID and App Secret in the Meta dashboard, the one-time app settings, and the
-connect flow, step by step with screenshots-free click paths and a troubleshooting table.
+First time here? [`docs/meta-api-setup.md`](docs/meta-api-setup.md) walks through creating
+a Meta app, finding its App ID and App Secret, the permissions, and the Connect flow.
+The one-time `/setup` page accepts login and Meta credentials on first install; after login, the protected
+`/setup/meta` page lets the owner configure the App ID, App Secret, site origin, Graph API version,
+and suite login username together. A new login password is optional; leave both password fields blank
+unless changing it. The page also generates callback/domain values to copy into Meta.
 
 Create a Meta developer app, add Facebook Login for Web, and enable Instagram API with Facebook Login
 (sometimes labelled Instagram Graph API; this integration does not use the separate Instagram Login

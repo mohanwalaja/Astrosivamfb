@@ -168,6 +168,9 @@ export function MetaStatus() {
               {busy ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}
               {label}
             </span>
+            <a href="/setup/meta" className="btn btn-ghost btn-sm" aria-label="Configure Meta API and suite login settings">
+              <ExternalLink className="h-3 w-3" aria-hidden="true" /> API setup
+            </a>
             <Button variant="ghost" size="sm" onClick={() => void check()} disabled={busy} icon={<RefreshCw className="h-3 w-3" />}>
               Check now
             </Button>

@@ -1,6 +1,8 @@
 Options -Indexes -MultiViews
 DirectoryIndex index.php
 RewriteEngine On
+# Never expose private token/config temporary files from the storage directory.
+RewriteRule ^storage(?:/|$) - [F,L]
 RewriteRule ^index\.php$ - [L]
 RewriteRule ^ index.php [QSA,L]
 
