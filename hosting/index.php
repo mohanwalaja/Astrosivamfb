@@ -468,10 +468,112 @@ function setup_page(string $error = ''): never
 {
     header('Content-Type: text/html; charset=utf-8');
     $errorHtml = $error === '' ? '' : '<div class="error" role="alert">' . htmlspecialchars($error, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>';
-    echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>First-time setup · Astro Sivam</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:18px;background:#161011;color:#f7f1e4;font:14px/1.5 system-ui,sans-serif}.wrap{max-width:760px;margin:24px auto;padding:26px 28px;border:1px solid rgba(231,206,164,.28);border-radius:18px;background:#1d1618}.tag{color:#e3ca99;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font:500 26px Georgia,serif;margin:8px 0 6px}p{color:#b4a58f;font-size:13px;line-height:1.55}.note{padding:12px 14px;background:rgba(199,154,60,.07);border:1px solid rgba(199,154,60,.22);border-radius:10px;color:#eddcb8;font-size:12px;line-height:1.5}.error{margin:14px 0;padding:11px 13px;border:1px solid #d8826f;border-radius:9px;background:rgba(216,130,111,.11);color:#f2b7a9;font-size:13px}label{display:block;margin:14px 0 6px;font-size:11.5px;color:#c7b9a3;font-weight:600;letter-spacing:.04em}input{width:100%;padding:10px 11px;border:1px solid rgba(231,206,164,.16);border-radius:8px;background:#140f10;color:#fff;font:inherit;font-size:14px}input:focus{outline:2px solid #c79a3c;outline-offset:1px}small{display:block;margin-top:4px;color:#948772;font-size:11px;line-height:1.45}button.main{margin-top:18px;width:100%;padding:13px 18px;border:0;border-radius:10px;background:linear-gradient(180deg,#e8ce96,#d2aa5a 44%,#bd9138);color:#241706;font:700 13px system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,248,231,.5),0 12px 24px -14px rgba(199,154,60,.7)}button.main:hover{filter:brightness(1.04)}details{margin-top:14px;border:1px solid rgba(231,206,164,.14);border-radius:12px;background:rgba(0,0,0,.16)}details[open]{background:rgba(0,0,0,.22)}summary{cursor:pointer;padding:12px 14px;color:#d8b164;font-size:12.5px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between}summary::-webkit-details-marker{display:none}summary:after{content:"▾";font-size:14px;transition:transform .15s}details[open] summary:after{transform:rotate(180deg)}.meta-inner{padding:4px 14px 14px}h3{margin:16px 0 6px;font:600 13px system-ui,sans-serif;color:#e3ca99;letter-spacing:.02em}.fb-steps{margin:8px 0;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(231,206,164,.14);border-radius:10px}.fb-steps ol{margin:6px 0 0 18px;padding:0;color:#dccfba;font-size:12px;line-height:1.6}.fb-steps li{margin:4px 0}.fb-steps a{color:#e8ce96;text-decoration:none;border-bottom:1px solid rgba(232,206,150,.3)}.fb-steps a:hover{color:#fff}.copy-row{display:flex;gap:6px;align-items:center;margin:6px 0}.copy-row code{flex:1;padding:8px 9px;background:#0f0c0d;border:1px solid rgba(231,206,164,.16);border-radius:7px;font:12px ui-monospace,monospace;color:#eddcb8;word-break:break-all}.copy-btn{flex:none;padding:7px 10px;border:1px solid rgba(231,206,164,.18);border-radius:7px;background:#2a1f14;color:#e3ca99;font:11px system-ui,sans-serif;cursor:pointer}.copy-btn:hover{background:#332818}.badge{display:inline-block;padding:2px 7px;border-radius:999px;background:rgba(199,154,60,.18);border:1px solid rgba(199,154,60,.3);color:#e3ca99;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:600px){.grid2{grid-template-columns:1fr}}.foot{margin-top:16px;padding-top:12px;border-top:1px solid rgba(231,206,164,.12);color:#948772;font-size:11px;line-height:1.5}.ok{color:#b7e3c2}</style></head><body><main class="wrap"><div class="tag">Astro Sivam · One-time setup</div><h1>Set up your private site login <span class="badge">Facebook integrated</span></h1><p>This installer creates the protected PHP configuration for this website and connects your Facebook Meta app in one step. It runs only until setup is complete.</p>' . $errorHtml . '<div class="note"><strong>One-time security check:</strong> In cPanel File Manager, open <code>storage/setup.key</code>, copy its contents, and paste them below. The key is deleted after setup succeeds.</div><form method="post" action="/setup"><label for="setup_code">One-time setup key *</label><input id="setup_code" name="setup_code" required autocomplete="off" placeholder="64-char hex from storage/setup.key"><label for="username">Login username *</label><input id="username" name="username" value="admin" required autocomplete="username"><label for="password">Login password *</label><input id="password" name="password" type="password" minlength="8" required autocomplete="new-password"><small>At least 8 characters. Use a unique strong password.</small><label for="password_confirm">Confirm password *</label><input id="password_confirm" name="password_confirm" type="password" minlength="8" required autocomplete="new-password"><label for="site_base_url">Website HTTPS address *</label><input id="site_base_url" name="site_base_url" type="url" value="https://suite.astrosivam.com" required><small>Only the origin — e.g. <code>https://suite.astrosivam.com</code>. No trailing slash, no path. This becomes SITE_BASE_URL and decides your callback URLs below.</small><details open><summary>Facebook Meta publishing app — let me set it up inside the installer</summary><div class="meta-inner"><p style="margin:0 0 10px;color:#dccfba;font-size:12.5px">Paste your App ID + Secret here and the installer writes <code>config.local.php</code> correctly. The panel on the right shows <em>exactly</em> what to copy back into the Meta dashboard to clear the “Currently ineligible” error.</p><div class="grid2"><div><label for="meta_app_id">Meta App ID</label><input id="meta_app_id" name="meta_app_id" autocomplete="off" value="4721278644775981" placeholder="e.g. 4721278644775981"><small>Found at developers.facebook.com → My Apps → Your app → Dashboard header. Public, safe to paste.</small></div><div><label for="meta_app_secret">Meta App Secret</label><input id="meta_app_secret" name="meta_app_secret" type="password" autocomplete="new-password" placeholder="32-char hex — Show in App settings → Basic"><small>Click Show in App settings → Basic (needs Admin). Treat like a password.</small></div></div><h3>Copy these 5 values into Meta → App Settings → Basic</h3><div class="fb-steps"><ol><li>Open <a href="https://developers.facebook.com/apps/4721278644775981/settings/basic/" target="_blank" rel="noopener">App Settings → Basic for 4721278644775981</a> (log in as the Facebook account that created the app)</li><li>Fill each field with the value on the right → <strong>Save Changes</strong>. The red “ineligible” banner then disappears.</li></ol><div class="copy-row"><code id="val-privacy">https://astrosivam.com/privacy-policy</code><button type="button" class="copy-btn" onclick="copyVal(\'val-privacy\')">Copy</button></div><small>→ Privacy Policy URL</small><div class="copy-row"><code id="val-category">Lifestyle</code><button type="button" class="copy-btn" onclick="copyVal(\'val-category\')">Copy</button></div><small>→ App Settings → Basic → Category (dropdown).</small><div class="copy-row"><code id="val-deletion">https://suite.astrosivam.com/api/meta/data-deletion</code><button type="button" class="copy-btn" onclick="copyVal(\'val-deletion\')">Copy</button></div><small>→ User Data Deletion → <strong>Data Deletion Callback URL</strong>. Installer already creates this endpoint + status page <code>/data-deletion-status</code>.</small><div class="copy-row"><code id="val-domains">suite.astrosivam.com</code><button type="button" class="copy-btn" onclick="copyVal(\'val-domains\')">Copy</button></div><small>→ App Domains (add also <code>astrosivam.com</code> if shown).</small></div><h3>And these 2 in Meta → Facebook Login → Settings</h3><div class="fb-steps"><div class="copy-row"><code id="val-redirect">https://suite.astrosivam.com/api/meta/callback</code><button type="button" class="copy-btn" onclick="copyVal(\'val-redirect\')">Copy</button></div><small>→ Valid OAuth Redirect URIs. Must equal <code>SITE_BASE_URL + /api/meta/callback</code> exactly — no extra slash.</small><div class="copy-row"><code id="val-base">https://suite.astrosivam.com</code><button type="button" class="copy-btn" onclick="copyVal(\'val-base\')">Copy</button></div><small>→ SITE_BASE_URL. Meta fetches publish images from <code>/_meta-media/*</code> under this origin.</small><p style="margin:8px 0 0;color:#94a68a;font-size:11.5px"><span class="ok">✔</span> After installer succeeds, go to your studio <code>/login</code> → <strong>Publish → Connect Meta account</strong> to pick the Page + Instagram account. Direct links: <a href="https://developers.facebook.com/apps/4721278644775981/dashboard/" target="_blank" rel="noopener">Dashboard</a> · <a href="https://developers.facebook.com/apps/4721278644775981/fb-login/settings/" target="_blank" rel="noopener">Login Settings</a></p></div><small style="margin-top:10px;display:block">Leave App ID + Secret blank to finish login setup now — you can add them later in cPanel File Manager by editing <code>hosting/config.local.php</code>.</small></div></details><button type="submit" class="main">Create secure configuration →</button></form><footer>This writes <code>hosting/config.local.php</code> (0600, private, git-ignored) with <code>META_APP_ID</code>, <code>META_APP_SECRET</code>, <code>META_REDIRECT_URI = SITE_BASE_URL + /api/meta/callback</code>, <code>SITE_BASE_URL</code> and v26.0. The setup key is removed after success.</footer></main><script>
-function copyVal(id){const el=document.getElementById(id);if(!el)return;const t=el.textContent;if(navigator.clipboard) navigator.clipboard.writeText(t).then(()=>{const b=el.nextElementSibling;if(b){const o=b.textContent;b.textContent="Copied!";setTimeout(()=>b.textContent=o,1200)}}); else {const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");s.removeAllRanges();}}
-(function(){const base=document.getElementById("site_base_url"), del=document.getElementById("val-deletion"), red=document.getElementById("val-redirect"), bse=document.getElementById("val-base"), dom=document.getElementById("val-domains");function sync(){let v=(base.value||"").trim().replace(/\/+$/,""); if(!v) return; try{const u=new URL(v); const origin=u.origin; if(del) del.textContent=origin+"/api/meta/data-deletion"; if(red) red.textContent=origin+"/api/meta/callback"; if(bse) bse.textContent=origin; if(dom) dom.textContent=u.hostname;}catch(e){}} base.addEventListener("input", sync); sync();})();
-</script></body></html>';
+    $html = <<<'HTML'
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>First-time setup · Astro Sivam</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:18px;background:#161011;color:#f7f1e4;font:14px/1.55 system-ui,sans-serif}
+  .wrap{max-width:780px;margin:24px auto;padding:26px 28px;border:1px solid rgba(231,206,164,.28);border-radius:18px;background:#1d1618}
+  .tag{color:#e3ca99;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font:500 26px Georgia,serif;margin:8px 0 6px}
+  p{color:#b4a58f;font-size:13px;line-height:1.6}.note{padding:12px 14px;background:rgba(199,154,60,.07);border:1px solid rgba(199,154,60,.22);border-radius:10px;color:#eddcb8;font-size:12px;line-height:1.55}
+  .error{margin:14px 0;padding:11px 13px;border:1px solid #d8826f;border-radius:9px;background:rgba(216,130,111,.11);color:#f2b7a9;font-size:13px}
+  label{display:block;margin:14px 0 6px;font-size:11.5px;color:#c7b9a3;font-weight:600;letter-spacing:.04em}input{width:100%;padding:10px 11px;border:1px solid rgba(231,206,164,.16);border-radius:8px;background:#140f10;color:#fff;font:inherit;font-size:14px}
+  input:focus{outline:2px solid #c79a3c;outline-offset:1px}small{display:block;margin-top:4px;color:#948772;font-size:11px;line-height:1.5}
+  button.main{margin-top:18px;width:100%;padding:13px 18px;border:0;border-radius:10px;background:linear-gradient(180deg,#e8ce96,#d2aa5a 44%,#bd9138);color:#241706;font:700 13px system-ui,sans-serif;letter-spacing:.02em;cursor:pointer}
+  button.main:hover{filter:brightness(1.04)}details{margin-top:14px;border:1px solid rgba(231,206,164,.14);border-radius:12px;background:rgba(0,0,0,.16)}summary{cursor:pointer;padding:12px 14px;color:#d8b164;font-size:12.5px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between}
+  summary::-webkit-details-marker{display:none}summary:after{content:"▾";font-size:14px}details[open] summary:after{transform:rotate(180deg)}.meta-inner{padding:4px 14px 14px}
+  h2{margin:16px 0 6px;font:600 13px system-ui,sans-serif;color:#e3ca99}.steps{margin:8px 0;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(231,206,164,.14);border-radius:10px}
+  .steps ol{margin:6px 0 0 18px;padding:0;color:#dccfba;font-size:12px;line-height:1.65}.steps li{margin:4px 0}.steps a{color:#e8ce96;text-decoration:none;border-bottom:1px solid rgba(232,206,150,.3)}
+  .copy-row{display:flex;gap:6px;align-items:center;margin:6px 0}.copy-row code{flex:1;padding:8px 9px;background:#0f0c0d;border:1px solid rgba(231,206,164,.16);border-radius:7px;font:12px ui-monospace,monospace;color:#eddcb8;word-break:break-all}
+  .copy-btn{flex:none;padding:7px 10px;border:1px solid rgba(231,206,164,.18);border-radius:7px;background:#2a1f14;color:#e3ca99;font:11px system-ui,sans-serif;cursor:pointer}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.foot{margin-top:16px;padding-top:12px;border-top:1px solid rgba(231,206,164,.12);color:#948772;font-size:11px;line-height:1.5}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}.wrap{padding:22px 18px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="tag">Astro Sivam · One-time setup</div>
+  <h1>Set up your private site login</h1>
+  <p>This installer creates the protected PHP configuration for the site. Create or select your Meta developer app first; the App ID and Secret are entered only on this trusted HTTPS page.</p>
+  <!--SETUP_ERROR-->
+  <div class="note"><strong>One-time security check:</strong> In cPanel File Manager, open <code>storage/setup.key</code>, copy its contents, and paste it below. The key is deleted after setup succeeds.</div>
+  <form method="post" action="/setup">
+    <label for="setup_code">One-time setup key *</label>
+    <input id="setup_code" name="setup_code" required autocomplete="off" placeholder="64-character key from storage/setup.key">
+    <label for="username">Login username *</label>
+    <input id="username" name="username" value="admin" required autocomplete="username">
+    <label for="password">Login password *</label>
+    <input id="password" name="password" type="password" minlength="8" required autocomplete="new-password">
+    <small>Use a unique strong password of at least 8 characters.</small>
+    <label for="password_confirm">Confirm password *</label>
+    <input id="password_confirm" name="password_confirm" type="password" minlength="8" required autocomplete="new-password">
+    <label for="site_base_url">Website HTTPS address *</label>
+    <input id="site_base_url" name="site_base_url" type="url" value="https://suite.astrosivam.com" required>
+    <small>Enter the public site origin only, e.g. <code>https://suite.astrosivam.com</code> — no path, query, or trailing slash.</small>
+
+    <details open>
+      <summary>Facebook + Instagram publishing app (optional during first install)</summary>
+      <div class="meta-inner">
+        <p>Create your app from <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer">Meta for Developers → My Apps</a>. In the app dashboard, the numeric <strong>App ID</strong> is under <strong>App settings → Basic</strong>; reveal the <strong>App Secret</strong> there with <strong>Show</strong>. The ID is public. Keep the Secret private and never paste it into chat, screenshots, or Git.</p>
+        <div class="grid2">
+          <div>
+            <label for="meta_app_id">Meta App ID</label>
+            <input id="meta_app_id" name="meta_app_id" autocomplete="off" inputmode="numeric" placeholder="Your numeric App ID">
+          </div>
+          <div>
+            <label for="meta_app_secret">Meta App Secret</label>
+            <input id="meta_app_secret" name="meta_app_secret" type="password" autocomplete="new-password" placeholder="Paste the Secret from App settings → Basic">
+          </div>
+        </div>
+        <small>Enter both Meta values or leave both blank for now. The App Secret is stored only in the private PHP config on this server.</small>
+
+        <h2>Copy these values into Meta → App settings</h2>
+        <div class="steps">
+          <ol>
+            <li>In <strong>App settings → Basic</strong>, set <strong>App Domains</strong> to the bare domain below (no scheme or path) and add the Privacy Policy and Data Deletion URLs if those fields are shown.</li>
+            <li>Add the <strong>Facebook Login</strong> product for <strong>Web</strong>. In its settings, paste the exact callback below under <strong>Valid OAuth Redirect URIs</strong>.</li>
+            <li>Enable the <strong>Instagram API / Instagram Graph API with Facebook Login</strong> product or use case. This site uses Facebook Login and a Page-linked professional Instagram account; it does not use the separate Instagram Login flow.</li>
+            <li>Before connecting, make these permissions available to the app: <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>instagram_basic</code>, and <code>instagram_content_publish</code>. In Development mode, the person connecting must have an app role; other users require Meta's review/approval as applicable.</li>
+          </ol>
+          <div class="copy-row"><code id="val-domains">suite.astrosivam.com</code><button type="button" class="copy-btn" onclick="copyVal('val-domains')">Copy</button></div>
+          <small>→ App Domains</small>
+          <div class="copy-row"><code id="val-privacy">https://astrosivam.com/privacy-policy</code><button type="button" class="copy-btn" onclick="copyVal('val-privacy')">Copy</button></div>
+          <small>→ Privacy Policy URL (if requested by Meta)</small>
+          <div class="copy-row"><code id="val-deletion">https://suite.astrosivam.com/api/meta/data-deletion</code><button type="button" class="copy-btn" onclick="copyVal('val-deletion')">Copy</button></div>
+          <small>→ User Data Deletion callback URL (if requested by Meta)</small>
+          <div class="copy-row"><code id="val-redirect">https://suite.astrosivam.com/api/meta/callback</code><button type="button" class="copy-btn" onclick="copyVal('val-redirect')">Copy</button></div>
+          <small>→ Facebook Login → Settings → Valid OAuth Redirect URIs (must match exactly)</small>
+        </div>
+        <p>After saving the Meta app settings and this installer, open the deployed site, sign in, go to <strong>Publish</strong>, and select <strong>Connect Meta account</strong>. Choose the Facebook Page that owns the linked Instagram Business or Creator account.</p>
+        <small>If the site was already installed without Meta credentials, do not rerun this one-time installer. Add the same values to the private <code>hosting/config.local.php</code> on the PHP host instead. Never add credentials to frontend files or the Node <code>.env</code> for a production Meta connection.</small>
+      </div>
+    </details>
+    <button type="submit" class="main">Create secure configuration →</button>
+  </form>
+  <footer class="foot">This writes <code>hosting/config.local.php</code> with restrictive permissions and removes the one-time setup key after success. The Meta redirect URI is generated as <code>SITE_BASE_URL + /api/meta/callback</code>; the App Secret and Page tokens remain server-side.</footer>
+</main>
+<script>
+function copyVal(id){
+  const el=document.getElementById(id);if(!el)return;const text=el.textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>{const button=el.nextElementSibling;if(button){const before=button.textContent;button.textContent="Copied";setTimeout(()=>button.textContent=before,1200);}});}
+  else{const range=document.createRange();range.selectNodeContents(el);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);document.execCommand("copy");selection.removeAllRanges();}
+}
+(function(){
+  const base=document.getElementById("site_base_url");
+  const fields={deletion:document.getElementById("val-deletion"),redirect:document.getElementById("val-redirect"),domain:document.getElementById("val-domains")};
+  function sync(){try{const url=new URL((base.value||"").trim());if(url.protocol!=="https:")return;const origin=url.origin;if(fields.deletion)fields.deletion.textContent=origin+"/api/meta/data-deletion";if(fields.redirect)fields.redirect.textContent=origin+"/api/meta/callback";if(fields.domain)fields.domain.textContent=url.hostname;}catch(_){}}
+  base.addEventListener("input",sync);sync();
+})();
+</script>
+</body>
+</html>
+HTML;
+    echo str_replace('<!--SETUP_ERROR-->', $errorHtml, $html);
     exit;
 }
 
@@ -838,6 +940,7 @@ if (!$authConfigured) {
             setup_page('Enter the HTTPS site origin only, such as https://suite.astrosivam.com.');
         }
         if (($appId === '') !== ($appSecret === '')) setup_page('Enter both Meta app fields, or leave both blank for now.');
+        if ($appId !== '' && !preg_match('/^[0-9]{1,32}$/', $appId)) setup_page('The Meta App ID should be the numeric value shown in App settings → Basic.');
         $localConfig = [
             'AUTH_USERNAME' => $username,
             'AUTH_PASSWORD' => $password,
@@ -969,9 +1072,10 @@ try {
         }
         $_SESSION['meta_oauth_state'] = bin2hex(random_bytes(32));
         $_SESSION['meta_oauth_state_created_at'] = time();
-        // Request only Facebook Page scopes here — Instagram scopes are auto-granted with the Page's linked Instagram account once the Page is selected.
-        // Requesting instagram_basic/instagram_content_publish via the Facebook dialog on an app without Instagram product approval triggers "Invalid Scopes" (shown only to developers).
-        $scopes = 'pages_show_list,pages_read_engagement,pages_manage_posts';
+        // This app uses the Instagram Graph API through Facebook Login and a linked Page.
+        // Add the corresponding Meta products and enable these permissions before connecting;
+        // asking for Page-only scopes would let Facebook work but leave Instagram publishing unauthorized.
+        $scopes = 'pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish';
         $params = [
             'client_id' => (string) $config['META_APP_ID'],
             'redirect_uri' => (string) $config['META_REDIRECT_URI'],

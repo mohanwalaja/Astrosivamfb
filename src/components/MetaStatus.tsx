@@ -353,8 +353,9 @@ export function MetaStatus() {
               <AlertTriangle className="h-3 w-3 text-[#E0B48C]" aria-hidden="true" /> “Permissions error (200)”
             </dt>
             <dd className="mt-0.5">
-              The app needs <code>pages_manage_posts</code> and <code>pages_read_engagement</code>, approved through app
-              review before anyone outside the app's own admins can publish.
+              The app must grant <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>,
+              <code>instagram_basic</code> and <code>instagram_content_publish</code>. In Development mode, test as an app role;
+              other users need the applicable Meta review/Advanced Access.
             </dd>
           </div>
         </dl>

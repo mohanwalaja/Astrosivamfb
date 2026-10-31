@@ -1,176 +1,141 @@
-# Meta API setup — finding your App ID & App Secret, and connecting this site
+# Fresh Facebook + Instagram API setup
 
-You already created a Meta developer app; this guide is for the moment after that,
-when nobody can remember **where the credentials actually are**. It covers where the
-App ID and App Secret live in the Meta dashboard, the one-time app settings this
-site needs, how to enter the credentials on the PHP host, and how to check the
-whole chain works. Nothing here publishes anything or changes any live account.
+This guide starts from **no Meta developer app** and ends with a connected Facebook Page and its linked Instagram professional account. It covers the Meta dashboard and this site's PHP host. Creating an app, retrieving its App ID, revealing its App Secret, approving permissions, and choosing the Page must be done by the account owner in Meta; this repository cannot sign in to Meta or create an app on your behalf.
 
----
+> **Never send anyone your App Secret, Facebook password, two-factor code, OAuth code, or access token.** Enter the App Secret only in Meta's dashboard and the private PHP-host setup/configuration. The App ID is public, but the Secret and tokens are not.
 
-## 1. Where the App ID and App Secret are (2 minutes)
+## Before you start
 
-1. Open <https://developers.facebook.com> in a browser that is logged in to the
-   **personal Facebook account that created the app**. The app list is per account —
-   being logged in to the wrong account is the single most common reason an app
-   "disappears".
-2. Click **My Apps** (top-right, the app-switcher grid). Every app you can reach is
-   listed there, grouped under its business portfolio. If the list looks empty, use
-   the portfolio dropdown at the top of that page to switch portfolios.
-3. Click your app's name. The **App Dashboard** opens.
-4. **App ID** — the number shown at the top of the dashboard under the app name, and
-   again under **App settings → Basic**. It looks like `1082345678904470`. It is
-   *not* secret; it is safe to write down anywhere.
-5. **App Secret** — open **App settings → Basic** in the left sidebar. In the
-   **App secret** row click **Show**. Meta asks for your Facebook password (plus your
-   two-factor code if you have it), then reveals a 32-character hex string. Copy it
-   straight into your password manager and treat it exactly like a password.
-   - Older dashboard layout: the same page lives under **Settings → Basic**.
-   - No **Show** button, or the row is blank? You are not an **Admin** of this app —
-     see the troubleshooting table below.
-6. Keep that **Basic** page open: step 4 pastes both values into the site.
+You need:
 
-### App ID vs App Secret vs access token
+- A personal Facebook account enrolled in Meta for Developers. That account must be an **Admin** of the developer app and have the access needed to manage the Facebook Page.
+- A public, working **HTTPS** deployment of this site on PHP. The Meta OAuth and publishing endpoints are in `hosting/index.php`; the Vite/Node preview and the Node production host do **not** implement Meta OAuth or publishing.
+- A Facebook Page you manage. For Instagram publishing, the Instagram account must be **Business or Creator** and linked to that Page.
+- The site's public origin, e.g. `https://suite.astrosivam.com`. Do not use localhost, an Arena preview URL, or a temporary hosting URL for a live app.
 
-| Credential | What it is | Where it comes from | Who may see it |
+If your site is not deployed on PHP yet, first follow [BigRock PHP hosting and Meta publishing in the README](../README.md#bigrock-php-hosting-and-meta-publishing). You can create the Meta app before deployment, but you will need the final HTTPS domain for the redirect URI.
+
+## 1. Create a new Meta app
+
+If you already have an app that you administer, skip to **Step 2**. Otherwise:
+
+1. Sign in at [Meta for Developers](https://developers.facebook.com/) with the Facebook account that manages the Page. If asked, complete Meta's developer registration and accept its terms.
+2. Open [My Apps](https://developers.facebook.com/apps/) and choose **Create app**.
+3. Follow the current creation wizard. Choose an app type/use case that supports **Facebook Login for Web** and the **Instagram API with Facebook Login** (some dashboard versions label this Instagram Graph API). If Meta asks for a business portfolio, select the portfolio that owns or manages the Page. The exact wizard wording can change.
+4. Give the app a name and contact email, then finish **Create app**. Keep it in **Development** mode while testing.
+5. Open the new app's dashboard. In the left menu, choose **App settings → Basic** (older dashboard: **Settings → Basic**).
+6. Copy the numeric **App ID** shown on this page or at the top of the dashboard. This is the value for `META_APP_ID`; it is not the App Secret.
+7. On the same **Basic** page, find **App Secret** and press **Show**. Complete Meta's identity check if prompted, then copy it directly into a password manager. This is the value for `META_APP_SECRET`. Only an app Admin can reveal it.
+
+### App ID, App Secret, and access token are different
+
+| Value | What it is | Where it comes from | Where it belongs |
 | --- | --- | --- | --- |
-| App ID | Your app's public identifier | Dashboard header / **App settings → Basic** | Anyone |
-| App Secret | Your app's password | **App settings → Basic → Show** | The PHP server only |
-| User / Page access tokens | Per-account keys that actually post | The site obtains these itself during **Connect** | The PHP server only (encrypted at rest) |
+| App ID | Public numeric identifier for your developer app | App dashboard / App settings → Basic | PHP host configuration; safe to identify the app |
+| App Secret | Password for the app | App settings → Basic → Show | Private PHP configuration only |
+| User/Page access token | Authorization granted for an account/Page | Fetched by the site's **Connect Meta account** flow | Encrypted storage on the PHP host; never copy it by hand |
 
-You never copy a token by hand — the Connect flow in step 5 fetches and stores them.
+Do not use a third-party app or an app whose Secret you do not control. If the app is missing from **My Apps**, check that you are signed in with the account that created it, switch business portfolios, or ask an existing app Admin to add you as an Admin. Do not make a duplicate app just because the dashboard is showing a permissions/review warning.
 
----
+## 2. Add the login and Instagram API capabilities
 
-## 2. If the app is not visible at all
+In the app dashboard, add/enable the products or use cases that match this integration:
 
-- <https://developers.facebook.com/apps/> is the raw list of every app the logged-in
-  account can reach. Start there.
-- **Wrong account:** apps belong to the personal account — or the business portfolio —
-  that created them. Log in with the account used at creation time. If an agency or
-  colleague created it, ask them to add you as an admin on the app's **Roles** page
-  (App roles → Roles), or to move the app into a portfolio you both share.
-- **Business portfolio apps** also appear at <https://business.facebook.com> →
-  **Settings → Accounts → Apps**, which is a good cross-check.
-- A deleted app cannot be restored; making a replacement takes about two minutes
-  (**My Apps → Create app → Business type**), then continue at step 3.
+1. Add **Facebook Login** and select **Web** when asked for a platform. This project uses Meta's standard Facebook Login OAuth dialog, not a separate Instagram Login flow or a Facebook Login for Business configuration flow.
+2. Add/enable **Instagram API with Facebook Login** (some dashboard versions call it **Instagram Graph API** or offer it within an Instagram API setup wizard). Choose the Facebook Login method because the Instagram account will be discovered through its linked Facebook Page.
+3. Keep the app in **Development** mode while testing. Add the Facebook account that will test it under **App roles** (Admin, Developer, or Tester) and accept the invitation if Meta sends one. That account must also have the needed Page access.
 
----
+If the dashboard only offers Instagram Login and not a Facebook Login option, double-check the selected API setup path; it will not match this site's Page-linked OAuth flow.
 
-## 3. One-time app settings (in the App Dashboard)
+## 3. Set the domains and exact callback URLs
 
-1. **Add Product** (left sidebar): add **Facebook Login** (choose **Web**) and
-   **Instagram Graph API**. These two products unlock everything the publisher uses.
-2. **Facebook Login → Settings → Valid OAuth Redirect URIs**: add exactly one URL —
-   your site's public HTTPS origin plus `/api/meta/callback`, for example
-   `https://suite.astrosivam.com/api/meta/callback`. Save it. It must match
-   `META_REDIRECT_URI` in step 4 **character for character** (https, no trailing
-   slash), or the Facebook dialog will refuse to redirect back.
-3. **App settings → Basic**: set **App Domains** to the bare domain
-   (`suite.astrosivam.com` — no `https://`, no path) and fill the **Privacy Policy
-   URL** and **Category** fields. The privacy policy URL is required before the app
-   can ever switch to Live mode.
-4. **Permissions.** Connect requests five scopes: `pages_show_list`,
-   `pages_read_engagement`, `pages_manage_posts`, `instagram_basic` and
-   `instagram_content_publish`. All five are *Advanced Access* permissions, which
-   means:
-   - While the app is in **Development mode** (the toggle at the top of the
-     dashboard), only people with an app role — Admins, Developers, Testers — can
-     complete Connect. For publishing to *your own* Page that is usually all you
-     need, because the app owner is an Admin.
-   - Before **anyone else** can connect, submit those permissions for **App Review /
-     Advanced Access** under **App Review → Permissions and features**. Until Meta
-     approves, other accounts will hit a permissions error at the dialog.
-5. That is everything on Meta's side. The site exchanges the login code for a
-   long-lived token by itself and encrypts the Page tokens on the PHP host — there
-   is nothing else to copy out of the dashboard.
+For this example, assume the final site address is `https://suite.astrosivam.com`. Replace it everywhere with your own **public HTTPS origin** if different.
 
----
+1. In **App settings → Basic**, set **App Domains** to the bare host: `suite.astrosivam.com` — no `https://`, slash, or path. Add the parent domain too only if Meta asks for it.
+2. Set the **Privacy Policy URL** to the public privacy policy for this service. This project's privacy policy is `https://astrosivam.com/privacy-policy`.
+3. If the Basic settings show **User Data Deletion**, set its callback to `https://suite.astrosivam.com/api/meta/data-deletion`. This PHP endpoint is included in the project.
+4. Open **Facebook Login → Settings**. In **Valid OAuth Redirect URIs**, add this exact URI and save it:
 
-## 4. Entering the App ID and Secret on the site
+   ```text
+   https://suite.astrosivam.com/api/meta/callback
+   ```
 
-The credentials live **only on the PHP host**, in `config.local.php` (git-ignored) or
-as PHP environment variables with the same names. Two ways to set them:
+   The callback must match `META_REDIRECT_URI` character-for-character: HTTPS, same hostname, exact path, no trailing slash or query string. The setup installer displays copy buttons for the URLs based on the site address you enter.
 
-- **During first-time setup:** the one-time installer at `https://your-site/setup`
-  has an *"Optional: Meta publishing app"* section — paste the App ID and App Secret
-  there together with the site login you are creating.
-- **After install:** in cPanel File Manager open the site folder and edit
-  `config.local.php` (create it from `hosting/config.example.php` if missing):
+5. Complete any other required Basic settings Meta marks in the dashboard, then save.
+
+## 4. Make the required permissions available
+
+The site's Connect flow asks Meta for these five permissions:
+
+```text
+pages_show_list
+pages_read_engagement
+pages_manage_posts
+instagram_basic
+instagram_content_publish
+```
+
+In the app dashboard, open **App Review → Permissions and features** (the menu may be named **Use cases → Permissions and features**) and make these permissions available to the app. Meta's Standard/Advanced Access and review rules vary by permission and by app. In Development mode, use an app Admin/Developer/Tester for your initial test. Before unrelated people can use the integration, complete the applicable App Review/Advanced Access and business-verification requirements Meta shows for this app.
+
+If the Facebook dialog reports **Invalid scopes**, stop and fix the product/permission setup first; do not remove the Instagram scopes if you need Instagram publishing. The site now requests the Page and Instagram permissions together.
+
+## 5. Save the credentials on the PHP host
+
+### First-time installation
+
+On the already-deployed PHP site, open `https://suite.astrosivam.com/setup`. Use the one-time key from `storage/setup.key`, set the site's login, and enter the App ID and App Secret in the Meta section. The installer writes them to private `hosting/config.local.php` and derives:
+
+```text
+SITE_BASE_URL     = https://suite.astrosivam.com
+META_REDIRECT_URI = https://suite.astrosivam.com/api/meta/callback
+```
+
+Make sure the website address in the installer is the **same origin** used in Meta's callback settings. Keep `storage/` writable but private; the installer removes the one-time setup key after success.
+
+### If the site is already installed
+
+Do **not** rerun the one-time installer. In cPanel File Manager, open the deployed `hosting/config.local.php` and add/update these values, keeping the existing login settings:
 
 ```php
-'META_APP_ID'        => '1082345678904470',        // dashboard header
-'META_APP_SECRET'    => 'abcd1234…32 hex chars',   // App settings → Basic → Show
+'META_APP_ID'        => 'your-numeric-app-id',
+'META_APP_SECRET'    => 'your-private-app-secret',
 'META_REDIRECT_URI'  => 'https://suite.astrosivam.com/api/meta/callback',
 'META_GRAPH_VERSION' => 'v26.0',
 'SITE_BASE_URL'      => 'https://suite.astrosivam.com',
 ```
 
-Rules the publisher enforces:
+The PHP config also accepts PHP environment variables with these names. Do not put production Meta secrets in frontend code, a public repository, screenshots, or this chat. `hosting/config.local.php` is intentionally private and git-ignored.
 
-- `META_REDIRECT_URI` must be the public HTTPS origin plus `/api/meta/callback` and
-  must equal the Valid OAuth Redirect URI from step 3. The callback rejects anything
-  else before a single request leaves the server.
-- `SITE_BASE_URL` must be the public HTTPS origin, because Meta downloads the image
-  being published from it.
-- Never commit `config.local.php`, and never paste the App Secret into chat, email,
-  issues or screenshots. If it ever leaks: **App settings → Basic → Reset**, then
-  update the file — the old secret stops working immediately.
+## 6. Connect and verify
 
----
+1. Visit the deployed HTTPS site, sign in, and open **Publish**.
+2. Click **Connect Meta account**. The browser should open a Facebook authorization dialog. Sign in as the app-role user who manages the Page and approve the requested permissions.
+3. Choose the Facebook Page returned by Meta. The Instagram account must be linked to that Page and be Business or Creator. If it is not linked, fix it in Meta Business Suite/Instagram account settings, then reconnect.
+4. The site's live status check should show a valid Page connection and, where configured, the linked Instagram username. Try a small, non-sensitive test image only after the UI confirms the correct Page and destination. Publishing is a real, immediate post; it is not a draft.
+5. Confirm `https://suite.astrosivam.com/api/health` returns a PHP health response. If you see a **service not deployed** message or `/api/meta` is missing, you are probably testing the Vite/Node version or the wrong document root; deploy the `hosting/` PHP backend.
 
-## 5. Connect and verify
+No API tokens should be copied into a browser, Meta's App Secret should never be sent through chat, and no real post should be made without the Page owner's approval.
 
-1. Sign in to the site and open the **Publish** panel.
-2. Press **Connect Meta account**. The Facebook dialog opens; log in with the account
-   that manages the Page and approve the five permissions.
-3. The site swaps the login code for a long-lived user token, reads your Pages from
-   `me/accounts` (including each Page's linked Instagram professional account) and
-   shows them for selection. Pick the Page you publish from.
-4. The panel then reads live state back from the Graph API — Page name, Instagram
-   username and the daily publishing quota. Seeing those means the setup is
-   complete; the status tile in the studio (`MetaStatus`) shows the same state.
-5. Optional terminal check that the ID/secret *pair* is valid, without touching any
-   account:
+## Troubleshooting
 
-   ```bash
-   curl "https://graph.facebook.com/v26.0/app?access_token=YOUR_APP_ID|YOUR_APP_SECRET"
-   ```
+| What you see | Check this |
+| --- | --- |
+| App ID is not visible / app missing from My Apps | Sign in with the personal Facebook account that created the app; switch portfolio; have an existing app Admin grant you the Admin role. |
+| **Invalid OAuth redirect URI**, URL blocked, or error 191 | Match the Facebook Login Valid OAuth Redirect URI to `SITE_BASE_URL + /api/meta/callback` exactly. Use the final HTTPS domain, not localhost, Arena preview, `www` vs non-`www`, or a trailing slash. |
+| **Invalid scopes** in the Facebook dialog | Add the Facebook Login Web and Instagram API with Facebook Login capabilities; enable all five requested permissions in the app; reconnect as an app role while testing. |
+| Login says the app is in development / user is not allowed | Add that Facebook account to App roles and accept the invitation. A non-role user needs the applicable review/advanced-access approval and the app must be ready for public use. |
+| Connect succeeds, but no Facebook Pages are listed | The authorizing Facebook account has no eligible Page access, `pages_show_list` was not granted, or the app/account lacks access to the Page. Use the account that manages the Page and reconnect. |
+| Page appears, but Instagram is missing | Switch Instagram to Business or Creator, link it to the same Facebook Page, make sure the authorizing Facebook user can manage both, then reconnect. |
+| Facebook publishing works but Instagram gets permission error | Confirm `instagram_basic` and `instagram_content_publish` are available and granted, the Instagram API/Facebook Login setup is enabled, and the selected Page still links to that professional account. Check the Meta code/subcode shown in the studio. |
+| `(#200)` permissions error | Verify the exact permission for the failed platform, Page access/task, app mode and any review status required. Reconnect after changing grants. |
+| **Service is not deployed** or `META_APP_ID... must be set` | This OAuth/publishing backend is PHP-only. Check the BigRock document root contains `index.php`, `dist/`, and private `config.local.php`; ensure HTTPS and PHP cURL/OpenSSL/Fileinfo are enabled. |
+| Meta shows **Currently ineligible** | Read the exact item Meta marks incomplete under the app's use case, permission, review, or business verification. Filling in App Domains/redirects alone does not grant Advanced Access or approve the app. |
+| Page token reports expired/invalid | Use **Reconnect** in the Publish panel. The site obtains fresh tokens; never paste an access token manually. |
 
-   A JSON object containing your app's name confirms the pair. (Quote the URL; some
-   shells need the pipe written as `%7C`.)
+## Security notes
 
----
-
-## 6. Troubleshooting
-
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| No **Show** button on the App secret row | You are not an Admin of the app | App roles → Roles: have an Admin add you, or copy the secret across in person |
-| App missing from **My Apps** | Wrong personal account or business portfolio | Check <https://developers.facebook.com/apps/>, switch portfolio, or get added as an admin |
-| Site redirects to `/?meta=not-configured` | `META_APP_ID`, `META_APP_SECRET` or `META_REDIRECT_URI` empty on the host | Fill all three in `config.local.php` (step 4) |
-| Dialog error: *URL blocked / redirect URI isn't an exact match* | Saved redirect URI differs by even one character | Make Valid OAuth Redirect URIs identical to `META_REDIRECT_URI` |
-| Dialog error 191 (*Can't Load URL*) | Redirect URI or App Domains not saved | Step 3, items 2–3 |
-| Dialog succeeds but the site reports *no Pages* | You logged in with an account that manages no Page | Connect with the Facebook account that owns the Page |
-| Page listed with no Instagram account | Instagram is not Professional, or not linked to that Page | In Meta Business Suite switch the IG account to Business/Creator and link it to the Page |
-| Publish fails `(#200)` permissions error | Token lacks `pages_manage_posts` / `instagram_content_publish`, or app is in Development mode and the user has no role | Reconnect after granting; review step 3 item 4 |
-| Publish fails `(#368)` or rate limits (4 / 17 / 32 / 613) | Meta-side temporary block or cap | Wait, then retry; the Publish panel shows the live quota |
-| Connect worked before, now reports expired | The long-lived authorization window elapsed | Reconnect from the Publish panel; tokens are re-fetched |
-
----
-
-## 7. Security ground rules
-
-- The App Secret and all Page tokens stay on the PHP host. The browser only ever
-  receives connection *status*, never credentials.
-- `hosting/config.local.php` and `hosting/storage/` are git-ignored; the repository
-  ships only `hosting/config.example.php` with empty values.
-- Saved Page tokens are encrypted at rest on the host; the one-time `/setup`
-  installer removes its own setup key (`storage/setup.key`) after success.
-- Rotate the App Secret (**App settings → Basic → Reset**) the moment you suspect a
-  leak, then update `config.local.php` and reconnect.
-
-Related reading: the README section *BigRock PHP hosting and Meta publishing*, and
-[`docs/meta-security-audit.md`](meta-security-audit.md) for the source review and the
-manual launch checklist. No Meta OAuth flow, account change, token revocation, remote
-image fetch or real post was exercised while writing this guide.
+- The App Secret and Page tokens stay on the PHP host. Page tokens are encrypted at rest; the browser receives status fields only.
+- `hosting/config.local.php` and `hosting/storage/` must remain private and out of Git. Do not share `storage/` backups or publish PHP error logs containing sensitive query strings.
+- If an App Secret is exposed, reset it in **App settings → Basic**, update the PHP config, and reconnect.
+- This guide does not perform app creation, permission review, account linking, token exchange, or live publishing. Those require the account owner's explicit action in Meta and on the deployed site.

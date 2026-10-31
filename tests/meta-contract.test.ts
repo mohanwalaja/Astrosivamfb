@@ -98,6 +98,34 @@ test("publishing is still a single deliberate multipart POST with CSRF", () => {
   assert.match(PHP, /require_csrf\(\);/, "the PHP route still enforces CSRF");
 });
 
+test("the OAuth connect flow requests Page access and Instagram publishing scopes", () => {
+  const connectStart = PHP.indexOf("if ($uriPath === '/api/meta/connect' && $method === 'GET')");
+  const statusStart = PHP.indexOf("if ($uriPath === '/api/meta/status' && $method === 'GET')", connectStart);
+  assert.notEqual(connectStart, -1, "the Meta connect route must exist");
+  assert.notEqual(statusStart, -1, "the status route bounds the connect route");
+  const connectRoute = PHP.slice(connectStart, statusStart);
+  for (const permission of [
+    "pages_show_list",
+    "pages_read_engagement",
+    "pages_manage_posts",
+    "instagram_basic",
+    "instagram_content_publish",
+  ]) {
+    assert.ok(connectRoute.includes(permission), `OAuth must request ${permission}`);
+  }
+  assert.match(connectRoute, /'scope' => \$scopes/);
+});
+
+test("first-time setup does not pin a previous Meta app ID", () => {
+  const setupStart = PHP.indexOf("function setup_page(");
+  const loginStart = PHP.indexOf("function login_page()", setupStart);
+  const setup = PHP.slice(setupStart, loginStart);
+  assert.doesNotMatch(setup, /developers\.facebook\.com\/apps\/\d+|value="\d{10,}"/, "a new install must not inherit another app's ID");
+  assert.match(setup, /name="meta_app_id"[^>]+placeholder="Your numeric App ID"/);
+  assert.match(setup, /name="meta_app_secret"[^>]+type="password"/);
+  assert.match(setup, /SITE_BASE_URL \+ \/api\/meta\/callback/);
+});
+
 test("OAuth callback state is one-use, session-bound and expires after ten minutes", () => {
   assert.match(PHP, /random_bytes\(32\)/, "state must be unpredictable");
   assert.match(PHP, /meta_oauth_state_created_at/);
