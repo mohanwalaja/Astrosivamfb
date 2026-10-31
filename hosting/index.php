@@ -678,6 +678,109 @@ if (str_contains($uriPath, "\0") || str_contains($uriPath, '..')) {
     http_response_code(400); echo 'Bad request'; exit;
 }
 
+// Meta User Data Deletion callback — must be public (no auth) so Meta can POST to it.
+// Configured in App Settings → Basic as https://suite.astrosivam.com/api/meta/data-deletion
+if ($uriPath === '/api/meta/data-deletion') {
+    header('X-Robots-Tag: noindex, nofollow');
+    // Meta expects a JSON response with `url` and `confirmation_code` even on GET probe.
+    $appSecret = (string) ($config['META_APP_SECRET'] ?? '');
+    $siteBase = rtrim((string) ($config['SITE_BASE_URL'] ?? ''), '/');
+    if ($siteBase === '') $siteBase = 'https://suite.astrosivam.com';
+    // Helper to generate a confirmation code
+    $makeCode = static function () {
+        return 'DEL-' . strtoupper(bin2hex(random_bytes(6))) . '-' . time();
+    };
+    // On GET — simple reachability check (Meta dashboard test fetch)
+    if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'url' => $siteBase . '/data-deletion-status',
+            'confirmation_code' => $makeCode(),
+            'message' => 'POST signed_request here for data deletion. Email admin@astrosivam.com for manual deletion.',
+        ], JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    // On POST — parse Meta signed_request
+    $signedRequest = (string) ($_POST['signed_request'] ?? ($_REQUEST['signed_request'] ?? ''));
+    $userId = null;
+    if ($signedRequest !== '' && $appSecret !== '') {
+        $parts = explode('.', $signedRequest, 2);
+        if (count($parts) === 2) {
+            [$encodedSig, $encodedPayload] = $parts;
+            $sig = base64_decode(strtr($encodedSig, '-_', '+/'), true);
+            $payloadJson = base64_decode(strtr($encodedPayload, '-_', '+/'), true);
+            if ($sig !== false && $payloadJson !== false) {
+                $expectedSig = hash_hmac('sha256', $encodedPayload, $appSecret, true);
+                if (hash_equals($expectedSig, $sig)) {
+                    $payload = json_decode($payloadJson, true);
+                    if (is_array($payload) && isset($payload['user_id'])) {
+                        $userId = (string) $payload['user_id'];
+                    } elseif (is_array($payload) && isset($payload['userID'])) {
+                        $userId = (string) $payload['userID'];
+                    }
+                }
+            }
+        }
+    }
+    // Fallback: if signature can't be verified (e.g. secret not yet set or test POST), still respond per Meta spec
+    $confirmationCode = $makeCode();
+    $statusUrl = $siteBase . '/data-deletion-status?id=' . urlencode($confirmationCode);
+    // Persist request for 30-day audit trail (private storage)
+    try {
+        if (!is_dir($storageDirectory) && !mkdir($storageDirectory, 0700, true) && !is_dir($storageDirectory)) {
+            // non-fatal
+        } else {
+            $logFile = $storageDirectory . '/data-deletion-requests.json';
+            $existing = [];
+            if (is_file($logFile)) {
+                $raw = (string) @file_get_contents($logFile);
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) $existing = $decoded;
+            }
+            $existing[] = [
+                'time' => gmdate('c'),
+                'confirmation_code' => $confirmationCode,
+                'user_id' => $userId ?? 'unknown',
+                'signed_request_present' => $signedRequest !== '',
+                'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+            ];
+            // Keep last 500 entries
+            if (count($existing) > 500) $existing = array_slice($existing, -500);
+            @file_put_contents($logFile, json_encode($existing, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT), LOCK_EX);
+            @chmod($logFile, 0600);
+        }
+    } catch (Throwable $e) {
+        // Log but don't fail the response — Meta expects 200
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'url' => $statusUrl,
+        'confirmation_code' => $confirmationCode,
+    ], JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+// Human-readable deletion status page (no auth) — linked from the callback response
+if ($uriPath === '/data-deletion-status') {
+    $siteBaseStatus = rtrim((string) ($config['SITE_BASE_URL'] ?? ''), '/');
+    if ($siteBaseStatus === '') $siteBaseStatus = 'https://suite.astrosivam.com';
+    $confirmId = (string) ($_GET['id'] ?? '');
+    header('Content-Type: text/html; charset=utf-8');
+    header('X-Robots-Tag: noindex, nofollow');
+    echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Data Deletion Status — Astro Sivam</title>';
+    echo '<body style="font-family:system-ui,sans-serif;max-width:640px;margin:48px auto;padding:0 20px;color:#1a1a1a;line-height:1.6">';
+    echo '<h1>Data Deletion Request Received</h1>';
+    if ($confirmId !== '') {
+        echo '<p>Your request has been recorded.</p><p><strong>Confirmation code:</strong> <code>' . htmlspecialchars($confirmId, ENT_QUOTES) . '</code></p>';
+    } else {
+        echo '<p>If you requested deletion via Facebook, your request is recorded and will be processed within 30 days.</p>';
+    }
+    echo '<p>We store only what Facebook sends for publishing (Page tokens on the secure PHP host). Deletion removes your Page connection and any stored tokens from our server. Contact <a href="mailto:admin@astrosivam.com">admin@astrosivam.com</a> for manual deletion or questions.</p>';
+    echo '<p><a href="https://astrosivam.com/privacy-policy">Privacy Policy</a> · <a href="' . htmlspecialchars($siteBaseStatus, ENT_QUOTES) . '">Studio Home</a></p>';
+    echo '</body></html>';
+    exit;
+}
+
 // Meta needs to fetch each uploaded image without being signed in. Filenames are random and
 // the temporary image is deleted as soon as the publishing request finishes.
 if (preg_match('~^/_meta-media/([a-f0-9]{32}\.(?:jpg|png))$~', $uriPath, $mediaMatch)) {
