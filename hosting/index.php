@@ -969,7 +969,9 @@ try {
         }
         $_SESSION['meta_oauth_state'] = bin2hex(random_bytes(32));
         $_SESSION['meta_oauth_state_created_at'] = time();
-        $scopes = 'pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish';
+        // Request only Facebook Page scopes here — Instagram scopes are auto-granted with the Page's linked Instagram account once the Page is selected.
+        // Requesting instagram_basic/instagram_content_publish via the Facebook dialog on an app without Instagram product approval triggers "Invalid Scopes" (shown only to developers).
+        $scopes = 'pages_show_list,pages_read_engagement,pages_manage_posts';
         $params = [
             'client_id' => (string) $config['META_APP_ID'],
             'redirect_uri' => (string) $config['META_REDIRECT_URI'],
