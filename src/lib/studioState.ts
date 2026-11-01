@@ -158,7 +158,7 @@ export function presetFromFestival(festival: Festival): StudioPreset {
       hindi: festival.greetingHi,
       subline: festival.subline,
       cta: "astrosivam.com",
-      footer: "astrosivam.com · Email: admin@astrosivam.com",
+      footer: "astrosivam.com",
       showLogo: true,
     },
   };

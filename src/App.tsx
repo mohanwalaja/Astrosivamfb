@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { BRAND } from "./data/brand";
 import { LaunchControl } from "./components/LaunchControl";
+import { Publisher } from "./components/Publisher";
 
 // Everything below pulls the canvas engines (templates, poster, style art) — loading
 // them lazily keeps the first paint on the landing section small.
@@ -50,7 +51,6 @@ const PosterStudio = lazy(() => import("./components/PosterStudio").then((m) => 
 const Panchangam = lazy(() => import("./components/Panchangam").then((m) => ({ default: m.Panchangam })));
 const ServicePosts = lazy(() => import("./components/ServicePosts").then((m) => ({ default: m.ServicePosts })));
 const StyleGallery = lazy(() => import("./components/StyleGallery").then((m) => ({ default: m.StyleGallery })));
-const Publisher = lazy(() => import("./components/Publisher").then((m) => ({ default: m.Publisher })));
 import { ensureFonts, fontHealth } from "./lib/canvas";
 import { getCsrfToken } from "./lib/csrf";
 import { PublishContextProvider, type PublisherDraft } from "./lib/publishContext";
@@ -342,9 +342,6 @@ function MobileDrawer({
           >
             <LogOut className="h-3.5 w-3.5" aria-hidden="true" /> Sign out
           </button>
-          <p className="mt-3 text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">
-            {BRAND.email}
-          </p>
         </div>
       </div>
     </div>
@@ -557,19 +554,15 @@ function Shell() {
                   Nadu.
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">
-                <span>{BRAND.email}</span>
-                <span aria-hidden="true">·</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10.5px] uppercase tracking-[0.14em] text-[#A2937D]">
                 <a
                   href={BRAND.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-colors hover:text-champagne"
+                  className="transition-colors hover:text-champagne font-medium"
                 >
                   astrosivam.com
                 </a>
-                <span aria-hidden="true">·</span>
-                <span>Suite v2.1</span>
               </div>
             </div>
           </footer>
@@ -586,9 +579,7 @@ function Shell() {
         />
       </div>
 
-        <Suspense fallback={null}>
-          <Publisher open={publisherOpen} draft={publisherDraft} onClose={closePublisher} />
-        </Suspense>
+        <Publisher open={publisherOpen} draft={publisherDraft} onClose={closePublisher} />
       </div>
     </PublishContextProvider>
   );

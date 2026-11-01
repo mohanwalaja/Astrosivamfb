@@ -59,7 +59,7 @@ export interface IgGridSlot {
   focal: "art" | "type";
 }
 
-const FOOTER = "astrosivam.com · Email: admin@astrosivam.com";
+const FOOTER = "astrosivam.com";
 const TAGS_CORE = ["#AstroSivam", "#VedicAstrology", "#Jyotish"];
 const TAGS_LOCAL = ["#TamilNadu", "#Chennai"];
 const tags = (...extra: string[]) => [...TAGS_CORE, ...extra.slice(0, 2)];

@@ -473,7 +473,7 @@ export function fullPackMarkdown(): string {
   lines.push("");
   lines.push("---");
   lines.push("");
-  lines.push(`Prepared for ${BRAND.name} · ${BRAND.email} · ${BRAND.url}`);
+  lines.push(`Prepared for ${BRAND.name} · ${BRAND.website}`);
   lines.push("");
   return lines.join("\n");
 }

@@ -41,7 +41,7 @@ test("service posts point at a real service in the catalogue", () => {
 
 test("no post leaves the brand line or the call to action empty", () => {
   for (const entry of FB_COPY_ENTRIES) {
-    assert.ok(entry.content.footer.includes("Astro Sivam"), `${entry.id} loses the brand in transit`);
+    assert.ok(/astrosivam/i.test(entry.content.footer), `${entry.id} loses the brand in transit`);
     assert.ok(entry.cta.line.trim().length > 3, `${entry.id} has no CTA line`);
     assert.ok(entry.cta.url.trim().length > 3, `${entry.id} has no CTA url`);
     assert.ok(entry.cta.quickReply.trim().length > 3, `${entry.id} has no Messenger quick reply`);

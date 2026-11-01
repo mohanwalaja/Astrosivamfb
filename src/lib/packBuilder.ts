@@ -127,7 +127,7 @@ export async function brandPackFiles(
         "Palette: #05070E · #0D1930 · #C9962C · #D9AE5F · #F3DCA9 · #F8F2E5",
         "Type: Cinzel (display) · Plus Jakarta Sans (UI) · Tiro Tamil (Tamil)",
         "",
-        "astrosivam.com · admin@astrosivam.com",
+        "astrosivam.com",
       ].join("\n"),
     ),
   });

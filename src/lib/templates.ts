@@ -1230,7 +1230,7 @@ async function renderStyleSheet(
   ctx.fillRect(pad, footerY - 22, W - pad * 2, 1);
   ctx.fillStyle = withAlpha(theme.muted, 0.95);
   ctx.font = SANS(13, 500);
-  ctx.fillText(`astrosivam.com · one copy contract, ${count} layouts · Signature Gold stays on identity assets`, pad, footerY);
+  ctx.fillText("astrosivam.com", pad, footerY);
   ctx.textAlign = "right";
   ctx.fillStyle = withAlpha(theme.gold, 0.9);
   ctx.font = SANS(12, 600);

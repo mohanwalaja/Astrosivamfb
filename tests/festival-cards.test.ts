@@ -33,7 +33,7 @@ import {
 const ROOT = new URL("..", import.meta.url).pathname;
 const SOURCE = readFileSync(join(ROOT, "src/lib/festivalCreative.ts"), "utf8");
 
-const STYLES: FestivalStyle[] = ["traditional", "minimal", "luxury", "contemporary"];
+const STYLES: FestivalStyle[] = CARD_STYLES.map((s) => s.key);
 
 /* ------------------------------- the library ------------------------------ */
 
@@ -127,7 +127,8 @@ test("a stored date is printed exactly as the calendar formats it", () => {
 test("the four families are four compositions, not four tints", () => {
   assert.deepEqual(CARD_STYLES.map((style) => style.key), STYLES);
   for (const style of STYLES) {
-    assert.match(SOURCE, new RegExp(`function ${style}\\(scene: Scene\\)`), `${style} needs its own painter`);
+    const fnName = style.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    assert.match(SOURCE, new RegExp(`function ${fnName}\\(scene: Scene\\)`), `${style} needs its own painter`);
   }
   const palettes = new Set(CARD_STYLES.map((style) => style.defaultTheme));
   const displays = new Set(CARD_STYLES.map((style) => style.defaultDisplay));
@@ -260,7 +261,7 @@ test("logo placement is honoured, including the absence of a logo", async (t) =>
   const copy = festivalCopy(festival, festivalDateView(festival.id, 2026));
   const render = (logo: "plaque" | "wordmark" | "corner" | "none") =>
     renderFestivalCard({
-      style: "luxury",
+      style: "tanjore-heirloom",
       format: "ig-square",
       theme: "midnight",
       display: "cinzel",
@@ -300,7 +301,7 @@ test("festival wishes support service-header, custom and rotated wordmark arrang
   const copy = festivalCopy(festival, festivalDateView(festival.id, 2026));
   const render = (logo: "service-top-right" | "custom", orientation: "horizontal" | "vertical" | "circular", customX = 86) =>
     renderFestivalCard({
-      style: "luxury",
+      style: "tanjore-heirloom",
       format: "ig-post",
       theme: "midnight",
       display: "cinzel",

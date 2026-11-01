@@ -324,7 +324,7 @@ export const FestivalWishes: React.FC = () => {
             </span>
           </>
         }
-        description="Four genuine treatments — traditional, minimal, luxury, contemporary — each with its own grid, type pairing and palette. Pick a festival, a language, a palette, the type faces and where the logo sits. Dates come only from the verified panchang table: a festival with no stored date is printed as waiting, never guessed."
+        description="Eight sacred temple and devotional treatments — Traditional, Temple Sanctum, Full Devotional Bleed, Tanjore Gold, Raja Gopuram, Chola Bronze, Surya Prabha, and Deepam Jyothi — each with authentic South Indian iconography, sacred framing, and verified panchang dates."
         actions={
           <>
             <PublishCanvasButton

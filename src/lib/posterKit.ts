@@ -1126,9 +1126,8 @@ export function drawLogoMark(ctx: CanvasRenderingContext2D, logo: HTMLImageEleme
 }
 
 /**
- * The one contact line every creative carries: website and email, centred at
- * the bottom. Brand decision — the lockup lives top-left with no seal, and
- * contact details live here, so neither competes with the message.
+ * The one contact line every creative carries: website only (astrosivam.com), centred at
+ * the bottom.
  */
 export function drawContactLine(
   ctx: CanvasRenderingContext2D,
@@ -1144,7 +1143,7 @@ export function drawContactLine(
   ctx.font = SANS(size, 500);
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(`${BRAND.website} · Email: ${BRAND.email}`, W / 2, y);
+  ctx.fillText(BRAND.website, W / 2, y);
   ctx.restore();
 }
 

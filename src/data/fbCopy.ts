@@ -42,7 +42,7 @@ export interface FbCopyEntry {
   };
 }
 
-const BASE_FOOTER = "astrosivam.com · Email: admin@astrosivam.com";
+const BASE_FOOTER = "astrosivam.com";
 
 const CORE_TAGS = ["#AstroSivam", "#VedicAstrology", "#Jyotish", "#TamilAstrology"];
 const LOCAL_TAGS = ["#TamilNadu", "#Chennai", "#Walajapet", "#SouthIndia"];

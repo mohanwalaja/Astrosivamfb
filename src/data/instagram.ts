@@ -66,7 +66,7 @@ export const IG_HIGHLIGHTS: HighlightPlan[] = [
     id: "baby",
     label: "Baby Names",
     glyph: "namakaranam",
-    theme: "ivory",
+    theme: "terracotta",
     purpose: "A gentle, saveable set for expecting parents.",
     stories: [
       "How the birth star gives the naming syllable.",

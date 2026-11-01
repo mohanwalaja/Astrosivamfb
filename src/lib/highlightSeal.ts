@@ -18,7 +18,7 @@ import { drawGrain } from "./premium";
 export const HIGHLIGHT_STYLE: Record<string, { style: StyleKey; service?: string }> = {
   jathagam: { style: "signature", service: "jathagam" },
   porutham: { style: "silk", service: "marriage" },
-  baby: { style: "signature", service: "baby-naming" },
+  baby: { style: "kolam", service: "baby-naming" },
   muhurtham: { style: "gopuram", service: "muhurtham" },
   panchangam: { style: "ephemeris", service: "panchangam" },
   reviews: { style: "aurum" },

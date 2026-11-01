@@ -130,7 +130,7 @@ export function festivalCopy(
     dateNote: date.note && date.note.toLowerCase() !== festival.name.toLowerCase() ? date.note : null,
     provisional: date.confidence === "provisional",
     traditional: festival.when,
-    footer: overrides.footer ?? `${BRAND.website} · Email: ${BRAND.email}`,
+    footer: overrides.footer ?? BRAND.website,
     site: overrides.site ?? BRAND.website,
   };
 }

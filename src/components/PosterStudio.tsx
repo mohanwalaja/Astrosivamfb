@@ -107,7 +107,7 @@ const DEFAULT: Omit<PosterOptions, "scale"> = {
   hindi: STARTER_DEITY.hindi,
   subline: STARTER_DEITY.epithet,
   cta: "astrosivam.com",
-  footer: "astrosivam.com · Email: admin@astrosivam.com",
+  footer: "astrosivam.com",
   showLogo: true,
 };
 
@@ -127,14 +127,18 @@ const readInitial = (): StudioInit => {
   const saved = loadPreset();
   const formatId = preset?.formatId ?? saved?.formatId ?? "ig-post";
   const format = FORMATS.find((item) => item.id === formatId) ?? FORMATS[0];
+  const combinedState = {
+    ...DEFAULT,
+    ...(saved?.state ?? {}),
+    ...(preset?.state ?? {}),
+    width: format.width,
+    height: format.height,
+  };
+  if (combinedState.footer?.includes("Email:") || combinedState.footer?.includes("@astrosivam.com")) {
+    combinedState.footer = "astrosivam.com";
+  }
   return {
-    state: {
-      ...DEFAULT,
-      ...(saved?.state ?? {}),
-      ...(preset?.state ?? {}),
-      width: format.width,
-      height: format.height,
-    },
+    state: combinedState,
     formatId: format.id,
     deityKey: preset ? (preset.deityKey ?? null) : (saved?.deityKey ?? "ganesha"),
     note: preset?.note,

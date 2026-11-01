@@ -482,34 +482,28 @@ export function drawServiceArt(
 
     // South Indian 4×4 rasi grid lines (perimeter houses only, central 2×2 sanctum stays open)
     ctx.strokeStyle = withAlpha(theme.gold, 0.85);
-    ctx.lineWidth = 1.2;
-    for (const p of [-19.5, 19.5]) {
-      // Top & bottom segments
+    ctx.lineWidth = 1.6;
+    for (const p of [-17, 17]) {
+      // Top & bottom outer boundary of central sanctum
       ctx.beginPath();
-      ctx.moveTo(p, -39);
-      ctx.lineTo(p, -19.5);
-      ctx.moveTo(p, 19.5);
-      ctx.lineTo(p, 39);
+      ctx.moveTo(p, -34);
+      ctx.lineTo(p, 34);
       ctx.stroke();
 
-      // Left & right segments
+      // Left & right outer boundary of central sanctum
       ctx.beginPath();
-      ctx.moveTo(-39, p);
-      ctx.lineTo(-19.5, p);
-      ctx.moveTo(19.5, p);
-      ctx.lineTo(39, p);
+      ctx.moveTo(-34, p);
+      ctx.lineTo(34, p);
       ctx.stroke();
     }
 
-    // Outer perimeter dividers for 12 houses
-    for (const d of [-39, 39]) {
-      ctx.beginPath();
-      ctx.moveTo(-19.5, d);
-      ctx.lineTo(19.5, d);
-      ctx.moveTo(d, -19.5);
-      ctx.lineTo(d, 19.5);
-      ctx.stroke();
-    }
+    // Mid dividers for outer perimeter houses (leaving center open)
+    ctx.beginPath();
+    ctx.moveTo(0, -34); ctx.lineTo(0, -17);
+    ctx.moveTo(0, 17); ctx.lineTo(0, 34);
+    ctx.moveTo(-34, 0); ctx.lineTo(-17, 0);
+    ctx.moveTo(17, 0); ctx.lineTo(34, 0);
+    ctx.stroke();
 
     // Sacred Tamil / Vedic planetary glyph seeds in key houses:
     // Mesha (1st / Lagna): Ascendant marker "ல" (La)
@@ -554,29 +548,29 @@ export function drawServiceArt(
 
     // Central Brahma Sanctum (open 2×2 field) with radiant 8-petal golden lotus & bindu
     ctx.save();
-    const sanctumGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 19.5);
+    const sanctumGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 15);
     sanctumGrad.addColorStop(0, "#4E3010");
     sanctumGrad.addColorStop(0.65, "#251404");
     sanctumGrad.addColorStop(1, "#100601");
-    roundRect(ctx, -19.5, -19.5, 39, 39, 3);
+    roundRect(ctx, -15.5, -15.5, 31, 31, 2);
     ctx.fillStyle = sanctumGrad;
     ctx.fill();
-    ctx.strokeStyle = gold;
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = withAlpha(theme.gold, 0.6);
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     // Sri Yantra diamond in sanctum
     ctx.strokeStyle = withAlpha(theme.goldSoft, 0.45);
     ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(0, -17);
-    ctx.lineTo(17, 0);
-    ctx.lineTo(0, 17);
-    ctx.lineTo(-17, 0);
+    ctx.moveTo(0, -14);
+    ctx.lineTo(14, 0);
+    ctx.lineTo(0, 14);
+    ctx.lineTo(-14, 0);
     ctx.closePath();
     ctx.stroke();
 
-    // 8-petal central blooming lotus
+    // 8-petal central blooming lotus (compact sanctum bindu keeps central 2×2 open)
     for (let i = 0; i < 8; i += 1) {
       const a = (i / 8) * Math.PI * 2;
       ctx.save();
@@ -584,8 +578,8 @@ export function drawServiceArt(
       ctx.fillStyle = gold;
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(3.2, 7, 0, 13);
-      ctx.quadraticCurveTo(-3.2, 7, 0, 0);
+      ctx.quadraticCurveTo(1.8, 3.5, 0, 6.5);
+      ctx.quadraticCurveTo(-1.8, 3.5, 0, 0);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -593,10 +587,10 @@ export function drawServiceArt(
 
     // Divine central bindu with sacred radiance
     ctx.shadowColor = withAlpha(theme.gold, 0.95);
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 6;
     ctx.fillStyle = "#FFFDE7";
     ctx.beginPath();
-    ctx.arc(0, 0, 3.4, 0, Math.PI * 2);
+    ctx.arc(0, 0, 2.6, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   } else if (serviceKey === "marriage") {

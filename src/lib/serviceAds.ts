@@ -397,7 +397,7 @@ const urlLine = (scene: Scene, x: number, y: number, align: CanvasTextAlign = "l
 };
 
 const footerLine = (scene: Scene, x: number, y: number, align: CanvasTextAlign = "left", color?: string) => {
-  drawText(scene, "footer", `${BRAND.website} · Email: ${BRAND.email}`, x, y, scene.fonts.sans(scene.W * S.footer, 500), color ?? withAlpha(scene.theme.ink, 0.62), { align });
+  drawText(scene, "footer", BRAND.website, x, y, scene.fonts.sans(scene.W * S.footer, 500), color ?? withAlpha(scene.theme.ink, 0.62), { align });
 };
 
 /** Vertical rule. `hairline` only draws across, so the spines need their own. */
@@ -840,7 +840,7 @@ function eduGuide(scene: Scene) {
   drawText(
     scene,
     "footer",
-    ellipsize(ctx, copy.source ?? `${BRAND.website} · Email: ${BRAND.email}`, W - pad * 2 - W * 0.24, fonts.sans(W * S.footer, 500)),
+    ellipsize(ctx, copy.source ?? BRAND.website, W - pad * 2 - W * 0.24, fonts.sans(W * S.footer, 500)),
     pad,
     H * 0.898,
     fonts.sans(W * S.footer, 500),
@@ -893,7 +893,7 @@ function eduStep(scene: Scene) {
   drawText(
     scene,
     "footer",
-    ellipsize(ctx, copy.source ?? `${BRAND.website} · Email: ${BRAND.email}`, W - pad * 2 - W * 0.24, fonts.sans(W * S.footer, 500)),
+    ellipsize(ctx, copy.source ?? BRAND.website, W - pad * 2 - W * 0.24, fonts.sans(W * S.footer, 500)),
     pad,
     H - H * 0.077,
     fonts.sans(W * S.footer, 500),

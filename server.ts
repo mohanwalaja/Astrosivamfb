@@ -83,14 +83,14 @@ function setSessionCookie(res: Response): void {
   res.cookie(COOKIE_NAME, `${expiryText}.${nonce}.${signature(`${expiryText}.${nonce}`)}`, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: SESSION_DURATION_SECONDS * 1000,
   });
   res.cookie("astrosivam_csrf", csrf, {
     httpOnly: false,
     secure: isProd,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: SESSION_DURATION_SECONDS * 1000,
   });
@@ -331,8 +331,8 @@ async function startServer() {
 
   app.post("/api/auth/logout", (req, res) => {
     if (!authRequired) {
-      res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: isProd, sameSite: "lax", path: "/" });
-      res.clearCookie("astrosivam_csrf", { httpOnly: false, secure: isProd, sameSite: "lax", path: "/" });
+      res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: isProd, sameSite: "strict", path: "/" });
+      res.clearCookie("astrosivam_csrf", { httpOnly: false, secure: isProd, sameSite: "strict", path: "/" });
       return res.status(200).json({ authenticated: false });
     }
 
@@ -340,8 +340,8 @@ async function startServer() {
     if (!nonce) return res.status(401).json({ error: "Authentication required" });
     if (!csrfMatches(req)) return res.status(403).json({ error: "Security token expired. Refresh the page and try again." });
     activeSessions.delete(nonce);
-    res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: isProd, sameSite: "lax", path: "/" });
-    res.clearCookie("astrosivam_csrf", { httpOnly: false, secure: isProd, sameSite: "lax", path: "/" });
+    res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: isProd, sameSite: "strict", path: "/" });
+    res.clearCookie("astrosivam_csrf", { httpOnly: false, secure: isProd, sameSite: "strict", path: "/" });
     return res.status(200).json({ authenticated: false });
   });
 

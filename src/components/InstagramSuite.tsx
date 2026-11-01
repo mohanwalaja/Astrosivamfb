@@ -349,7 +349,7 @@ const ProfileTab: React.FC<{ bioIndex: number; setBioIndex: (index: number) => v
               <span className="text-[#A2937D]">Account type:</span> Professional · Category “Astrologer”
             </div>
             <div className="rounded-lg border border-line-soft px-3 py-2 text-[11px] text-[#C7B9A3]">
-              <span className="text-[#A2937D]">Contact:</span> {BRAND.email}
+              <span className="text-[#A2937D]">Website:</span> {BRAND.website}
             </div>
           </div>
         </Panel>

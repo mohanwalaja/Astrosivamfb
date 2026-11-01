@@ -630,12 +630,12 @@ const paintLogo = (
 };
 
 const paintSite = (scene: Scene, _x?: number, y?: number, _align: CanvasTextAlign = "left") => {
-  // Single centered contact line across all festival cards: astrosivam.com · Email: admin@astrosivam.com
+  // Single centered contact line across all festival cards: astrosivam.com
   const lineY = y ?? scene.H - scene.H * 0.038;
   paintText(
     scene,
     "footer",
-    `${BRAND.website} · Email: ${BRAND.email}`,
+    BRAND.website,
     scene.W / 2,
     lineY,
     scene.fonts.sans(scene.W * TYPE.footer, 500),

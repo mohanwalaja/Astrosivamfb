@@ -118,7 +118,7 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
       hindi: hindi ?? "",
       subline: subline ?? "",
       cta: cta ?? "",
-      footer: footer ?? "",
+      footer: footer ? (footer.includes("Email:") || footer.includes("@astrosivam.com") ? "astrosivam.com" : footer) : "",
     },
     img,
     logo,

@@ -506,10 +506,6 @@ export const BrandSystem: React.FC = () => {
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-[#B4A58F]">
           <ExternalLink href={BRAND.url}>{BRAND.website}</ExternalLink>
-          <span>·</span>
-          <span>{BRAND.email}</span>
-          <span>·</span>
-          <span>{BRAND.delivery}</span>
         </div>
       </div>
     </div>

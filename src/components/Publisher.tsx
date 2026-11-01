@@ -856,3 +856,5 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
     </Modal>
   );
 };
+
+export default Publisher;

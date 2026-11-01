@@ -5,7 +5,6 @@ export const FB_PAGE_FIELDS = [
   { field: "Username", value: "@astrosivamofficial", note: "Claim on both platforms. Verify availability before publishing; alternates below." },
   { field: "Category", value: "Astrologist", note: "Add Astrology service and Spiritual consultant as secondary categories." },
   { field: "Website", value: "https://astrosivam.com", note: "Use the clean URL, no UTM on the profile field." },
-  { field: "Email", value: "admin@astrosivam.com", note: "Monitored by the team." },
   { field: "Location", value: "Walajapet, Ranipet District, Tamil Nadu, India", note: "Registered office per astrosivam.com/contact; reports are delivered online worldwide." },
   { field: "Hours", value: "Always open · replies within 6 hours", note: "Matches the six-hourly report review promise." },
   { field: "Price range", value: "US$5–10 · ₹470–940", note: "Per report, as listed at astrosivam.com/services. Daily Panjangam is free." },
@@ -138,7 +137,7 @@ export const FB_REVIEW_TEMPLATES = [
   {
     scenario: "Question inside a review",
     reply:
-      "Thank you for the trust. We have sent you a DM with the specific answer so your birth details stay private. You can always write to admin@astrosivam.com as well.",
+      "Thank you for the trust. We have sent you a DM with the specific answer so your birth details stay private. You can always reach us via astrosivam.com as well.",
   },
   {
     scenario: "Critical review about timing",

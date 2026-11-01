@@ -526,7 +526,7 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-wash px-4 py-3">
         <div className="flex items-center gap-2 text-[11.5px] text-[#B4A58F]">
           <Globe className="h-3.5 w-3.5 text-gold" />
-          Prepared for {BRAND.website} · {BRAND.email}
+          {BRAND.website}
         </div>
         <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-[0.14em] text-[#A2937D]">
           <span className="inline-flex items-center gap-1.5">
