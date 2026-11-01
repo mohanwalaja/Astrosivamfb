@@ -19,6 +19,18 @@ export type PosterState = Omit<PosterOptions, "scale" | "reveal">;
 export interface StudioPreset {
   /** One field per poster option — everything the studio would otherwise default. */
   state: Partial<PosterState>;
+  /**
+   * v3 hand-off: the design the studio should open on. When present it wins over
+   * `state`, because the v3 model carries copy and locks rather than a template.
+   */
+  design?: {
+    category: string;
+    composition?: string | null;
+    palette?: string | null;
+    face?: string | null;
+    copy: { kicker: string; headline: string; subline: string; cta: string; footer: string; badge?: string };
+    artId?: string | null;
+  };
   formatId?: string;
   deityKey?: DeityKey | null;
   /** Shown as a toast when the preset lands, so the jump is never mysterious. */
@@ -141,6 +153,19 @@ export function presetFromFestival(festival: Festival): StudioPreset {
     formatId: "ig-post",
     deityKey: festival.deity,
     note: `${festival.name} loaded — edit anything.`,
+    // The v3 studio opens on this design; the legacy `state` below keeps any
+    // older caller working unchanged.
+    design: {
+      category: "festival-greeting",
+      copy: {
+        kicker: festival.name,
+        headline: festival.headline,
+        subline: festival.subline,
+        cta: "astrosivam.com",
+        footer: "astrosivam.com",
+      },
+      artId: deity ? deity.key : null,
+    },
     state: {
       themeKey: festival.theme,
       style: festival.style,

@@ -76,40 +76,89 @@ test("the renderer dispatches on template and keeps the legacy path", () => {
   }
 });
 
-test("the studio keeps every editing control and adds the template picker", () => {
-  for (const control of [
-    'set("headline"',
-    'set("tamil"',
-    'set("hindi"',
-    'set("subline"',
-    'set("kicker"',
-    'set("cta"',
-    'set("footer"',
-    'set("themeKey"',
-    'set("style"',
-    'set("display"',
-    'set("script"',
-    'set("imageFit"',
-    'set("showLogo"',
-  ]) {
-    assert.ok(STUDIO_SOURCE.includes(control), `the studio lost its ${control} control`);
+test("the studio still exposes every editing control, now as independent locks", () => {
+  // Copy: one writer per field, so no field can be edited only through a preset.
+  for (const field of ["kicker", "headline", "subline", "cta", "footer"]) {
+    assert.ok(
+      STUDIO_SOURCE.includes(`setCopy("${field}"`),
+      `the studio lost its ${field} control`,
+    );
   }
-  assert.ok(STUDIO_SOURCE.includes("useDeity"), "the deity library must stay");
-  assert.ok(STUDIO_SOURCE.includes("onUpload"), "image upload must stay");
-  assert.ok(STUDIO_SOURCE.includes("chooseFormat"), "format switching must stay");
-  assert.ok(STUDIO_SOURCE.includes("renderPoster({ ...state, scale: 1 })"), "full-resolution export must stay");
-  // The picker itself.
-  assert.ok(STUDIO_SOURCE.includes("TEMPLATES.map"), "the template picker must be rendered");
-  assert.ok(STUDIO_SOURCE.includes("aria-pressed"), "template choices must expose their pressed state");
-  assert.ok(STUDIO_SOURCE.includes("TemplateGlyph"), "templates need a visual wireframe, not just a label");
+  // The independent locks the brief requires.
+  for (const lock of ["composition:", "palette:", "face:", "decoration:", "motion:", "formatId:", "artId:", "showLogo:"]) {
+    assert.ok(STUDIO_SOURCE.includes(lock), `the studio lost its ${lock} control`);
+  }
+  assert.ok(STUDIO_SOURCE.includes("another"), "Generate another design must stay");
+  assert.ok(STUDIO_SOURCE.includes("renderDesign({"), "full-resolution export must stay");
+  assert.ok(STUDIO_SOURCE.includes("scale: 1"), "exports must render at device scale 1");
+  assert.ok(STUDIO_SOURCE.includes("recordReel("), "animated export must stay");
+  assert.ok(STUDIO_SOURCE.includes("PublishCanvasButton"), "publishing must stay");
+  // The composition picker renders real thumbnails, not wireframe glyphs.
+  assert.ok(STUDIO_SOURCE.includes("COMPOSITIONS.map"), "the composition picker must be rendered");
+  assert.ok(STUDIO_SOURCE.includes("aria-pressed"), "choices must expose their pressed state");
+  assert.ok(STUDIO_SOURCE.includes("<Thumb"), "compositions need rendered thumbnails, not icons");
+  assert.ok(STUDIO_SOURCE.includes("const canvas = await renderDesign({"), "a thumbnail must be a real render of its composition");
 });
 
-test("a template switch never discards the client's work", () => {
-  const match = STUDIO_SOURCE.match(/const selectTemplate = \(key: PosterTemplate\) => \{([\s\S]*?)\n  \};/);
-  assert.ok(match, "selectTemplate is missing");
-  // Only the template and the legacy layout may change on a template switch.
-  assert.match(match[1], /template: key/);
-  assert.doesNotMatch(match[1], /themeKey|image:|headline:|tamil:|hindi:|subline:/);
+test("every control changes only itself — the independence guarantee", async () => {
+  const studio = await import("../src/lib/studioDesign.ts");
+  const base = studio.createStudioDesign({ category: "festival-greeting", formatId: "ig-post" });
+
+  // Composition: the structure moves, the palette, face and copy do not.
+  const compositions = [...new Set(
+    (await import("../src/design/compositions.ts")).COMPOSITIONS.map((c) => c.key),
+  )];
+  const other = compositions.find((key) => key !== base.design.composition);
+  assert.ok(other, "the studio needs more than one composition");
+  const moved = studio.applyChange(base, { composition: other });
+  assert.equal(moved.design.composition, other, "the chosen composition must be honoured");
+  assert.equal(moved.design.palette, base.design.palette, "a composition change recoloured the card");
+  assert.equal(moved.design.face, base.design.face, "a composition change changed the typeface");
+  assert.equal(moved.copy.headline, base.copy.headline, "a composition change discarded the copy");
+
+  // Palette: the colour moves, the structure and the type do not.
+  const recoloured = studio.applyChange(base, { palette: "emerald-temple" });
+  assert.equal(recoloured.design.palette, "emerald-temple");
+  assert.equal(recoloured.design.composition, base.design.composition, "a palette change moved the structure");
+  assert.equal(recoloured.design.face, base.design.face);
+
+  // Typeface: the face moves, the structure and the palette do not.
+  const retyped = studio.applyChange(base, { face: "inter" });
+  assert.equal(retyped.design.face, "inter");
+  assert.equal(retyped.design.composition, base.design.composition, "a typeface change moved the structure");
+  assert.equal(retyped.design.palette, base.design.palette);
+
+  // Illustration: swapping the artwork keeps the layout.
+  const restyled = studio.applyChange(base, { artId: "zodiac" });
+  assert.equal(restyled.design.art.kind, "zodiac-medallion");
+  assert.equal(restyled.design.composition, base.design.composition, "an art change moved the structure");
+
+  // Format: the canvas changes, the design identity does not.
+  const reshaped = studio.applyChange(base, { formatId: "story" });
+  assert.equal(reshaped.formatId, "story");
+  assert.equal(reshaped.design.palette, base.design.palette);
+
+  // Generate another: the structure must change and never repeat the last four.
+  let current = base;
+  const seen = [base.design.composition];
+  for (let i = 0; i < 5; i += 1) {
+    const next = studio.generateAnother(current);
+    assert.notEqual(next.design.composition, current.design.composition, "Generate another repeated the structure");
+    assert.ok(!seen.slice(-4).includes(next.design.composition), `Generate another repeated ${next.design.composition}`);
+    seen.push(next.design.composition);
+    current = next;
+  }
+  assert.ok(new Set(seen).size >= 4, "five generations produced fewer than four structures");
+});
+
+test("a category change keeps the client's own headline", async () => {
+  const studio = await import("../src/lib/studioDesign.ts");
+  const base = studio.createStudioDesign({ category: "festival-greeting" });
+  const written = studio.applyChange(base, { copy: { ...base.copy, headline: "A line the client wrote." } });
+  const moved = studio.selectCategory(written, "wedding-matching");
+  assert.equal(moved.category, "wedding-matching");
+  assert.equal(moved.copy.headline, "A line the client wrote.", "the client's headline must survive a category change");
+  assert.notEqual(moved.copy.subline, written.copy.subline, "the subline should follow the new brief");
 });
 
 /* --------------------------- canvas defect guards ------------------------- */

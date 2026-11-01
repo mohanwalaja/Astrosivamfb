@@ -12,6 +12,10 @@ import { LAYOUT_TEMPLATE, TEMPLATE_MAP, TEMPLATES, layoutForTemplate, templateFo
 import { createCanvas, ensureFonts, loadImageSource, loadLogo } from "./canvas";
 import { displayFaceFor } from "./posterKit";
 import { paintPosterTemplate } from "./posterTemplates";
+import { fromLegacyPoster } from "../design/adapters";
+import { paintDesign, renderDesign } from "../design/render";
+import type { DesignSpec } from "../design/engine";
+import type { PosterCopy } from "../design/compositions";
 
 export interface PosterOptions {
   width: number;
@@ -30,6 +34,11 @@ export interface PosterOptions {
   imageFit: ImageFit;
   kicker: string;
   headline: string;
+  /**
+   * Legacy Indic lines. Kept in the type so saved presets still parse, but never
+   * painted: the studio is English-only by policy. Anything left in them is
+   * dropped before the render.
+   */
   tamil: string;
   hindi: string;
   subline: string;
@@ -43,7 +52,19 @@ export interface PosterOptions {
    * existing export is unchanged.
    */
   reveal?: number;
+  /**
+   * Opt into the v3 design system (default). Set to `false` to paint the
+   * original v2 template instead — retained for saved posters and for the
+   * legacy regression tests.
+   */
+  engine?: "design" | "legacy";
+  /** A design produced by the design engine; overrides the derived one. */
+  design?: DesignSpec;
+  /** Motion state for the reel recorder; omitted means the finished poster. */
+  motion?: ReturnType<typeof stillMotion>;
 }
+
+const stillMotion = () => undefined as never;
 
 /* --------------------------------- fonts ---------------------------------- */
 
@@ -54,10 +75,14 @@ export const DISPLAY_FONTS: Array<{ key: DisplayFontKey; label: string; note: st
   { key: "inter", label: "Inter Tight", note: "Geometric modern sans — campaigns and guides" },
 ];
 
+/**
+ * Historically the Tamil/Hindi pairings. The studio is English-only, so these now
+ * name the *supporting* face only and never paint an Indic line.
+ */
 export const SCRIPT_FONTS: Array<{ key: ScriptFontKey; label: string; note: string }> = [
-  { key: "serif", label: "Noto Serif Tamil + Devanagari", note: "Book-weight serif Tamil and Hindi — pairs with every serif headline" },
-  { key: "sans", label: "Hind Madurai + Hind", note: "Clean sans Tamil and Hindi — pairs with Inter Tight" },
-  { key: "festive", label: "Baloo Thambi + Yatra One", note: "Heavy, rounded festive Tamil and Hindi for greetings" },
+  { key: "serif", label: "Serif support", note: "Book-weight secondary text — pairs with every serif headline" },
+  { key: "sans", label: "Sans support", note: "Clean geometric secondary text — pairs with Inter Tight" },
+  { key: "festive", label: "Rounded support", note: "Softer secondary text for greetings" },
 ];
 
 /* ------------------------------ compatibility ----------------------------- */
@@ -67,7 +92,101 @@ export type { TemplateMeta } from "../types";
 
 /* --------------------------------- render --------------------------------- */
 
+const legacyCopy = (options: PosterOptions): PosterCopy => ({
+  kicker: options.kicker ?? "",
+  headline: options.headline ?? "",
+  // `tamil` / `hindi` are deliberately not read.
+  subline: options.subline ?? "",
+  cta: options.cta ?? "",
+  footer: options.footer
+    ? options.footer.includes("Email:") || options.footer.includes("@astrosivam.com")
+      ? "astrosivam.com"
+      : options.footer
+    : "",
+});
+
+/** The v3 design a v2 poster maps onto. Exported for the studio and the tools. */
+export function designForPoster(options: PosterOptions): DesignSpec {
+  if (options.design) return options.design;
+  return fromLegacyPoster(
+    {
+      themeKey: options.themeKey,
+      style: options.style,
+      layout: options.layout,
+      template: options.template,
+      display: options.display,
+      script: options.script,
+      image: options.image,
+      imageFit: options.imageFit,
+      headline: options.headline,
+    },
+    0,
+  );
+}
+
 export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasElement> {
+  const { width, height, scale = 1, reveal = 1, showLogo } = options;
+
+  await ensureFonts();
+
+  // The legacy painter is opt-in only; every default render uses the v3 engine.
+  if (options.engine === "legacy") {
+    return renderLegacy(options);
+  }
+
+  const spec = designForPoster(options);
+  const motion = options.motion ?? (reveal >= 1 ? undefined : { ...stillReveal(reveal) });
+  const canvas = await renderDesign({
+    spec,
+    copy: legacyCopy(options),
+    width,
+    height,
+    scale,
+    showLogo,
+    motion,
+  });
+  void THEMES;
+  void TEMPLATE_MAP;
+  return canvas;
+}
+
+/** A degraded motion state for the v2 `reveal` flag: copy fades, art holds. */
+function stillReveal(reveal: number) {
+  return {
+    ground: 1,
+    art: 1,
+    artReveal: 1,
+    kicker: Math.min(1, reveal * 1.2),
+    headline: reveal,
+    sub: Math.max(0, reveal * 1.15 - 0.15),
+    cta: Math.max(0, reveal * 1.2 - 0.2),
+    logo: 1,
+    sweep: 0,
+    parallaxX: 0,
+    parallaxY: 0,
+    scale: 1,
+  };
+}
+
+/** Paint the v3 design into a caller-owned context (used by the reel). */
+export function paintPoster(ctx: CanvasRenderingContext2D, options: PosterOptions, motion?: ReturnType<typeof stillReveal>) {
+  const spec = designForPoster(options);
+  paintDesign(ctx, {
+    spec,
+    copy: legacyCopy(options),
+    width: options.width,
+    height: options.height,
+    scale: options.scale ?? 1,
+    showLogo: options.showLogo,
+    motion: (motion ?? stillReveal(options.reveal ?? 1)) as never,
+  });
+}
+
+/**
+ * The original v2 painting path. Only reached when a caller explicitly asks for
+ * it; kept so saved posters and the legacy regression suite still render.
+ */
+async function renderLegacy(options: PosterOptions): Promise<HTMLCanvasElement> {
   const {
     width,
     height,
@@ -92,13 +211,9 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
   } = options;
 
   const resolvedTemplate: PosterTemplate = template ?? templateForLayout(layout);
-
-  await ensureFonts();
   const theme = THEMES[themeKey] ? themeKey : "midnight";
   const { canvas, ctx } = createCanvas(width, height, scale);
 
-  // Only templates that use art load the photograph. The minimal typographic
-  // template deliberately ignores it, which also makes it the fastest export.
   const wantsImage = TEMPLATE_MAP[resolvedTemplate]?.usesImage !== false;
   const img = wantsImage && image ? await loadImageSource(image).catch(() => null) : null;
   const logo = showLogo ? await loadLogo().catch(() => null) : null;
@@ -114,8 +229,9 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
     copy: {
       kicker: kicker ?? "",
       headline: headline ?? "",
-      tamil: tamil ?? "",
-      hindi: hindi ?? "",
+      // English-only: the script lines are never painted.
+      tamil: tamil ? "" : "",
+      hindi: hindi ? "" : "",
       subline: subline ?? "",
       cta: cta ?? "",
       footer: footer ? (footer.includes("Email:") || footer.includes("@astrosivam.com") ? "astrosivam.com" : footer) : "",
