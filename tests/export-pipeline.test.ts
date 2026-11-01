@@ -436,6 +436,15 @@ test("every render entry point awaits the webfonts before it paints", () => {
   }
 });
 
+test("slow self-hosted fonts get a longer warmup and the warning rechecks late loads", () => {
+  const ROOT = new URL("..", import.meta.url).pathname;
+  const canvas = readFileSync(join(ROOT, "src/lib/canvas.ts"), "utf8");
+  const app = readFileSync(join(ROOT, "src/App.tsx"), "utf8");
+  assert.match(canvas, /setTimeout\(resolve, 10_000\)/, "mobile/shared hosts need more than a 4-second font timeout");
+  assert.match(app, /addEventListener\("loadingdone"/, "clear the warning after late font faces finish loading");
+  assert.match(app, /addEventListener\("loadingerror"/, "recheck health after a failed font request");
+});
+
 
 /* ------------------------------- safe areas ------------------------------- */
 
