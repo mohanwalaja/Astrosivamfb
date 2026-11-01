@@ -1,4 +1,4 @@
-import React, { Component, Suspense, lazy, useEffect, useRef, useState } from "react";
+import React, { Component, Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -53,6 +53,7 @@ const StyleGallery = lazy(() => import("./components/StyleGallery").then((m) => 
 const Publisher = lazy(() => import("./components/Publisher").then((m) => ({ default: m.Publisher })));
 import { ensureFonts, fontHealth } from "./lib/canvas";
 import { getCsrfToken } from "./lib/csrf";
+import { PublishContextProvider, type PublisherDraft } from "./lib/publishContext";
 import { ToastProvider, useHashSection } from "./components/ui";
 
 const NAV = [
@@ -355,6 +356,15 @@ function Shell() {
   const [drawer, setDrawer] = useState(false);
   const [fontsMissing, setFontsMissing] = useState<string[]>([]);
   const [publisherOpen, setPublisherOpen] = useState(false);
+  const [publisherDraft, setPublisherDraft] = useState<PublisherDraft | null>(null);
+  const openPublisher = useCallback((draft?: PublisherDraft) => {
+    setPublisherDraft(draft ?? null);
+    setPublisherOpen(true);
+  }, []);
+  const closePublisher = useCallback(() => {
+    setPublisherOpen(false);
+    setPublisherDraft(null);
+  }, []);
 
   const signOut = async () => {
     await fetch("/api/auth/logout", { method: "POST", headers: { "X-CSRF-Token": getCsrfToken() } }).catch(() => undefined);
@@ -390,7 +400,8 @@ function Shell() {
   };
 
   return (
-    <div className="grain flex min-h-screen flex-col text-cream">
+    <PublishContextProvider value={openPublisher}>
+      <div className="grain flex min-h-screen flex-col text-cream">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
@@ -417,7 +428,7 @@ function Shell() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setPublisherOpen(true)}
+            onClick={() => openPublisher()}
             className="flex h-11 w-11 items-center justify-center rounded-lg border border-line bg-[rgba(199,154,60,0.08)] text-gold-soft"
             aria-label="Publish a post"
           >
@@ -478,7 +489,7 @@ function Shell() {
               <span className="mx-1 h-4 w-px bg-line" aria-hidden="true" />
               <button
                 type="button"
-                onClick={() => setPublisherOpen(true)}
+                onClick={() => openPublisher()}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(216,177,100,0.42)] bg-[rgba(199,154,60,0.1)] px-3 py-1.5 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#EBD9AE] transition-colors hover:bg-[rgba(199,154,60,0.17)]"
               >
                 <Send className="h-3 w-3" aria-hidden="true" /> Publish
@@ -575,10 +586,11 @@ function Shell() {
         />
       </div>
 
-      <Suspense fallback={null}>
-        <Publisher open={publisherOpen} onClose={() => setPublisherOpen(false)} />
-      </Suspense>
-    </div>
+        <Suspense fallback={null}>
+          <Publisher open={publisherOpen} draft={publisherDraft} onClose={closePublisher} />
+        </Suspense>
+      </div>
+    </PublishContextProvider>
   );
 }
 

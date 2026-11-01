@@ -43,6 +43,7 @@ import {
 import { festivalArt, festivalCaptions, festivalCopy, festivalDateView, festivalYears, skinFor } from "../lib/festivalKit";
 import { festivalPackFiles, festivalYearFiles } from "../lib/festivalPack";
 import { Button, Callout, CopyButton, PageHeader, Panel, SectionLabel, useToast } from "./ui";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { ScriptText } from "./ScriptText";
 
 const MONTH_INDEX = (month: string) => FESTIVAL_MONTHS.indexOf(month);
@@ -169,6 +170,23 @@ export const FestivalWishes: React.FC = () => {
     dateLine: date.label ?? festival.when,
   });
 
+  const renderSelected = async () => {
+    const { renderFestivalCard } = await import("../lib/festivalCreative");
+    return renderFestivalCard({
+      style,
+      format: formatId,
+      theme: effectiveTheme,
+      display: effectiveDisplay,
+      script: effectiveScript,
+      logo: effectiveLogo,
+      brandLockup,
+      language,
+      copy,
+      art,
+      pictureSettings,
+    });
+  };
+
   const resetLook = () => {
     setTheme(null);
     setDisplay(null);
@@ -213,20 +231,7 @@ export const FestivalWishes: React.FC = () => {
   const downloadOne = async () => {
     setBusy("one");
     try {
-      const { renderFestivalCard } = await import("../lib/festivalCreative");
-      const out = await renderFestivalCard({
-        style,
-        format: formatId,
-        theme: effectiveTheme,
-        display: effectiveDisplay,
-        script: effectiveScript,
-        logo: effectiveLogo,
-        brandLockup,
-        language,
-        copy,
-        art,
-        pictureSettings,
-      });
+      const out = await renderSelected();
       await downloadCanvas(out.canvas, `astrosivam_${slugify(festival.id)}_${style}_${format.width}x${format.height}.png`);
       toast(`${festival.name} · ${style} · ${format.width} × ${format.height}`);
       if (out.warnings.length) toast(out.warnings[0], "error");
@@ -322,6 +327,14 @@ export const FestivalWishes: React.FC = () => {
         description="Four genuine treatments — traditional, minimal, luxury, contemporary — each with its own grid, type pairing and palette. Pick a festival, a language, a palette, the type faces and where the logo sits. Dates come only from the verified panchang table: a festival with no stored date is printed as waiting, never guessed."
         actions={
           <>
+            <PublishCanvasButton
+              render={async () => (await renderSelected()).canvas}
+              filename={`astrosivam_${slugify(festival.id)}_${style}_${format.width}x${format.height}.png`}
+              captions={captions}
+              sourceLabel={formatId === "ig-story" ? `${festival.name} · vertical image (Facebook feed only)` : `${festival.name} · ${format.ratio}`}
+              platforms={formatId === "ig-story" ? ["facebook"] : undefined}
+              disabled={busy !== null}
+            />
             <Button
               variant="gold"
               onClick={runPack}
@@ -838,10 +851,21 @@ export const FestivalWishes: React.FC = () => {
                 />
               </label>
             </div>
+            <PublishCanvasButton
+              render={async () => (await renderSelected()).canvas}
+              filename={`astrosivam_${slugify(festival.id)}_${style}_${format.width}x${format.height}.png`}
+              captions={captions}
+              sourceLabel={formatId === "ig-story" ? `${festival.name} · vertical image (Facebook feed only)` : `${festival.name} · ${format.ratio}`}
+              platforms={formatId === "ig-story" ? ["facebook"] : undefined}
+              full
+              className="mt-3"
+              disabled={busy !== null}
+              label="Publish card now"
+            />
             <Button
               variant="gold"
               full
-              className="mt-3"
+              className="mt-2"
               onClick={downloadOne}
               disabled={busy !== null}
               loading={busy === "one"}

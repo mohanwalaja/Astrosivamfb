@@ -266,12 +266,7 @@ fields and grid order have no API. The **Instagram → API limits** tab lists al
 the daily publish cap is read from `content_publishing_limit` rather than assumed, because Meta's own
 documentation quotes both 50 and 100 posts per 24 hours.
 
-After setup, sign in to the site, choose **Publish**, connect the Meta account once, pick a Page,
-select Facebook and/or its linked Instagram account, add an image and caption, then press **Publish
-now**. It publishes image posts immediately (PNG is converted to JPEG in the browser for Instagram).
-This does not publish Reels, Stories, scheduled posts, or text-only posts. When both platforms are
-selected, Meta handles the two posts separately, so one may succeed if the other fails; the result is
-shown per platform. `/api/health` is public and returns only basic health/version information.
+After setup, connect the Meta account once and select the Page. In **Service Posts**, **Festival Wishes**, **Poster Studio**, **Style Gallery**, the Facebook/Instagram feed composers, service ads, and Panchangam cards, tap **Publish now** beside a supported single-image design. That one click renders the selected artwork, loads its separate Facebook/Instagram captions and hashtags, validates the media, and publishes immediately—no download, copy/paste, or second confirmation. It targets the saved Facebook Page and its linked Instagram professional account when the design and account support Instagram; unsupported aspect ratios and vertical art default to Facebook only. If Meta is not connected or a check blocks the image, the publisher opens with the next required step; after first-time authorization, return to the design and tap Publish now again. PNG is converted to JPEG in the browser for Instagram. You can still open the general **Publish** composer to manually upload an image; manual uploads keep a review confirmation. This integration publishes one image at a time; it does not publish Reels, Stories, carousels, scheduled posts, or text-only posts. When both platforms are selected, Meta handles them separately, so one may succeed if the other fails; results are shown per platform. `/api/health` is public and returns only basic health/version information.
 
 ### Security audit
 
@@ -308,13 +303,16 @@ eight hours; a server restart signs existing sessions out.
 - Delivery promise, office Address (Walajapet, Ranipet District, Tamil Nadu) and the free Daily
   Panjangam URL (astrosivam.com/panjangam) mirror the live site. Review assets are placeholders until
   genuine customer feedback and permission are verified; do not publish placeholder copy.
-- Publishing is always a deliberate manual action from the Publish composer; there are no background or
-  scheduled posts. The publisher now validates the file's own bytes before upload — JPEG, PNG, WebP, GIF,
-  AVIF, HEIC, BMP and TIFF are recognised by magic number, anything outside JPEG/PNG is converted in the
-  browser, Instagram gets a JPEG capped at 1440 px, and both platforms enforce the 8 MB / aspect-ratio /
-  minimum-width rules with a reason for every rejection. A second confirmation step lists the Page,
-  targets, file and caption length before a real post is sent, and the per-platform result shows Meta's
-  raw error object when one platform fails. The other exports remain available for Meta Business Suite.
+- Publishing always requires a user-initiated **Publish now** action; there are no background or scheduled
+  posts. On supported single-image design surfaces, that one click renders the design, loads its separate
+  platform captions/hashtags, validates it, and sends it immediately when the connected Page is verified. No
+  second confirmation or manual download/copy step is required. The manual-upload composer retains its review
+  confirmation. The publisher validates image bytes before upload — JPEG, PNG, WebP, GIF, AVIF, HEIC, BMP and
+  TIFF are recognised by magic number, unsupported formats are converted in the browser, Instagram receives a
+  JPEG capped at 1440 px, and both platforms enforce the 8 MB / aspect-ratio / minimum-width rules. Facebook
+  and Instagram captions are validated and sent separately; Meta's per-platform results and raw error object
+  are shown when one target fails. This remains single-image, immediate publishing; the other exports remain
+  available for Meta Business Suite.
 - Image and copy rules live in `src/lib/imageValidate.ts`, the layouts in `src/lib/fbCreative.ts`, and the
   post library in `src/data/fbCopy.ts`; `npm test` covers format sniffing, the rejection rules, caption
   limits, hashtag policy, and the mobile legibility audit.

@@ -21,6 +21,7 @@ import { FB_CATEGORIES, FB_COPY_ENTRIES, composePost, type FbCategory, type FbCo
 import { renderFbCreative, auditLegibility, FB_LAYOUT_MAP, type FbLayout, type FbRender } from "../lib/fbCreative";
 import { validateCaption, validateImageFile, prepareImage, type Platform } from "../lib/imageValidate";
 import { downloadCanvas } from "../lib/export";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { fileToImageSource } from "../lib/imageUpload";
 import { Button, Callout, CopyButton, Panel, SectionLabel, Segmented, Select, Textarea, useToast } from "./ui";
 
@@ -54,7 +55,7 @@ function Blit({ source, width }: { source: HTMLCanvasElement; width?: number }) 
   return <canvas ref={ref} style={{ width: "100%", height: "auto", display: "block" }} />;
 }
 
-export function FbComposer({ onOpenPublisher }: { onOpenPublisher?: () => void } = {}) {
+export function FbComposer() {
   const toast = useToast();
   const [category, setCategory] = useState<FbCategory>("service");
   const [entryId, setEntryId] = useState(FB_COPY_ENTRIES[0].id);
@@ -133,6 +134,13 @@ export function FbComposer({ onOpenPublisher }: { onOpenPublisher?: () => void }
   );
   const text = useMemo(() => validateCaption(caption, [platform]), [caption, platform]);
   const fullCaption = useMemo(() => composePost(caption, entry, platform), [caption, entry, platform]);
+  const publishCaptions = useMemo(
+    () => ({
+      facebook: composePost(platform === "facebook" ? caption : entry.captions.facebook, entry, "facebook"),
+      instagram: composePost(platform === "instagram" ? caption : entry.captions.instagram, entry, "instagram"),
+    }),
+    [caption, entry, platform],
+  );
   const composedText = useMemo(() => validateCaption(fullCaption, [platform]), [fullCaption, platform]);
 
   const onUpload = async (file?: File | null) => {
@@ -308,11 +316,20 @@ export function FbComposer({ onOpenPublisher }: { onOpenPublisher?: () => void }
               <Button variant="gold" size="sm" onClick={() => void exportPng()} icon={<Download className="h-3.5 w-3.5" />}>
                 Export {layout.width} × {layout.height}
               </Button>
-              {onOpenPublisher ? (
-                <Button variant="ghost" size="sm" onClick={onOpenPublisher} icon={<Facebook className="h-3.5 w-3.5" />}>
-                  Publish
-                </Button>
-              ) : null}
+              <PublishCanvasButton
+                render={async () => (await renderFbCreative({
+                  layout: entry.layout,
+                  themeKey: theme,
+                  style: styleFor(entry.category),
+                  content: entry.content,
+                  art,
+                  scale: 1,
+                })).canvas}
+                filename={`astrosivam_${entry.id}_${layout.width}x${layout.height}.png`}
+                captions={publishCaptions}
+                sourceLabel={`Facebook post studio · ${entry.label}`}
+                label="Publish now"
+              />
             </div>
           </div>
         </Panel>
@@ -568,7 +585,7 @@ export function FbComposer({ onOpenPublisher }: { onOpenPublisher?: () => void }
           <ul className="space-y-1.5 text-[10.5px] leading-relaxed text-[#B4A58F]">
             <li className="flex gap-2">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gold/60" />
-              Export the PNG here, then attach it in the publisher — the same file, so the feed preview and the post match.
+              Tap Publish now beside the preview to post this exact full-resolution render immediately; no download or attachment step is needed.
             </li>
             <li className="flex gap-2">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gold/60" />
@@ -586,7 +603,7 @@ export function FbComposer({ onOpenPublisher }: { onOpenPublisher?: () => void }
             <CopyButton text={composePost(caption, entry, "instagram")} label="Copy IG post" compact />
           </div>
           <p className="mt-2 text-[9.5px] text-[#948772]">
-            Nothing on this screen publishes. Use the publisher to send a finished image and caption.
+            Publish now sends this image with its separate platform captions/hashtags after validation; no review click or schedule is involved.
           </p>
         </Panel>
       </div>

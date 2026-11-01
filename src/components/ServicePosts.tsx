@@ -24,7 +24,9 @@ import type { CreativeContent, DownloadFile, Service, StyleKey } from "../types"
 import { defaultContent, renderCreative } from "../lib/templates";
 import { fbCaption, fullIgCaption, igCaption } from "../lib/pack";
 import { canvasToBytesAndRelease, downloadCanvas, downloadZip, slugify } from "../lib/export";
+import { servicePublishCaptions } from "../lib/publishCaptions";
 import { CreativeCanvas } from "./CreativeCanvas";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { ServiceAds } from "./ServiceAds";
 import { Button, Callout, CopyButton, ExternalLink, PageHeader, Panel, PillTabs, SectionLabel, useToast } from "./ui";
 import { ScriptText } from "./ScriptText";
@@ -193,7 +195,14 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
           <>
             <CopyButton text={fullIgCaption(service)} label="Copy IG caption" />
             <CopyButton text={fbCaption(service)} label="Copy FB caption" />
-            <Button variant="gold" icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />} onClick={downloadOne} loading={busy === "one"} disabled={busy !== null}>
+            <PublishCanvasButton
+              render={() => render(style)}
+              filename={fileFor(service, style, formatId)}
+              captions={servicePublishCaptions(service, style)}
+              sourceLabel={`${service.shortName} · ${styleMeta.name}`}
+              disabled={busy !== null}
+            />
+            <Button variant="ghost" icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />} onClick={downloadOne} loading={busy === "one"} disabled={busy !== null}>
               Download creative
             </Button>
           </>
@@ -255,7 +264,14 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                 ))}
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                <Button variant="gold" size="sm" icon={<Download className="h-3 w-3" />} onClick={downloadOne} loading={busy === "one"} disabled={busy !== null}>
+                <PublishCanvasButton
+                  render={() => render(style)}
+                  filename={fileFor(service, style, formatId)}
+                  captions={servicePublishCaptions(service, style)}
+                  sourceLabel={`${service.shortName} · ${styleMeta.name}`}
+                  disabled={busy !== null}
+                />
+                <Button variant="ghost" size="sm" icon={<Download className="h-3 w-3" />} onClick={downloadOne} loading={busy === "one"} disabled={busy !== null}>
                   PNG
                 </Button>
                 <Button variant="ghost" size="sm" icon={<ImageDown className="h-3 w-3" />} onClick={downloadAll} loading={busy === "all"} disabled={busy !== null}>

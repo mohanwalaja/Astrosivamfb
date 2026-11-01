@@ -4,6 +4,7 @@ import * as zlib from "node:zlib";
 
 import {
   buildZip,
+  canvasToFile,
   exportFileName,
   pendingObjectUrlCount,
   revokePendingObjectUrls,
@@ -218,6 +219,20 @@ test("buildZip refuses an empty pack and de-duplicates names itself", async () =
 });
 
 /* --------------------------- download plumbing --------------------------- */
+
+test("a rendered canvas can become the named File used by direct publishing", async () => {
+  const canvas = {
+    width: 2,
+    height: 3,
+    toBlob(callback: BlobCallback, type?: string) {
+      callback(new Blob(["pixels"], { type: type ?? "image/png" }));
+    },
+  } as unknown as HTMLCanvasElement;
+  const file = await canvasToFile(canvas, "service-poster.png");
+  assert.equal(file.name, "service-poster.png");
+  assert.equal(file.type, "image/png");
+  assert.equal(file.size, 6);
+});
 
 test("a download creates one object URL and revokes it", async () => {
   const originalDocument = (globalThis as { document?: unknown }).document;

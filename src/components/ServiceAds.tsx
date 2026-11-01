@@ -3,9 +3,12 @@ import { Download, Info, Languages, Megaphone, ScrollText } from "lucide-react";
 import type { Service } from "../types";
 import { getDeity } from "../data/deities";
 import { AD_RULES, adsFor, referencePlates, SERVICE_LOCALES } from "../data/serviceAds";
-import { AD_LAYOUT_MAP, AD_LAYOUTS } from "../lib/serviceAds";
+import { AD_LAYOUT_MAP, AD_LAYOUTS, renderServiceAd } from "../lib/serviceAds";
+import { brandPostCaptions, servicePublishCaptions } from "../lib/publishCaptions";
+import type { Platform } from "../lib/imageValidate";
 import { AdCanvas, exportAd, type AdScene } from "./AdCanvas";
 import { Button, Callout, CopyButton, Panel, SectionLabel, Segmented, useToast } from "./ui";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 
 type Role = "ad" | "edu";
 type Lang = "en" | "ta" | "hi";
@@ -82,6 +85,21 @@ export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
     toast(ok ? `${card.id} exported — 1080 px PNG` : "The browser could not render the plate", ok ? "success" : "error");
   };
 
+  const captionsFor = (card: (typeof cards)[number]) =>
+    role === "ad"
+      ? servicePublishCaptions(service)
+      : brandPostCaptions(
+          [card.scene.copy.headline, card.scene.copy.subline, card.scene.copy.body, card.scene.copy.source]
+            .filter(Boolean)
+            .join("\n\n"),
+        );
+
+  const targetsFor = (card: (typeof cards)[number]): Platform[] | undefined => {
+    const meta = AD_LAYOUT_MAP[card.scene.layout];
+    const ratio = meta.width / meta.height;
+    return ratio >= 0.8 && ratio <= 1.91 ? undefined : ["facebook"];
+  };
+
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="min-w-0 space-y-4">
@@ -130,6 +148,14 @@ export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
                       {role === "ad" ? `${AD_LAYOUT_MAP[card.scene.layout].width} × ${AD_LAYOUT_MAP[card.scene.layout].height}` : "1080 × 1080"}
                     </div>
                   </div>
+                  <PublishCanvasButton
+                    render={async () => (await renderServiceAd({ ...card.scene, scale: 1 })).canvas}
+                    filename={`astrosivam_ad_${card.id}_${AD_LAYOUT_MAP[card.scene.layout].width}x${AD_LAYOUT_MAP[card.scene.layout].height}.png`}
+                    captions={captionsFor(card)}
+                    sourceLabel={`${service.shortName} · ${card.name}`}
+                    platforms={targetsFor(card)}
+                    label="Publish now"
+                  />
                   <Button
                     variant="ghost"
                     icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />}

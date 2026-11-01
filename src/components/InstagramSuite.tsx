@@ -52,13 +52,14 @@ import {
   IG_PUBLISHER_COVERAGE,
 } from "../data/igApi";
 import { getService } from "../data/services";
-import type { IgLayout } from "../lib/igCreative";
-import { IG_LAYOUT_MAP } from "../lib/igCreative";
+import { IG_LAYOUT_MAP, renderIgCreative, type IgLayout } from "../lib/igCreative";
+import { withHashtags } from "../lib/publishCaptions";
 import type { StyleKey } from "../types";
 import { defaultContent } from "../lib/templates";
 import { CreativeCanvas } from "./CreativeCanvas";
 import { exportIg, IgCanvas, type IgScene } from "./IgCanvas";
 import { Button, Callout, CopyButton, ExternalLink, PageHeader, Panel, PillTabs, SectionLabel, Segmented, useToast } from "./ui";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { ScriptText } from "./ScriptText";
 
 /* ==========================================================================
@@ -512,6 +513,7 @@ const GridTab: React.FC<{ onOpen: (id: string) => void }> = ({ onOpen }) => {
 const FeedCard: React.FC<{ entry: IgCopyEntry; open: boolean; onToggle: () => void }> = ({ entry, open, onToggle }) => {
   const meta = IG_LAYOUT_MAP[entry.layout];
   const caption = composeIgCaption(entry.captions.instagram, entry);
+  const facebookCaption = withHashtags(entry.captions.facebook, entry.hashtags.slice(0, 5), 5);
   const scene = sceneFor(entry);
   return (
     <Panel padded={false} className="overflow-hidden">
@@ -553,6 +555,19 @@ const FeedCard: React.FC<{ entry: IgCopyEntry; open: boolean; onToggle: () => vo
           <div className="mt-2 flex flex-wrap gap-1.5">
             <CopyButton text={caption} label="Copy caption + tags" compact />
             <CopyButton text={entry.captions.facebook} label="Copy Facebook caption" compact />
+            {meta.surface === "Feed" ? (
+              <PublishCanvasButton
+                render={async () => (await renderIgCreative({ ...scene, scale: 1 })).canvas}
+                filename={`astrosivam_ig_${entry.id}_${meta.width}x${meta.height}.png`}
+                captions={{ facebook: facebookCaption, instagram: caption }}
+                sourceLabel={`Instagram feed · ${entry.label}`}
+                label="Publish now"
+              />
+            ) : (
+              <span className="inline-flex items-center rounded-md border border-line px-2 py-1 text-[9.5px] text-[#A2937D]">
+                Carousel cover · export only
+              </span>
+            )}
             <DownloadButton scene={scene} name={`astrosivam_ig_${entry.id}.png`} caption={entry.captions.instagram} label="Export PNG" />
           </div>
 
@@ -1261,8 +1276,7 @@ export const InstagramSuite: React.FC<{ initialTab?: Tab }> = ({ initialTab = "p
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-wash px-4 py-3">
         <span className="inline-flex items-center gap-2 text-[11px] text-[#B4A58F]">
           <ImageIcon className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
-          Every export re-renders at 1080-wide and above — the file matches the preview, and no post is published from
-          this page.
+          Feed post cards can be published as one image with their captions prefilled. Stories, Reels, carousels and highlight covers remain export-only.
         </span>
         <ExternalLink href={BRAND.url}>{BRAND.website}</ExternalLink>
       </div>
