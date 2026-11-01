@@ -187,6 +187,11 @@ export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
+export async function canvasToFile(canvas: HTMLCanvasElement, filename: string): Promise<File> {
+  const blob = await canvasToBlob(canvas);
+  return new File([blob], filename, { type: blob.type || "image/png", lastModified: Date.now() });
+}
+
 export async function canvasToBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   const blob = await canvasToBlob(canvas);
   return new Uint8Array(await blob.arrayBuffer());

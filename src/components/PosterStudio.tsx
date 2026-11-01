@@ -31,9 +31,11 @@ import {
   type PosterOptions,
 } from "../lib/poster";
 import { downloadCanvas, exportFileName, saveBlob, slugify } from "../lib/export";
+import { brandPostCaptions } from "../lib/publishCaptions";
 import { fileToImageSource } from "../lib/imageUpload";
 import { Button, Callout, CopyButton, Field, Input, PageHeader, Panel, PreviewFrame, SectionLabel, Textarea, Toggle, useToast } from "./ui";
 import { ExportLibrary } from "./ExportLibrary";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { recordReel, reelFileName, reelSupport, type ReelStage } from "../lib/reel";
 import { recordExport } from "../lib/exportLibrary";
 import {
@@ -322,8 +324,19 @@ export const PosterStudio: React.FC = () => {
         description="A blank canvas that still obeys the brand. Start from one of eight compositions — temple mandapam, gallery plate, manifesto, glass nocturne, guide slide, offer card, festival blessing or series cover — pick a deity painting or upload your own photo, set the English, Tamil and Hindi lines, then export at platform size. Switching template keeps every word and image you have already written."
         actions={
           <>
+            <PublishCanvasButton
+              render={() => renderPoster({ ...state, scale: 1 })}
+              filename={`${exportFileName(["astrosivam", "poster", slugify(state.headline).slice(0, 40), formatId])}_${state.width}x${state.height}.png`}
+              captions={brandPostCaptions(studioCaption(state))}
+              sourceLabel={state.width / state.height >= 0.8 && state.width / state.height <= 1.91
+                ? "Custom poster · Facebook/Instagram feed image"
+                : "Custom poster · Facebook feed image (not an Instagram Story or Reel)"}
+              platforms={state.width / state.height >= 0.8 && state.width / state.height <= 1.91 ? undefined : ["facebook"]}
+              disabled={busy || Boolean(reel)}
+              label="Publish poster now"
+            />
             <Button
-              variant="gold"
+              variant="ghost"
               onClick={download}
               loading={busy}
               icon={<Download className="h-3.5 w-3.5" />}

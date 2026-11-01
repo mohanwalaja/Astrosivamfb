@@ -19,7 +19,7 @@ import { CreativeCanvas } from "./CreativeCanvas";
 import { Accordion, Callout, CopyButton, ExternalLink, PageHeader, Panel, PreviewFrame, SectionLabel, Segmented } from "./ui";
 import { FbComposer } from "./FbComposer";
 import { FbAssets } from "./FbAssets";
-import { Publisher } from "./Publisher";
+import { useOpenPublisher } from "../lib/publishContext";
 import { MetaStatus } from "./MetaStatus";
 
 const pinnedService = getService(FB_PINNED_POST.serviceId);
@@ -36,7 +36,7 @@ const SUITE_VIEWS: Array<{ value: SuiteView; label: string; note: string }> = [
 
 export const FacebookSuite: React.FC = () => {
   const [view, setView] = useState<SuiteView>("studio");
-  const [publisherOpen, setPublisherOpen] = useState(false);
+  const openPublisher = useOpenPublisher();
 
   return (
     <div>
@@ -64,26 +64,25 @@ export const FacebookSuite: React.FC = () => {
         </p>
       </div>
 
-      {view === "studio" ? <FbComposer onOpenPublisher={() => setPublisherOpen(true)} /> : null}
+      {view === "studio" ? <FbComposer /> : null}
       {view === "assets" ? <FbAssets /> : null}
       {view === "publish" ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <MetaStatus />
           <Panel>
-            <SectionLabel right={<span className="chip chip-gold">Two steps</span>}>Publishing</SectionLabel>
+            <SectionLabel right={<span className="chip chip-gold">One-click post</span>}>Publishing</SectionLabel>
             <ol className="space-y-2 text-[11px] leading-relaxed text-[#C7B9A3]">
               <li>
                 <span className="font-display text-[10px] text-gold-soft">01 · </span>
-                Finish the image in the studio and export the PNG at full size. The publisher validates the same file the
-                feed preview showed.
+                On a supported single-image design, tap <strong>Publish now</strong> once. Its rendered image and separate Facebook/Instagram captions/hashtags are sent immediately after the Page and media checks.
               </li>
               <li>
                 <span className="font-display text-[10px] text-gold-soft">02 · </span>
-                Open the publisher, choose the Page and targets, then confirm the summary. Only then is a real post sent.
+                Read the per-platform result in the publisher. No download, copy, review click, draft, or schedule is involved.
               </li>
             </ol>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className="btn btn-gold btn-sm" onClick={() => setPublisherOpen(true)}>
+              <button type="button" className="btn btn-gold btn-sm" onClick={() => openPublisher()}>
                 Open publisher
               </button>
               <a href="/api/meta/connect" className="btn btn-ghost btn-sm">
@@ -91,8 +90,7 @@ export const FacebookSuite: React.FC = () => {
               </a>
             </div>
             <Callout tone="quiet">
-              During development nothing is posted: the publisher requires an explicit confirmation, and a host without the
-              PHP service returns the "not deployed" state above rather than a fake result.
+              Nothing publishes in the background. Tapping a design's <strong>Publish now</strong> is the explicit action that starts an immediate post after account and image checks; manual uploads retain a review step. A host without the PHP service reports "not deployed" rather than faking success.
             </Callout>
             <p className="mt-2 text-[10px] leading-relaxed text-[#948772]">
               Accepted uploads: JPEG, PNG, WebP, GIF, AVIF, HEIC, BMP and TIFF (everything except JPEG and PNG is converted
@@ -103,7 +101,6 @@ export const FacebookSuite: React.FC = () => {
       ) : null}
       {view === "kit" ? <PageKit /> : null}
 
-      <Publisher open={publisherOpen} onClose={() => setPublisherOpen(false)} />
     </div>
   );
 };

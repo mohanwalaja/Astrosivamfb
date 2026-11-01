@@ -1419,14 +1419,25 @@ try {
             json_response(['error' => 'Instagram requires a JPEG, 320–1,440 px wide, with an aspect ratio from 0.8:1 to 1.91:1.'], 415);
         }
 
-        $caption = is_string($_POST['caption'] ?? null) ? trim((string) $_POST['caption']) : '';
-        if (strlen($caption) > 20000) json_response(['error' => 'Caption is too long.'], 413);
-        $captionCharacters = preg_match_all('/./us', $caption, $unused);
-        if ($captionCharacters === false || $captionCharacters > 5000) json_response(['error' => 'Caption is limited to 5,000 characters.'], 413);
-        if (in_array('instagram', $platforms, true)) {
-            $captionLength = preg_match_all('/./us', $caption, $unused);
-            if ($captionLength !== false && $captionLength > 2200) json_response(['error' => 'Instagram captions are limited to 2,200 characters.'], 413);
-            if ($mime !== 'image/jpeg') json_response(['error' => 'Instagram requires a JPEG image. The site converts PNG to JPEG before upload; please try again.'], 415);
+        $legacyCaption = is_string($_POST['caption'] ?? null) ? trim((string) $_POST['caption']) : '';
+        // New editor buttons send separate platform captions. Keep the old field as
+        // a compatibility fallback for clients that have not updated yet.
+        $captions = [
+            'facebook' => is_string($_POST['facebookCaption'] ?? null) ? trim((string) $_POST['facebookCaption']) : $legacyCaption,
+            'instagram' => is_string($_POST['instagramCaption'] ?? null) ? trim((string) $_POST['instagramCaption']) : $legacyCaption,
+        ];
+        foreach ($platforms as $platform) {
+            $caption = $captions[$platform];
+            if ($caption === '') json_response(["error" => ucfirst($platform) . ' caption is required.'], 400);
+            if (strlen($caption) > 20000) json_response(['error' => ucfirst($platform) . ' caption is too long.'], 413);
+            $captionCharacters = preg_match_all('/./us', $caption, $unused);
+            $captionLimit = $platform === 'instagram' ? 2200 : 5000;
+            if ($captionCharacters === false || $captionCharacters > $captionLimit) {
+                json_response(['error' => ucfirst($platform) . ' captions are limited to ' . number_format($captionLimit) . ' characters.'], 413);
+            }
+        }
+        if (in_array('instagram', $platforms, true) && $mime !== 'image/jpeg') {
+            json_response(['error' => 'Instagram requires a JPEG image. The site converts PNG to JPEG before upload; please try again.'], 415);
         }
         $baseUrl = rtrim((string) ($config['SITE_BASE_URL'] ?? ''), '/');
         if (!valid_site_origin($baseUrl)) json_response(['error' => 'Set SITE_BASE_URL to the public HTTPS URL for this site in hosting/config.local.php.'], 503);
@@ -1474,12 +1485,12 @@ try {
                 if ($platform === 'facebook') {
                     $published = graph_request('POST', rawurlencode((string) $page['id']) . '/photos', [
                         'url' => $imageUrl,
-                        'caption' => $caption,
+                        'caption' => $captions['facebook'],
                         'published' => 'true',
                     ], (string) $page['access_token']);
                     $results[] = ['platform' => 'facebook', 'success' => true, 'id' => (string) ($published['post_id'] ?? $published['id'] ?? '')];
                 } else {
-                    $id = instagram_publish($page, $imageUrl, $caption);
+                    $id = instagram_publish($page, $imageUrl, $captions['instagram']);
                     $results[] = ['platform' => 'instagram', 'success' => true, 'id' => $id];
                 }
             } catch (Throwable $error) {

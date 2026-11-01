@@ -18,10 +18,12 @@ import { CHENNAI, OBSERVERS, computePanchangam, durationText, timeText, type Pan
 import { cardChips, cardDateLine, cardSubline } from "../lib/panchangCard";
 import { renderCreative } from "../lib/templates";
 import { downloadCanvas, exportFileName } from "../lib/export";
+import { brandPostCaptions } from "../lib/publishCaptions";
 import { FORMAT_MAP } from "../data/formats";
 import { getService } from "../data/services";
 import { copyText } from "../lib/export";
 import { Callout, CopyButton, PageHeader, Panel, SectionLabel, useToast } from "./ui";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 
 /**
  * The panchangam screen.
@@ -110,24 +112,30 @@ export const Panchangam: React.FC = () => {
     [day],
   );
 
+  const renderPanchangamCard = () => renderCreative({
+    format: FORMAT_MAP["panchangam-card"],
+    style: "signature",
+    service: getService("panchangam"),
+    content: {
+      kicker: "Daily Panchangam",
+      headline: cardDateLine(day),
+      subline: cardSubline(day),
+      tamil: "தினசரி பஞ்சாங்கம்",
+      chips,
+      price: "Free",
+      cta: "astrosivam.com",
+    },
+    scale: 1,
+  });
+
+  const panchangamCaptions = brandPostCaptions(
+    `Daily Panchangam · ${longDate(day.date)} · ${place}\n\n${cardSubline(day)}\n\n${tamilRows}`,
+  );
+
   const downloadCard = async () => {
     setBusy(true);
     try {
-      const canvas = await renderCreative({
-        format: FORMAT_MAP["panchangam-card"],
-        style: "signature",
-        service: getService("panchangam"),
-        content: {
-          kicker: "Daily Panchangam",
-          headline: cardDateLine(day),
-          subline: cardSubline(day),
-          tamil: "தினசரி பஞ்சாங்கம்",
-          chips,
-          price: "Free",
-          cta: "astrosivam.com",
-        },
-        scale: 1,
-      });
+      const canvas = await renderPanchangamCard();
       // The place name is free text and may contain "/" or spaces; slug it so the
       // browser does not quietly rename or refuse the file.
       const name = `${exportFileName(["astrosivam", "panchangam", iso, place])}_${canvas.width}x${canvas.height}.png`;
@@ -158,7 +166,15 @@ export const Panchangam: React.FC = () => {
         description="A panchangam is five limbs in name and ten in practice: a printed Tamil almanac opens with the year, half-year, season and solar month before it ever reaches the tithi. These values are computed from the Sun and Moon for the chosen city, on the Lahiri ayanamsa — the same seven limbs your panchangam.rf.gd site prints, now in English and ready to post."
         actions={
           <>
-            <button type="button" className="btn btn-gold" onClick={downloadCard} disabled={busy}>
+            <PublishCanvasButton
+              render={renderPanchangamCard}
+              filename={`${exportFileName(["astrosivam", "panchangam", iso, place])}_${FORMAT_MAP["panchangam-card"].width}x${FORMAT_MAP["panchangam-card"].height}.png`}
+              captions={panchangamCaptions}
+              sourceLabel={`Daily Panchangam · ${place} · ${iso}`}
+              disabled={busy}
+              label="Publish card now"
+            />
+            <button type="button" className="btn btn-ghost" onClick={downloadCard} disabled={busy}>
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               Panchangam card
             </button>

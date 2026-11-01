@@ -15,7 +15,9 @@ import { SERVICES, getService } from "../data/services";
 import type { DownloadFile, StyleKey } from "../types";
 import { defaultContent, renderCreative } from "../lib/templates";
 import { canvasToBytesAndRelease, downloadCanvas, downloadZip, slugify } from "../lib/export";
+import { servicePublishCaptions } from "../lib/publishCaptions";
 import { CreativeCanvas } from "./CreativeCanvas";
+import { PublishCanvasButton } from "./PublishCanvasButton";
 import { PREMIUM, setPremiumQuality, type PremiumQuality } from "../lib/premium";
 import { Button, Callout, CopyButton, PageHeader, Panel, SectionLabel, useToast } from "./ui";
 
@@ -293,6 +295,13 @@ export const StyleGallery: React.FC<{ onNavigate?: (id: string) => void }> = ({ 
                   <div className="border-t border-line-soft px-3.5 py-3">
                     <p className="text-[11px] leading-relaxed text-[#B4A58F]">{style.tagline}</p>
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      <PublishCanvasButton
+                        render={() => render(style.key)}
+                        filename={filenameFor(style.key, service.id, formatId)}
+                        captions={servicePublishCaptions(service, style.key)}
+                        sourceLabel={`${service.shortName} · ${style.name}`}
+                        disabled={busy !== null}
+                      />
                       <button type="button" className="btn btn-quiet" onClick={() => grab(style.key)} disabled={busy !== null}>
                         {busy === style.key ? (
                           <Loader2 className="h-3 w-3 animate-spin" />

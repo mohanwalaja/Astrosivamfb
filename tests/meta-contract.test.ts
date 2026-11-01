@@ -76,7 +76,7 @@ test("an unreachable service is reported as such, never as a connection", () => 
   assert.match(STATUS, /payload\.connected|live\.connected/, "connection state comes from the payload");
 });
 
-test("publishing requires an explicit confirmation listing page, targets and file", () => {
+test("manual uploads require an explicit confirmation listing page, targets and file", () => {
   assert.match(PUBLISHER, /setConfirming\(true\)/, "the first submit only prepares and asks");
   assert.match(PUBLISHER, /Confirm this publishes right now/, "the confirmation must be unambiguous");
   assert.match(PUBLISHER, /This sends a real post\. Nothing here is a draft\./, "the consequence must be stated");
@@ -91,13 +91,53 @@ test("the publisher validates the file instead of converting blindly", () => {
   assert.match(PUBLISHER, /accept=\{ACCEPTED\}/, "the picker should accept every readable format");
 });
 
-test("publishing is still a single deliberate multipart POST with CSRF", () => {
-  for (const field of ['"image"', '"caption"', '"pageId"', '"platforms[]"']) {
+test("publishing sends per-platform captions in one CSRF-protected multipart POST", () => {
+  for (const field of ['"image"', '"caption"', '"facebookCaption"', '"instagramCaption"', '"pageId"', '"platforms[]"']) {
     assert.ok(PUBLISHER.includes(`data.append(${field}`), `the upload must include ${field}`);
   }
   assert.match(PUBLISHER, /"X-CSRF-Token": csrf/, "the request must carry the CSRF token");
   assert.match(PHP, /if \(\$uriPath === '\/api\/meta\/publish' && \$method === 'POST'\)/, "the PHP route is unchanged");
   assert.match(PHP, /require_csrf\(\);/, "the PHP route still enforces CSRF");
+  assert.match(PHP, /'caption' => \$captions\['facebook'\]/, "Facebook receives its own caption");
+  assert.match(PHP, /instagram_publish\(\$page, \$imageUrl, \$captions\['instagram'\]\)/, "Instagram receives its own caption");
+  assert.match(PHP, /foreach \(\$platforms as \$platform\) \{\s*\$caption = \$captions\[\$platform\]/, "the server validates each requested platform's caption");
+  assert.match(PHP, /\$captionLimit = \$platform === 'instagram' \? 2200 : 5000/, "each selected caption uses its platform's limit");
+  assert.match(PHP, /\$legacyCaption/, "older clients retain a backward-compatible caption fallback");
+});
+
+test("single-image creative surfaces open the shared publisher with the rendered design", () => {
+  for (const path of [
+    "src/components/ServicePosts.tsx",
+    "src/components/StyleGallery.tsx",
+    "src/components/FestivalWishes.tsx",
+    "src/components/PosterStudio.tsx",
+    "src/components/ServiceAds.tsx",
+    "src/components/Panchangam.tsx",
+    "src/components/FbComposer.tsx",
+    "src/components/InstagramSuite.tsx",
+  ]) {
+    assert.match(read(path), /PublishCanvasButton/, `${path} should offer direct publish for its single-image designs`);
+  }
+  assert.match(PUBLISHER, /Artwork and captions loaded from your design/);
+  assert.match(PUBLISHER, /draft \? "Publish now"/);
+  assert.match(PUBLISHER, /data\.append\("facebookCaption", captions\.facebook\)/);
+  assert.match(PUBLISHER, /data\.append\("instagramCaption", captions\.instagram\)/);
+});
+
+test("a design Publish now action sends immediately after account and media checks", () => {
+  const DESIGN_BUTTON = read("src/components/PublishCanvasButton.tsx");
+  assert.match(DESIGN_BUTTON, /autoPublish: true/, "the explicit design action requests immediate publishing");
+  assert.match(PUBLISHER, /!draft\?\.autoPublish/, "automatic publishing is restricted to explicit design drafts");
+  assert.match(PUBLISHER, /selectedPage\.tokenStatus !== "valid"/, "an unverified Page is never auto-published to");
+  assert.match(PUBLISHER, /validationTargetsMatch/, "the selected targets must finish image validation before publishing");
+  assert.match(PUBLISHER, /await requestPublish\(\)/, "the design action starts the publish request without a second click");
+  assert.match(PUBLISHER, /Manual uploads retain a final confirmation/, "manual uploads keep their confirmation step");
+});
+
+test("Instagram carousel-cover art is export-only, not sent as a single-image post", () => {
+  const INSTAGRAM_SUITE = read("src/components/InstagramSuite.tsx");
+  assert.match(INSTAGRAM_SUITE, /meta\.surface === "Feed" \?/);
+  assert.match(INSTAGRAM_SUITE, /Carousel cover · export only/);
 });
 
 test("OAuth uses a Meta login configuration for Unified Login and keeps legacy scope fallback", () => {

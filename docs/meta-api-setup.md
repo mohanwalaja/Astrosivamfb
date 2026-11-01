@@ -114,10 +114,10 @@ The PHP config also accepts PHP environment variables with these names. Do not p
 
 ## 6. Connect and verify
 
-1. Visit the deployed HTTPS site, sign in, and open **Publish**.
+1. Visit the deployed HTTPS site, sign in, and open **Publish** from the header to connect Meta once.
 2. Click **Connect Meta account**. The browser should open a Facebook authorization dialog. Sign in as the app-role user who manages the Page and approve the requested permissions.
 3. Choose the Facebook Page returned by Meta. The Instagram account must be linked to that Page and be Business or Creator. If it is not linked, fix it in Meta Business Suite/Instagram account settings, then reconnect.
-4. The site's live status check should show a valid Page connection and, where configured, the linked Instagram username. Try a small, non-sensitive test image only after the UI confirms the correct Page and destination. Publishing is a real, immediate post; it is not a draft.
+4. The site's live status check should show a valid Page connection and, where configured, the linked Instagram username. Then return to a supported single-image design and tap **Publish now** once. The artwork and separate Facebook/Instagram captions and hashtags load automatically, the media is validated, and the post is sent immediately without a second confirmation. If the Page or image needs attention, the publisher explains what to fix. It is not a draft or schedule.
 5. Confirm `https://suite.astrosivam.com/api/health` returns a PHP health response. If you see a **service not deployed** message or `/api/meta` is missing, you are probably testing the Vite/Node version or the wrong document root; deploy the `hosting/` PHP backend.
 
 No API tokens should be copied into a browser, Meta's App Secret should never be sent through chat, and no real post should be made without the Page owner's approval.

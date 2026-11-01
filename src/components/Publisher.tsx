@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   Check,
@@ -22,6 +22,7 @@ import {
   type ImageValidation,
   type Platform as TargetPlatform,
 } from "../lib/imageValidate";
+import type { PlatformCaptions, PublisherDraft } from "../lib/publishContext";
 
 type MetaPage = {
   id: string;
@@ -63,6 +64,7 @@ type PostResult = {
 type ImageCheck = {
   file: File;
   name: string;
+  platforms: TargetPlatform[];
   validation: ImageValidation;
 };
 
@@ -85,11 +87,17 @@ async function readJson(response: Response, allowErrorResponse = false) {
 const formatBytes = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 
-export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: PublisherDraft | null }> = ({ open, onClose, draft = null }) => {
   const [status, setStatus] = useState<MetaStatus>(emptyStatus);
   const [loading, setLoading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [autoPublishPending, setAutoPublishPending] = useState(false);
+  const statusReadyRef = useRef(false);
+  const requestInFlightRef = useRef(false);
+  const autoPublishHandledRef = useRef<PublisherDraft | null>(null);
   const [loadError, setLoadError] = useState("");
-  const [caption, setCaption] = useState("");
+  const [captions, setCaptions] = useState<PlatformCaptions>({ facebook: "", instagram: "" });
+  const [captionPlatform, setCaptionPlatform] = useState<TargetPlatform>("facebook");
   const [check, setCheck] = useState<ImageCheck | null>(null);
   const [prepared, setPrepared] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
@@ -97,6 +105,8 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
   const [publishing, setPublishing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [results, setResults] = useState<PostResult[]>([]);
+  const [publishedTargets, setPublishedTargets] = useState<TargetPlatform[]>([]);
+  const [uncertainTargets, setUncertainTargets] = useState<TargetPlatform[]>([]);
   const [notice, setNotice] = useState("");
   const [csrf, setCsrf] = useState("");
 
@@ -106,11 +116,26 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
   );
   const instagramAvailable = Boolean(selectedPage?.instagramId);
   const validation = check?.validation ?? null;
-  const blocking = validation?.issues.filter((issue) => issue.severity === "error") ?? [];
-  const warnings = validation?.issues.filter((issue) => issue.severity === "warning") ?? [];
-  const text = useMemo(() => validateCaption(caption, platforms), [caption, platforms]);
+  const imageBlocking = validation?.issues.filter((issue) => issue.severity === "error") ?? [];
+  const imageWarnings = validation?.issues.filter((issue) => issue.severity === "warning") ?? [];
+  const captionChecks = useMemo(
+    () => ({
+      facebook: validateCaption(captions.facebook, ["facebook"]),
+      instagram: validateCaption(captions.instagram, ["instagram"]),
+    }),
+    [captions],
+  );
+  const captionBlocking = platforms.flatMap((platform) =>
+    captionChecks[platform].issues.filter((issue) => issue.severity === "error"),
+  );
+  const activeCaptionPlatform = platforms.includes(captionPlatform) ? captionPlatform : platforms[0] ?? "facebook";
+  const activeCaption = captions[activeCaptionPlatform];
+  const validationTargetsMatch = Boolean(
+    check && check.platforms.length === platforms.length && check.platforms.every((platform) => platforms.includes(platform)),
+  );
 
   const refreshStatus = async () => {
+    statusReadyRef.current = false;
     setLoading(true);
     setLoadError("");
     try {
@@ -121,6 +146,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Could not load Meta account status.");
     } finally {
+      statusReadyRef.current = true;
       setLoading(false);
     }
   };
@@ -128,6 +154,56 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
   useEffect(() => {
     if (open) void refreshStatus();
   }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      autoPublishHandledRef.current = null;
+      setAutoPublishPending(false);
+      return;
+    }
+    setResults([]);
+    setPublishedTargets([]);
+    setUncertainTargets([]);
+    setNotice("");
+    setConfirming(false);
+    setPrepared(null);
+    setAutoPublishPending(false);
+    if (!draft) {
+      setCaptions({ facebook: "", instagram: "" });
+      setPlatforms(["facebook"]);
+      setCaptionPlatform("facebook");
+      setCheck(null);
+      return;
+    }
+
+    const initialTargets: TargetPlatform[] = draft.platforms?.length
+      ? [...draft.platforms]
+      : ["facebook", "instagram"];
+    setCaptions(draft.captions);
+    setPlatforms(initialTargets);
+    setCaptionPlatform(initialTargets[0] ?? "facebook");
+    setCheck(null);
+    let cancelled = false;
+    void validateImageFile(draft.file, initialTargets)
+      .then((next) => {
+        if (!cancelled) setCheck({ file: draft.file, name: draft.file.name, platforms: [...initialTargets], validation: next });
+      })
+      .catch((error) => {
+        if (!cancelled) setNotice(error instanceof Error ? error.message : "Could not validate the selected design.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, draft]);
+
+  useEffect(() => {
+    if (!open || loading || !status.connected || !selectedPage || selectedPage.instagramId || !platforms.includes("instagram")) return;
+    const next = platforms.filter((platform) => platform !== "instagram");
+    const targets: TargetPlatform[] = next.length ? next : ["facebook"];
+    setPlatforms(targets);
+    setCaptionPlatform(targets[0] ?? "facebook");
+    setNotice("The selected Page has no linked Instagram professional account, so this post is set to Facebook only.");
+  }, [open, loading, status.connected, selectedPage?.id, selectedPage?.instagramId, platforms, check]);
 
   useEffect(() => {
     const source = prepared ?? check?.file ?? null;
@@ -143,29 +219,39 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
   const togglePlatform = (platform: TargetPlatform) => {
     const next = platforms.includes(platform) ? platforms.filter((item) => item !== platform) : [...platforms, platform];
     setPlatforms(next);
+    if (next.length && !next.includes(captionPlatform)) setCaptionPlatform(next[0]);
     setResults([]);
     setNotice("");
     setConfirming(false);
-    // Instagram's rules are stricter, so a file that passed for Facebook has to be
-    // re-checked the moment Instagram joins the targets.
-    if (check && next.length) void recheck(check.file, next);
   };
 
   const recheck = async (file: File, targets: TargetPlatform[]) => {
-    const next = await validateImageFile(file, targets);
-    setCheck({ file, name: file.name, validation: next });
-    setPrepared(null);
+    try {
+      const next = await validateImageFile(file, targets);
+      setCheck({ file, name: file.name, platforms: [...targets], validation: next });
+      setPrepared(null);
+    } catch (error) {
+      setCheck(null);
+      setNotice(error instanceof Error ? error.message : "Could not validate the selected image.");
+    }
   };
+
+  useEffect(() => {
+    if (!open || !check || !platforms.length || validationTargetsMatch) return;
+    void recheck(check.file, platforms);
+  }, [open, check, platforms, validationTargetsMatch]);
 
   const pickFile = async (file?: File | null) => {
     if (!file) return;
     setResults([]);
+    setPublishedTargets([]);
+    setUncertainTargets([]);
     setNotice("");
     setConfirming(false);
     setPrepared(null);
     try {
       const next = await validateImageFile(file, platforms);
-      setCheck({ file, name: file.name, validation: next });
+      setCheck({ file, name: file.name, platforms: [...platforms], validation: next });
     } catch (error) {
       setCheck(null);
       setNotice(error instanceof Error ? error.message : "That file could not be read.");
@@ -175,6 +261,8 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
   const selectPage = async (pageId: string) => {
     setStatus((current) => ({ ...current, selectedPageId: pageId }));
     setResults([]);
+    setPublishedTargets([]);
+    setUncertainTargets([]);
     try {
       const body = await readJson(
         await fetch("/api/meta/select", {
@@ -202,43 +290,26 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
       setStatus(emptyStatus);
       setNotice("Meta account disconnected.");
       setResults([]);
+      setPublishedTargets([]);
+      setUncertainTargets([]);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not disconnect the account.");
     }
   };
 
-  /** Step one of publishing: validate, prepare, then ask for explicit confirmation. */
-  const requestPublish = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!check || !selectedPage || platforms.length === 0) return;
-    if (blocking.length || !text.ok) {
-      setNotice("Fix the blocking issues above before publishing.");
-      return;
-    }
-    setNotice("");
-    try {
-      const upload = await prepareImage(check.file, check.validation);
-      if (upload.size > PLATFORM_RULES.facebook.maxBytes) {
-        setNotice("The prepared image is larger than 8 MB. Export a smaller file.");
-        return;
-      }
-      setPrepared(upload);
-      setConfirming(true);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Could not prepare the image for upload.");
-    }
-  };
-
-  /** Step two: the actual POST, only after the summary has been confirmed. */
-  const publish = async () => {
-    if (!prepared || !selectedPage) return;
+  const publishFile = async (image: File) => {
+    if (!selectedPage || platforms.length === 0) return;
     setPublishing(true);
     setResults([]);
     setNotice("");
     try {
       const data = new FormData();
-      data.append("image", prepared);
-      data.append("caption", caption);
+      data.append("image", image);
+      // Keep `caption` for older PHP bundles; current hosting reads the separate
+      // platform fields so Facebook and Instagram receive their own copy.
+      data.append("caption", captions[platforms[0]]);
+      data.append("facebookCaption", captions.facebook);
+      data.append("instagramCaption", captions.instagram);
       data.append("pageId", selectedPage.id);
       platforms.forEach((platform) => data.append("platforms[]", platform));
       const response = await fetch("/api/meta/publish", {
@@ -247,36 +318,142 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
         body: data,
       });
       const body = await readJson(response, true);
-      setResults(body.results || []);
+      const nextResults = Array.isArray(body.results) ? (body.results as PostResult[]) : [];
+      setResults(nextResults);
+      setPublishedTargets((current) =>
+        Array.from(new Set([...current, ...nextResults.filter((result) => result.success).map((result) => result.platform)])),
+      );
+      setUncertainTargets((current) =>
+        Array.from(new Set([...current, ...nextResults.filter((result) => result.outcomeUnknown).map((result) => result.platform)])),
+      );
       setNotice(body.message || `${body.category ? `${String(body.category).replaceAll("_", " ")} · ` : ""}${body.error || "Publishing finished."}`);
       setConfirming(false);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Could not publish this post.");
+      setUncertainTargets((current) => Array.from(new Set([...current, ...platforms])));
+      const reason = error instanceof Error ? error.message : "Could not confirm this post's result.";
+      setNotice(`${reason} Check the Page/Instagram account before retrying to avoid a duplicate.`);
     } finally {
       setPublishing(false);
     }
   };
 
-  const maxCaption = platforms.includes("instagram") ? 2200 : 5000;
-  const canPublish = Boolean(status.connected && check && platforms.length && selectedPage?.tokenStatus === "valid" && !publishing);
+  /** A selected design skips the extra review step; its one-click action posts
+   * after account and media checks. Manual uploads retain explicit confirmation. */
+  const requestPublish = async (event?: React.FormEvent) => {
+    event?.preventDefault();
+    if (!check || !validationTargetsMatch || !selectedPage || platforms.length === 0) return;
+    if (imageBlocking.length || captionBlocking.length) {
+      setNotice("Fix the blocking image or caption issues above before publishing.");
+      return;
+    }
+    if (platforms.some((platform) => publishedTargets.includes(platform) || uncertainTargets.includes(platform))) {
+      setNotice("A selected target has already published this image or has an uncertain result. Deselect that target before retrying.");
+      return;
+    }
+    if (requestInFlightRef.current) return;
+    requestInFlightRef.current = true;
+    setPreparing(true);
+    setNotice("");
+    try {
+      const upload = await prepareImage(check.file, check.validation);
+      const maxBytes = Math.min(...platforms.map((platform) => PLATFORM_RULES[platform].maxBytes));
+      if (upload.size > maxBytes) {
+        setNotice(`The prepared image is larger than ${formatBytes(maxBytes)}. Choose a smaller design.`);
+        return;
+      }
+      setPrepared(upload);
+      if (draft) await publishFile(upload);
+      else setConfirming(true);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not prepare the image for upload.");
+    } finally {
+      requestInFlightRef.current = false;
+      setPreparing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open || !draft?.autoPublish || autoPublishHandledRef.current === draft) return;
+    if (!statusReadyRef.current || loading || loadError || !status.connected || !selectedPage) return;
+    if (selectedPage.tokenStatus !== "valid") {
+      autoPublishHandledRef.current = draft;
+      setNotice("The saved Meta Page needs attention before this design can be published. Reconnect or resolve and verify the Page, then return to the design and tap Publish now again.");
+      return;
+    }
+    if (!platforms.length || (platforms.includes("instagram") && !instagramAvailable)) return;
+    if (!check || check.file !== draft.file || !validationTargetsMatch) return;
+
+    autoPublishHandledRef.current = draft;
+    if (imageBlocking.length || captionBlocking.length) {
+      setNotice("The selected design needs attention before it can be published. Fix the blocking issues below, then press Publish now.");
+      return;
+    }
+
+    setAutoPublishPending(true);
+    void (async () => {
+      try {
+        await requestPublish();
+      } finally {
+        setAutoPublishPending(false);
+      }
+    })();
+  }, [
+    open,
+    draft,
+    loading,
+    loadError,
+    status.connected,
+    selectedPage,
+    platforms,
+    instagramAvailable,
+    check,
+    validationTargetsMatch,
+    imageBlocking.length,
+    captionBlocking.length,
+    requestPublish,
+  ]);
+
+  /** Manual uploads retain a final confirmation before the real POST. */
+  const publish = async () => {
+    if (prepared) await publishFile(prepared);
+  };
+
+  const activeMaxCaption = PLATFORM_RULES[activeCaptionPlatform].captionLimit;
+  const draftAutoPublishHandled = Boolean(draft?.autoPublish && autoPublishHandledRef.current === draft);
+  const draftHasPublished = Boolean(draft?.autoPublish && publishedTargets.length > 0);
+  const draftHasUncertain = Boolean(draft?.autoPublish && uncertainTargets.length > 0);
+  const selectedProtectedTarget = platforms.some((platform) => publishedTargets.includes(platform) || uncertainTargets.includes(platform));
+  const canPublish = Boolean(
+    status.connected &&
+      check &&
+      validationTargetsMatch &&
+      platforms.length &&
+      selectedPage?.tokenStatus === "valid" &&
+      !publishing &&
+      !preparing &&
+      !autoPublishPending &&
+      !selectedProtectedTarget,
+  );
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      dismissible={!publishing}
+      dismissible={!publishing && !preparing && !autoPublishPending}
       size="md"
       icon={<Send className="h-4 w-4" />}
       eyebrow="Meta publishing"
       title="Publish from one place"
-      description="Send a finished creative and caption to your Facebook Page, Instagram, or both."
+      description={draft ? `Ready to publish ${draft.sourceLabel}. The artwork and platform captions are loaded from your design.` : "Send a finished creative and caption to your Facebook Page, Instagram, or both."}
       footer={
         <>
           <span className="mr-auto max-w-[320px] text-[9.5px] leading-relaxed text-[#A2937D]">
-            Posts publish immediately once you confirm. Meta may reject content or require re-authorization — the exact
-            error it returns is shown below.
+            {draft?.autoPublish
+              ? "The design-surface Publish now action sends this image immediately after the Page and image checks pass. This is not a draft or a schedule."
+              : "Posts publish immediately when you choose Publish now — this is not a draft or a schedule."}{" "}
+            Meta may reject content or require re-authorization; its response is shown below.
           </span>
-          <Button variant="quiet" onClick={onClose} disabled={publishing}>
+          <Button variant="quiet" onClick={onClose} disabled={publishing || preparing || autoPublishPending}>
             Close
           </Button>
           {status.connected && !confirming ? (
@@ -284,11 +461,11 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
               variant="gold"
               type="submit"
               form="publisher-form"
-              loading={publishing}
-              disabled={!canPublish || blocking.length > 0 || !text.ok}
+              loading={publishing || preparing || autoPublishPending}
+              disabled={!canPublish || imageBlocking.length > 0 || captionBlocking.length > 0}
               icon={<Send className="h-3.5 w-3.5" />}
             >
-              Review &amp; publish
+              {autoPublishPending || publishing ? "Publishing…" : preparing ? "Preparing…" : draftHasPublished ? "Published" : draft ? "Publish now" : "Review & publish"}
             </Button>
           ) : null}
           {status.connected && confirming ? (
@@ -337,6 +514,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
             <p className="rounded-xl border border-line bg-wash px-4 py-3 text-[10.5px] leading-relaxed text-[#A2937D]">
               Requires a Meta developer app configured by the site owner and the relevant Meta publishing permissions.
               Meta may require app review before other people can authorize.
+              {draft ? " Connect the Page once, return to your design, and press Publish again; Meta authorization leaves this screen." : ""}
             </p>
           </div>
         ) : (
@@ -348,6 +526,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                   fieldClassName="min-w-0 flex-1"
                   value={selectedPage?.id || ""}
                   onChange={(event) => void selectPage(event.target.value)}
+                  disabled={preparing || autoPublishPending || publishing}
                 >
                   {status.pages.map((page) => (
                     <option key={page.id} value={page.id}>
@@ -356,12 +535,17 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                     </option>
                   ))}
                 </Select>
-                <a href="/api/meta/connect" className="btn btn-ghost btn-sm h-[38px] shrink-0">
+                <a
+                  href={preparing || autoPublishPending || publishing ? undefined : "/api/meta/connect"}
+                  aria-disabled={preparing || autoPublishPending || publishing}
+                  className={`btn btn-ghost btn-sm h-[38px] shrink-0 ${preparing || autoPublishPending || publishing ? "pointer-events-none opacity-50" : ""}`}
+                >
                   <ExternalLink className="h-3 w-3" aria-hidden="true" /> Reconnect
                 </a>
                 <button
                   type="button"
                   onClick={() => void disconnect()}
+                  disabled={preparing || autoPublishPending || publishing}
                   className="btn btn-quiet btn-sm h-[38px] shrink-0 text-[#C7B9A3] hover:text-[#F0B9A4]"
                 >
                   <Unlink className="h-3 w-3" aria-hidden="true" /> Disconnect
@@ -382,17 +566,23 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                   <button
                     type="button"
                     aria-pressed={platforms.includes("facebook")}
+                    disabled={preparing || autoPublishPending || publishing}
                     onClick={() => togglePlatform("facebook")}
                     className={`choice inline-flex items-center gap-2 px-3 py-2 text-[11.5px] ${
                       platforms.includes("facebook") ? "choice-active" : ""
                     }`}
                   >
                     <Facebook className="h-3.5 w-3.5 text-[#9DB3D4]" aria-hidden="true" /> Facebook Page
+                    {publishedTargets.includes("facebook")
+                      ? " · published"
+                      : uncertainTargets.includes("facebook")
+                        ? " · verify result"
+                        : ""}
                   </button>
                   <button
                     type="button"
                     aria-pressed={platforms.includes("instagram")}
-                    disabled={!instagramAvailable}
+                    disabled={!instagramAvailable || preparing || autoPublishPending || publishing}
                     onClick={() => togglePlatform("instagram")}
                     className={`choice inline-flex items-center gap-2 px-3 py-2 text-[11.5px] disabled:cursor-not-allowed disabled:opacity-40 ${
                       platforms.includes("instagram") ? "choice-active" : ""
@@ -400,30 +590,75 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                   >
                     <Instagram className="h-3.5 w-3.5 text-[#D0A8B8]" aria-hidden="true" /> Instagram
                     {instagramAvailable ? "" : selectedPage?.instagramStatus === "not_linked" ? " · not linked" : " · verify Page"}
+                    {publishedTargets.includes("instagram")
+                      ? " · published"
+                      : uncertainTargets.includes("instagram")
+                        ? " · verify result"
+                        : ""}
                   </button>
                 </div>
               </fieldset>
 
+              {draft ? (
+                <Callout
+                  tone="quiet"
+                  title={autoPublishPending ? "Publishing selected design" : "Artwork and captions loaded from your design"}
+                  icon={<Sparkles className="h-3.5 w-3.5" />}
+                >
+                  {autoPublishPending
+                    ? "The one-click publish is in progress. The rendered image and platform-specific captions are being sent to the selected Facebook Page and linked Instagram target, where enabled."
+                    : draftHasUncertain
+                      ? "One or more platform results are uncertain. Verify targets marked ‘verify result’ before retrying; already-published targets marked ‘published’ cannot be sent again here."
+                      : draftHasPublished
+                        ? "At least one platform has published this design. Deselect any target marked published before retrying; this prevents accidental duplicate posts."
+                        : draft.autoPublish
+                        ? draftAutoPublishHandled
+                          ? "The one-click attempt was blocked or returned an error. Review the status and any validation messages below before retrying."
+                          : "Checking the saved Page, targets and rendered image. This one-click design action publishes immediately after those checks pass; no second confirmation is required."
+                        : "Check the Page and targets, then press Publish now. The post goes live immediately."}
+                </Callout>
+              ) : null}
               <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_238px]">
                 <div>
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="label mb-0">Platform captions &amp; hashtags</span>
+                    {platforms.length > 1 ? (
+                      <div className="flex gap-1.5">
+                        {platforms.map((platform) => (
+                          <button
+                            key={platform}
+                            type="button"
+                            aria-pressed={activeCaptionPlatform === platform}
+                            disabled={preparing || autoPublishPending || publishing}
+                            onClick={() => setCaptionPlatform(platform)}
+                            className={`chip ${activeCaptionPlatform === platform ? "chip-gold" : ""}`}
+                          >
+                            {platform === "facebook" ? "Facebook" : "Instagram"}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                   <Textarea
-                    label="Caption"
-                    id="post-caption"
-                    value={caption}
+                    label={activeCaptionPlatform === "facebook" ? "Facebook caption" : "Instagram caption"}
+                    id={`post-caption-${activeCaptionPlatform}`}
+                    value={activeCaption}
+                    disabled={preparing || autoPublishPending || publishing}
                     onChange={(event) => {
-                      setCaption(event.target.value);
+                      setCaptions((current) => ({ ...current, [activeCaptionPlatform]: event.target.value }));
                       setConfirming(false);
+                      setPrepared(null);
                     }}
-                    maxLength={maxCaption}
+                    maxLength={activeMaxCaption}
                     rows={7}
-                    placeholder="Write the post caption…"
-                    hint={`${Array.from(caption).length} / ${maxCaption} characters · ${text.hashtagCount} hashtags · first line ${text.hookLength}`}
+                    placeholder={`Write the ${activeCaptionPlatform === "facebook" ? "Facebook" : "Instagram"} caption…`}
+                    hint={`${Array.from(activeCaption).length} / ${activeMaxCaption} characters · ${captionChecks[activeCaptionPlatform].hashtagCount} hashtags · first line ${captionChecks[activeCaptionPlatform].hookLength}`}
                   />
-                  {text.issues.length ? (
+                  {captionChecks[activeCaptionPlatform].issues.length ? (
                     <div className="mt-1.5 space-y-1">
-                      {text.issues.map((issue) => (
+                      {captionChecks[activeCaptionPlatform].issues.map((issue) => (
                         <div
-                          key={issue.code}
+                          key={`${activeCaptionPlatform}-${issue.code}`}
                           className={`flex items-start gap-1.5 text-[10px] leading-relaxed ${
                             issue.severity === "error" ? "text-[#F0C3A2]" : "text-[#E0D4C0]"
                           }`}
@@ -433,6 +668,9 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                         </div>
                       ))}
                     </div>
+                  ) : null}
+                  {captionBlocking.length && !captionChecks[activeCaptionPlatform].issues.some((issue) => issue.severity === "error") ? (
+                    <p className="mt-1.5 text-[10px] text-[#F0C3A2]">A selected platform’s caption has a blocking issue. Open its tab to review it.</p>
                   ) : null}
                 </div>
                 <div>
@@ -444,6 +682,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                       id="post-image"
                       type="file"
                       accept={ACCEPTED}
+                      disabled={preparing || autoPublishPending || publishing}
                       aria-label="Choose an image for the post"
                       className="sr-only"
                       onChange={(event) => void pickFile(event.target.files?.[0])}
@@ -471,10 +710,13 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                         </div>
                         <button
                           type="button"
+                          disabled={preparing || autoPublishPending || publishing}
                           onClick={() => {
                             setCheck(null);
                             setPrepared(null);
                             setResults([]);
+                            setPublishedTargets([]);
+                            setUncertainTargets([]);
                             setConfirming(false);
                           }}
                           className="shrink-0 text-[9.5px] text-[#A2937D] underline decoration-[#948772] underline-offset-2 hover:text-cream"
@@ -497,7 +739,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                         </div>
                       ) : null}
 
-                      {[...blocking, ...warnings].map((issue, index) => (
+                      {[...imageBlocking, ...imageWarnings].map((issue, index) => (
                         <div
                           key={`${issue.code}-${index}`}
                           className={`flex items-start gap-1.5 text-[10px] leading-relaxed ${
@@ -527,7 +769,11 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void }> = ({ op
                     <li>
                       File · {prepared.name} ({(prepared.size / (1024 * 1024)).toFixed(2)} MB, {prepared.type})
                     </li>
-                    <li>Caption · {Array.from(caption).length} characters</li>
+                    {platforms.map((platform) => (
+                      <li key={`caption-${platform}`}>
+                        {platform === "facebook" ? "Facebook caption" : "Instagram caption"} · {Array.from(captions[platform]).length} characters
+                      </li>
+                    ))}
                   </ul>
                   <p className="mt-2 text-[10px] text-[#B4A58F]">
                     This sends a real post. Nothing here is a draft.
