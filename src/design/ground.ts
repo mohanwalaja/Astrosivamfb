@@ -142,9 +142,12 @@ export function rays(
   ctx.save();
   ctx.translate(cx, cy);
   ctx.globalCompositeOperation = "screen";
-  for (let i = 0; i < count; i += 1) {
-    const a = startAngle + (spread * i) / count;
-    const width = (spread / count) * (0.28 + rng() * 0.4);
+  // The ray count responds to the decoration control: a quiet card keeps a few
+  // broad shafts of light, a rich one gets the full fan.
+  const beams = ornamentCount(count);
+  for (let i = 0; i < beams; i += 1) {
+    const a = startAngle + (spread * i) / beams;
+    const width = (spread / beams) * (0.28 + rng() * 0.4);
     const len = radius * (0.72 + rng() * 0.42);
     const g = ctx.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len);
     g.addColorStop(0, withAlpha(color, alpha * (0.5 + rng() * 0.6)));
@@ -846,15 +849,24 @@ const quietPaper: GroundPainter = (ctx, W, H, p, o) => {
     [0.72, p.deep],
     [1, p.deepAlt],
   ]);
-  ctx.save();
-  ctx.strokeStyle = withAlpha(p.gold, 0.5);
-  ctx.lineWidth = Math.max(1, W * 0.0016);
-  ctx.strokeRect(W * 0.08, H * 0.07, W * 0.84, H * 0.86);
-  ctx.restore();
-  ctx.fillStyle = withAlpha(p.gold, 0.85);
-  ctx.fillRect(W * 0.08, H * 0.07, W * 0.1, Math.max(2, H * 0.0026));
+  // The frame is ornament, so it follows the decoration control: a quiet card is
+  // pure field, a rich one wears the full rule and its corner tick.
+  if (activeDetail !== "quiet") {
+    ctx.save();
+    ctx.strokeStyle = withAlpha(p.gold, activeDetail === "rich" ? 0.6 : 0.5);
+    ctx.lineWidth = Math.max(1, W * (activeDetail === "rich" ? 0.0022 : 0.0016));
+    ctx.strokeRect(W * 0.08, H * 0.07, W * 0.84, H * 0.86);
+    if (activeDetail === "rich") {
+      ctx.strokeRect(W * 0.09, H * 0.08, W * 0.82, H * 0.84);
+    }
+    ctx.restore();
+  }
+  if (activeDetail !== "quiet") {
+    ctx.fillStyle = withAlpha(p.gold, 0.85);
+    ctx.fillRect(W * 0.08, H * 0.07, W * 0.1, Math.max(2, H * 0.0026));
+  }
   radialGlow(ctx, W * 0.12, H * 0.92, W * 0.7, p.gold, 0.1);
-  grain(ctx, W, H, (o.seed ?? 23) + 2, 0.03);
+  grain(ctx, W, H, (o.seed ?? 23) + 2, activeDetail === "rich" ? 0.045 : 0.03);
 };
 
 /** 13 · Festival burst: hanging garlands, radiating festive geometry, warm base. */
@@ -867,7 +879,7 @@ const festivalBurst: GroundPainter = (ctx, W, H, p, o) => {
   ctx.fillRect(0, 0, W, H);
   rays(ctx, W * 0.5, H * 0.42, Math.max(W, H) * 0.7, p.goldSoft, 20, 0.2, Math.PI * 2, -Math.PI / 2, 3);
   // toran swags along the top
-  const swags = 5;
+  const swags = Math.max(2, Math.round((ornamentCount(6) * 5) / 6));
   ctx.save();
   ctx.strokeStyle = withAlpha(p.gold, 0.7);
   ctx.lineWidth = Math.max(1.4, W * 0.0026);

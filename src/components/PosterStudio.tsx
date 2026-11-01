@@ -417,10 +417,11 @@ export const PosterStudio: React.FC = () => {
               {COMPOSITIONS.length} families. Each thumbnail is that composition, rendered — not an icon.
               Picking one keeps your palette, typeface and artwork.
             </p>
-            <div className={`grid gap-2 ${showGallery ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-3 sm:grid-cols-5"}`} role="group" aria-label="Composition">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-label="Composition">
               {COMPOSITIONS.map((composition, index) => {
                 const active = design.design.composition === composition.key;
-                // The rail shows every family; "all structures" widens the sheet.
+                // The rail shows the first ten families; "All structures" shows
+                // every one. The active card is always visible either way.
                 if (!showGallery && index > 9 && !active) return null;
                 return (
                   <button
