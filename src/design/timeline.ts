@@ -84,8 +84,10 @@ const spiritual: MotionPreset = {
   state: (t) => ({
     ...base,
     ground: win(t, 0, 0.22, easeOutCubic),
-    artReveal: win(t, 0.08, 0.72, easeOutQuint),
-    art: win(t, 0.05, 0.6),
+    // Layer-by-layer: the halo leads, the crest and symbol follow, and the art
+    // layer is already at full strength when the first stroke is drawn.
+    artReveal: win(t, 0.06, 0.66, easeOutQuint),
+    art: win(t, 0.02, 0.3),
     parallaxY: Math.sin(t * Math.PI * 1.5) * 0.004,
     kicker: win(t, 0.42, 0.62),
     headline: win(t, 0.5, 0.86, easeOutQuint),
