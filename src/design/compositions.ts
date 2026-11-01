@@ -49,6 +49,7 @@ import {
   type Measured,
 } from "./type";
 import {
+  chromeHeight,
   metrics,
   paintChrome,
   paintCopy,
@@ -171,6 +172,14 @@ export type CompositionKey =
  * setting goes through here, and only sub-labels use a fixed face.
  */
 const scene_face = (scene: CompositionContext, preferred: DisplayFace): DisplayFace => scene.face ?? preferred;
+
+/** Truncate at a word boundary — a chip that ends mid-word reads as a bug. */
+const truncateWords = (text: string, max: number) => {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max * 0.5 ? cut.slice(0, space) : cut).trimEnd()}…`;
+};
 
 /** Hard truncation for single-line plates where the copy is decoration. */
 const truncateTo = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
@@ -428,11 +437,12 @@ const heroIllustration: Composition = {
     ctx.translate(-W / 2, -H / 2);
 
     const chromeTop = H - planChrome(s, { cta: "outline", align: "center", inset: met.bottom });
-    const artSize = Math.min(W * 0.66, (chromeTop - met.top) * 0.62);
+    const squarePage = H / W <= 1.06;
+    const artSize = Math.min(W * (squarePage ? 0.56 : 0.66), (chromeTop - met.top) * (squarePage ? 0.52 : 0.62));
     const artBox = { x: (W - artSize) / 2 + motion.parallaxX * W * 0.4, y: met.top + H * 0.03 + motion.parallaxY * H * 0.3, w: artSize, h: artSize };
     art(s, artBox);
 
-    const copyTop = artBox.y + artSize * 0.92;
+    const copyTop = artBox.y + artSize;
     const plan = planCopy(s, {
       w: met.colW * 0.94,
       align: "center",
@@ -559,9 +569,30 @@ const circularMandala: Composition = {
     const { ctx, W, H, palette: p, motion } = s;
     const met = metrics(W, H);
     paintGround(ctx, "mandala-rose", W, H, p, { seed: s.seed, focusY: 0.4, detail: s.detail });
+    const chromeTopM = H - planChrome(s, { cta: "none", inset: met.bottom });
+    // The disc and the copy share the sheet: reserve the type bay first, then fit
+    // the rose into what is left, so the headline never lands on a ring.
     const cx = W / 2;
-    const cy = H * 0.42;
-    const R = Math.min(W * 0.42, H * 0.34);
+    // One column, measured bottom-up: the painted chrome at the foot, the copy
+    // above it, and the disc in whatever is left. The copy is planned first, so
+    // the disc can never take space the headline needs.
+    const chromeTopPainted = H - met.bottom - chromeHeight(s, { cta: "none", stacked: true });
+    const copyProbe = planCopy(s, {
+      w: met.colW,
+      align: "center",
+      headSize: W * 0.095,
+      maxHeadLines: 2,
+      face: scene_face(s, "cinzel"),
+      bodySize: Math.max(12, W * 0.024),
+      maxBodyLines: 2,
+      maxHeight: H * 0.26,
+      gaps: { body: H * 0.018 },
+    });
+    const R = Math.max(
+      W * 0.2,
+      Math.min(W * 0.42, H * 0.34, (chromeTopPainted - met.top - copyProbe.height - H * 0.05) / 2),
+    );
+    const cy = met.top + H * 0.01 + R;
     ctx.save();
     ctx.translate(cx, cy);
     ctx.scale(motion.scale, motion.scale);
@@ -581,19 +612,9 @@ const circularMandala: Composition = {
     const artSize = R * 1.06;
     art(s, { x: cx - artSize / 2 + motion.parallaxX * W * 0.25, y: cy - artSize / 2 + motion.parallaxY * H * 0.25, w: artSize, h: artSize });
 
-    const chromeTop = H - planChrome(s, { cta: "none", inset: met.bottom });
-    const copyTop = cy + R * 1.16;
-    const plan = planCopy(s, {
-      w: met.colW,
-      align: "center",
-      headSize: W * 0.095,
-      maxHeadLines: 2,
-      face: scene_face(s, "cinzel"),
-      bodySize: Math.max(12, W * 0.024),
-      maxBodyLines: 2,
-      maxHeight: chromeTop - copyTop,
-      gaps: { body: H * 0.018 },
-    });
+    const chromeTop = chromeTopPainted;
+    const copyTop = cy + R + H * 0.03;
+    const plan = copyProbe;
     paintCopy(s, plan, { x: met.side, y: copyTop, align: "center" });
     diamondRule(ctx, cx, Math.min(chromeTop - H * 0.008, copyTop + plan.height + H * 0.02), W * 0.24, p.goldSoft, 0.85);
     paintChrome(s, { x: met.side, y: chromeTop, w: met.colW, align: "center", cta: "none", inset: met.bottom, stacked: true });
@@ -995,29 +1016,32 @@ const commercialAd: Composition = {
     const chromeTop = H - planChrome(s, { cta: "none", inset: met.bottom });
     const seal = Math.min(W * 0.34, H * 0.22);
 
+    const planTop = met.top + H * 0.03;
+    // The headline shares its band with the seal, so its measure stops short of
+    // it. At full column width the last word ran behind the artwork on every
+    // format — the art is a block on the page, not a backdrop for type.
+    art(s, { x: W - met.side - seal + motion.parallaxX * W * 0.22, y: planTop + motion.parallaxY * H * 0.25, w: seal, h: seal });
     const plan = planCopy(s, {
-      w: met.colW * 0.82,
+      w: met.colW - seal - W * 0.035,
       align: "left",
-      headSize: W * 0.108,
-      maxHeadLines: 3,
+      headSize: W * 0.1,
+      maxHeadLines: 4,
       face: scene_face(s, "inter"),
       weight: 700,
       headLeading: 1.0,
       kickerSize: Math.max(10, W * 0.0185),
       includeBody: false,
-      maxHeight: H * 0.3,
+      maxHeight: seal + H * 0.02,
     });
-    const planTop = met.top + H * 0.03;
     paintCopy(s, plan, { x: met.side, y: planTop });
-    art(s, { x: W - met.side - seal + motion.parallaxX * W * 0.22, y: planTop + H * 0.01 + motion.parallaxY * H * 0.25, w: seal, h: seal });
 
     // benefit chips, wrapped and measured
     const chips = points(englishOnly(s.copy.subline), 3);
-    let chipY = Math.max(planTop + plan.height + H * 0.035, H * 0.4);
+    let chipY = Math.max(planTop + Math.max(plan.height, seal) + H * 0.03, H * 0.36);
     let chipX = met.side;
     const chipSize = Math.max(10, W * 0.019);
     chips.forEach((chip, i) => {
-      const label = chip.length > 24 ? `${chip.slice(0, 22).trim()}…` : chip;
+      const label = truncateWords(chip, Math.round((W * 0.42) / (chipSize * 0.5)));
       ctx.font = sansFor(chipSize, 600);
       const cw = measure(ctx, englishOnly(label), chipSize * 0.04) + chipSize * 1.7;
       if (chipX + cw > W - met.side && chipX > met.side) {
@@ -1592,7 +1616,8 @@ const geometricAstrology: Composition = {
     ctx.scale(motion.scale, motion.scale);
     ctx.translate(-W / 2, -H / 2);
 
-    const ring = Math.min(W * 0.36, H * 0.24);
+    const squarePage = H / W <= 1.06;
+    const ring = Math.min(W * (squarePage ? 0.3 : 0.34), H * (squarePage ? 0.2 : 0.24));
     art(s, { x: W - met.side - ring + motion.parallaxX * W * 0.28, y: met.top + H * 0.02 + motion.parallaxY * H * 0.28, w: ring, h: ring }, { kind: "zodiac-medallion" });
 
     // margin tick strip
@@ -1611,11 +1636,13 @@ const geometricAstrology: Composition = {
     ctx.restore();
 
     const chromeTop = H - planChrome(s, { cta: "ribbon", align: "left", inset: met.bottom });
-    const planTop = H * 0.48;
+    // A square page has no room for a band of type under a full-width ring: the
+    // block starts below the artwork instead of under a heading it would cross.
+    const planTop = squarePage ? met.top + H * 0.02 + ring + H * 0.05 : H * 0.48;
     const plan = planCopy(s, {
-      w: met.colW * 0.92,
+      w: met.colW * (squarePage ? 1 : 0.92),
       align: "left",
-      headSize: W * 0.125,
+      headSize: W * (squarePage ? 0.1 : 0.125),
       maxHeadLines: 3,
       face: scene_face(s, "playfair"),
       weight: 700,

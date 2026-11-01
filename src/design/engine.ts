@@ -199,6 +199,8 @@ export function designFromBrief(input: BriefInput = {}): DesignSpec {
           .sort((a, b) => b.score - a.score)[0].key;
 
   const palette = (input.palette && PALETTES[input.palette] ? input.palette : paletteFor(category.key, nonce)) as PaletteKey;
+  // A locked typeface always wins: the studio's type control is independent of
+  // the composition, so no composition may quietly substitute its own face.
   const face = (input.face ?? faceFor(category.key, compositionKey, nonce)) as DisplayFace;
   const art: ArtPlan = input.art ?? { ...category.art, seed: clampSeed(hashString(`${category.key}:${nonce}`)) };
   const motion: MotionPresetKey = PRESET_FOR_COMPOSITION[compositionKey] ?? "spiritual";

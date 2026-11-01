@@ -1331,7 +1331,9 @@ export function drawCoupleSeal(r: ArtRequest) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.globalAlpha = stage;
-  const gap = R * 0.78;
+  // A true interlock: each medallion is centred a radius and a half outside the
+  // other's centre, so the discs cross by a third rather than sitting apart.
+  const gap = R * 1.42;
   [-1, 1].forEach((dir, index) => {
     const x = dir * gap * 0.5;
     ctx.save();
@@ -1368,14 +1370,14 @@ export function drawCoupleSeal(r: ArtRequest) {
     ctx.fill();
     ctx.restore();
   });
-  // connector knot
-  ctx.beginPath();
-  ctx.moveTo(-gap * 0.3, -R * 0.28);
-  ctx.quadraticCurveTo(0, -R * 0.5, gap * 0.3, -R * 0.28);
-  ctx.quadraticCurveTo(0, 0, -gap * 0.3, -R * 0.28);
-  ctx.strokeStyle = withAlpha(p.goldSoft, 0.8);
-  ctx.lineWidth = Math.max(1.4, R * 0.04);
-  ctx.stroke();
+  // the vesica where the two discs meet: a diamond, the porutham mark
+  ctx.save();
+  ctx.rotate(Math.PI / 4);
+  ctx.strokeStyle = withAlpha(p.goldSoft, 0.85);
+  ctx.lineWidth = Math.max(1.4, R * 0.035);
+  const d = R * 0.26;
+  ctx.strokeRect(-d / 2, -d / 2, d, d);
+  ctx.restore();
   ctx.restore();
 }
 

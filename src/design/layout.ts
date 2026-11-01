@@ -133,6 +133,11 @@ function footerRepeatsCta(scene: CompositionContext): boolean {
 }
 
 /** How much vertical room the foot of the design needs. Plan this *first*. */
+/** The painted height of the chrome block itself, excluding its bottom inset. */
+export function chromeHeight(scene: CompositionContext, options: ChromeOptions = {}): number {
+  return Math.round(chromeRows(scene, options).reduce((sum, row) => sum + row.height + row.gapAfter, 0));
+}
+
 export function planChrome(scene: CompositionContext, options: ChromeOptions = {}): number {
   const met = metrics(scene.W, scene.H);
   const rows = chromeRows(scene, options);
@@ -154,7 +159,12 @@ export function paintChrome(scene: CompositionContext, options: ChromeOptions & 
   const inset = options.inset ?? met.bottom;
   const rows = chromeRows(scene, options);
   // Anchor the block so its *inset* lands on met.bottom, not its last pixel.
-  let cursor = options.y;
+  // Callers pass the top of the reserved block; shifting by the difference
+  // between the inset and the exact residual lands the block precisely on the
+  // margin, so no composition can drift a row into the sheet edge.
+  const bottom = scene.H - inset;
+  const blockHeight = rows.reduce((sum, row) => sum + row.height + row.gapAfter, 0);
+  let cursor = options.y + (bottom - (options.y + blockHeight));
 
   rows.forEach((row) => {
     if (row.kind === "cta") {

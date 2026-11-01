@@ -139,6 +139,7 @@ export const PosterStudio: React.FC = () => {
   const [stage, setStage] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [libraryKey, setLibraryKey] = useState(0);
   const reelAbort = useRef<AbortController | null>(null);
   const support = useRef(reelSupport()).current;
   const format = formatById(design.formatId);
@@ -207,6 +208,7 @@ export const PosterStudio: React.FC = () => {
       });
       const name = `${exportFileName(["astrosivam", "poster", slugify(design.copy.headline).slice(0, 40), design.formatId])}_${format.width}x${format.height}.png`;
       const saved = await downloadCanvas(canvas, name, { formatId: design.formatId, caption: captionFor(design) });
+      if (saved) setLibraryKey((key) => key + 1);
       toast(saved ? `Downloaded ${format.width} × ${format.height} — kept in your exports` : `Downloaded ${format.width} × ${format.height} PNG`);
     } catch {
       toast("Export failed — try another format.", "error");
@@ -259,7 +261,10 @@ export const PosterStudio: React.FC = () => {
           height: result.thumbnailCanvas.height,
           caption: captionFor(design),
         });
-        if (saved) toast("Reel saved and kept in your exports.");
+        if (saved) {
+          setLibraryKey((key) => key + 1);
+          toast("Reel saved and kept in your exports.");
+        }
       } catch {
         /* the download still stands */
       }
@@ -666,7 +671,7 @@ export const PosterStudio: React.FC = () => {
           </Panel>
 
           <div className="grid gap-4">
-            <ExportLibrary refreshKey={0} />
+            <ExportLibrary refreshKey={libraryKey} />
             <Panel>
               <SectionLabel>Before you post</SectionLabel>
               <ul className="space-y-2 text-[11px] leading-relaxed text-[#B4A58F]">
