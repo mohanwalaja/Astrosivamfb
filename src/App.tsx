@@ -361,19 +361,22 @@ function Shell() {
     window.location.assign("/login");
   };
 
-  // The suite used to fall back to Georgia without saying anything. Now the app
-  // checks the loaded font faces once and warns if any brand family is missing.
+  // The suite used to fall back to Georgia without saying anything. Check after
+  // the initial font warmup, then re-check as late mobile/shared-hosted font
+  // requests finish so a slow WOFF2 is not reported as permanently missing.
   useEffect(() => {
     let cancelled = false;
-    ensureFonts()
-      .then(() => {
-        if (cancelled) return;
-        const health = fontHealth();
-        if (!health.ok) setFontsMissing(health.missing);
-      })
-      .catch(() => undefined);
+    const fontSet = typeof document === "undefined" ? null : document.fonts;
+    const updateFontHealth = () => {
+      if (!cancelled) setFontsMissing(fontHealth().missing);
+    };
+    fontSet?.addEventListener("loadingdone", updateFontHealth);
+    fontSet?.addEventListener("loadingerror", updateFontHealth);
+    ensureFonts().then(updateFontHealth).catch(() => undefined);
     return () => {
       cancelled = true;
+      fontSet?.removeEventListener("loadingdone", updateFontHealth);
+      fontSet?.removeEventListener("loadingerror", updateFontHealth);
     };
   }, []);
 
@@ -502,10 +505,10 @@ function Shell() {
                 </span>
                 <div>
                   <strong className="font-semibold text-[#FFD9B0]">Brand fonts did not load.</strong>{" "}
-                  Posters and exports will render in fallback type. Missing:{" "}
-                  <span className="text-[#FFD9B0]">{fontsMissing.join(", ")}</span>. Reload the page, or check that
-                  <code className="mx-1 rounded bg-black/30 px-1 py-0.5 text-[11px]">/assets</code>
-                  is not blocked by your network.
+                  Posters and exports may use fallback type while fonts are loading. Missing:{" "}
+                  <span className="text-[#FFD9B0]">{fontsMissing.join(", ")}</span>. If this remains after 10 seconds,
+                  reload the page or check that <code className="mx-1 rounded bg-black/30 px-1 py-0.5 text-[11px]">/assets</code>
+                  can serve the font files.
                 </div>
               </div>
             ) : null}

@@ -236,6 +236,7 @@ return [
     'AUTH_SESSION_SECRET' => 'a-long-random-secret-at-least-32-characters',
     'META_APP_ID' => 'your-meta-app-id',
     'META_APP_SECRET' => 'your-meta-app-secret',
+    'META_LOGIN_CONFIG_ID' => 'your-facebook-login-business-configuration-id', // New Unified Login apps; blank for legacy OAuth.
     'META_REDIRECT_URI' => 'https://your-domain.com/api/meta/callback',
     'META_GRAPH_VERSION' => 'v26.0',
     'SITE_BASE_URL' => 'https://your-domain.com',
@@ -251,19 +252,11 @@ The Meta App Secret and Page tokens stay on the PHP server; they are never sent 
 First time here? [`docs/meta-api-setup.md`](docs/meta-api-setup.md) walks through creating
 a Meta app, finding its App ID and App Secret, the permissions, and the Connect flow.
 The one-time `/setup` page accepts login and Meta credentials on first install; after login, the protected
-`/setup/meta` page lets the owner configure the App ID, App Secret, site origin, Graph API version,
-and suite login username together. A new login password is optional; leave both password fields blank
+`/setup/meta` page lets the owner configure the App ID, App Secret, Facebook Login for Business
+Configuration ID, site origin, Graph API version, and suite login username together. A new login password is optional; leave both password fields blank
 unless changing it. The page also generates callback/domain values to copy into Meta.
 
-Create a Meta developer app, add Facebook Login for Web, and enable Instagram API with Facebook Login
-(sometimes labelled Instagram Graph API; this integration does not use the separate Instagram Login
-flow). Set the exact OAuth redirect URL from `META_REDIRECT_URI` in the app's Valid OAuth Redirect
-URIs. The Facebook Page must be managed by the account that authorizes the app. For Instagram, switch
-the Instagram account to Professional and link it to that Facebook Page. The Connect flow requests
-the Page and Instagram publishing permissions (`pages_show_list`, `pages_read_engagement`,
-`pages_manage_posts`, `instagram_basic`, and `instagram_content_publish`). Meta may require App
-Review/Advanced Access before people other than app roles can connect. The app's Graph API version
-is configurable in `config.local.php`.
+Create a Meta developer app and enable the Facebook Login for Business / Unified Login path used by new apps, plus Instagram API with Facebook Login (not separate Instagram Login). In **Facebook Login for Business → Configurations**, create a **User access token** configuration for this interactive publishing flow, select the Facebook Page/linked Instagram assets and these permissions: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `instagram_basic`, and `instagram_content_publish`. The PHP callback exchanges an authorization code server-side; Meta's User access token flow is implicit by default but can support the authorization-code grant. If the dashboard offers a grant/response choice, enable **Authorization Code**. This site sends `response_type=code` and `override_default_response_type=true`; paste the configuration's numeric ID as `META_LOGIN_CONFIG_ID`. Older classic OAuth apps can leave that value blank and use the direct-scope fallback. Set the exact callback URL in Meta's redirect settings. The Facebook Page must be managed by the authorizing account, and the Instagram account must be Professional and linked to that Page. Meta may require App Review/Advanced Access before people other than app roles can connect. The Graph API version is configurable in `config.local.php`.
 
 Instagram is stricter than Facebook, and the studio says so instead of hiding it. An Instagram
 professional account (Business or Creator) linked to that Page is required before anything can be

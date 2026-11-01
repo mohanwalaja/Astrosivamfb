@@ -529,16 +529,20 @@ function setup_page(string $error = ''): never
             <label for="meta_app_secret">Meta App Secret</label>
             <input id="meta_app_secret" name="meta_app_secret" type="password" autocomplete="new-password" placeholder="Paste the Secret from App settings → Basic">
           </div>
+          <div>
+            <label for="meta_login_config_id">Facebook Login for Business Config ID</label>
+            <input id="meta_login_config_id" name="meta_login_config_id" inputmode="numeric" pattern="[0-9]{1,32}" autocomplete="off" placeholder="Needed for new Unified Login apps">
+          </div>
         </div>
-        <small>Enter both Meta values or leave both blank for now. The App Secret is stored only in the private PHP config on this server.</small>
+        <small>For new apps showing Unified Login, create a Facebook Login for Business configuration with a User access token and the required Page/Instagram permissions, enable the authorization-code grant if Meta offers that option, then enter its Configuration ID. Leave it blank only for older apps using classic OAuth scopes. Enter both App ID and App Secret, or leave both blank for now. The App Secret is stored only in the private PHP config on this server.</small>
 
         <h2>Copy these values into Meta → App settings</h2>
         <div class="steps">
           <ol>
             <li>In <strong>App settings → Basic</strong>, set <strong>App Domains</strong> to the bare domain below (no scheme or path) and add the Privacy Policy and Data Deletion URLs if those fields are shown.</li>
-            <li>Add the <strong>Facebook Login</strong> product for <strong>Web</strong>. In its settings, paste the exact callback below under <strong>Valid OAuth Redirect URIs</strong>.</li>
-            <li>Enable the <strong>Instagram API / Instagram Graph API with Facebook Login</strong> product or use case. This site uses Facebook Login and a Page-linked professional Instagram account; it does not use the separate Instagram Login flow.</li>
-            <li>Before connecting, make these permissions available to the app: <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>instagram_basic</code>, and <code>instagram_content_publish</code>. In Development mode, the person connecting must have an app role; other users require Meta's review/approval as applicable.</li>
+            <li>For a new app that shows <strong>Unified Login</strong>, open <strong>Facebook Login for Business → Configurations</strong>, create a <strong>User access token</strong> configuration, choose the Page/Instagram assets and required permissions below, then paste its Configuration ID into this installer. Register the callback shown below in Meta's redirect settings. Older classic OAuth apps can leave the Config ID blank.</li>
+            <li>Enable <strong>Instagram API with Facebook Login</strong> (or the matching Instagram use case). This site uses a Facebook user login and a Page-linked professional Instagram account; it does not use separate Instagram Login.</li>
+            <li>Include these permissions in the Unified Login configuration (classic apps request them as OAuth scopes): <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>instagram_basic</code>, and <code>instagram_content_publish</code>. In Development mode, the person connecting must have an app role; other users require Meta's review/approval as applicable.</li>
           </ol>
           <div class="copy-row"><code id="val-domains">suite.astrosivam.com</code><button type="button" class="copy-btn" onclick="copyVal('val-domains')">Copy</button></div>
           <small>→ App Domains</small>
@@ -547,7 +551,7 @@ function setup_page(string $error = ''): never
           <div class="copy-row"><code id="val-deletion">https://suite.astrosivam.com/api/meta/data-deletion</code><button type="button" class="copy-btn" onclick="copyVal('val-deletion')">Copy</button></div>
           <small>→ User Data Deletion callback URL (if requested by Meta)</small>
           <div class="copy-row"><code id="val-redirect">https://suite.astrosivam.com/api/meta/callback</code><button type="button" class="copy-btn" onclick="copyVal('val-redirect')">Copy</button></div>
-          <small>→ Facebook Login → Settings → Valid OAuth Redirect URIs (must match exactly)</small>
+          <small>→ Facebook Login / Facebook Login for Business redirect settings (must match exactly)</small>
         </div>
         <p>After saving the Meta app settings and this installer, open the deployed site, sign in, go to <strong>Publish</strong>, and select <strong>Connect Meta account</strong>. Choose the Facebook Page that owns the linked Instagram Business or Creator account.</p>
         <small>After the first login is created, use the protected <code>/setup/meta</code> page to add or update Meta settings without editing PHP files. Never add credentials to frontend files or the Node <code>.env</code> for a production Meta connection.</small>
@@ -588,9 +592,8 @@ function save_meta_api_config(array $settings): void
         $localConfig = $loaded;
     }
     // Preserve unrelated local settings and the session/token-encryption key.
-    // Login username/password are included only as validated settings; never rotate
-    // do not rotate AUTH_SESSION_SECRET here, because doing so would invalidate stored tokens.
-    foreach (['AUTH_USERNAME', 'AUTH_PASSWORD', 'META_APP_ID', 'META_APP_SECRET', 'META_REDIRECT_URI', 'META_GRAPH_VERSION', 'SITE_BASE_URL'] as $key) {
+    // Login username/password are included only as validated settings; do not rotate AUTH_SESSION_SECRET here or encrypted Page tokens become unreadable.
+    foreach (['AUTH_USERNAME', 'AUTH_PASSWORD', 'META_APP_ID', 'META_APP_SECRET', 'META_LOGIN_CONFIG_ID', 'META_REDIRECT_URI', 'META_GRAPH_VERSION', 'SITE_BASE_URL'] as $key) {
         if (array_key_exists($key, $settings)) $localConfig[$key] = $settings[$key];
     }
     if (!is_dir($storageDirectory) && !mkdir($storageDirectory, 0700, true) && !is_dir($storageDirectory)) {
@@ -617,6 +620,7 @@ function meta_api_setup_page(string $csrf, array $config, string $error = '', bo
     header('X-Robots-Tag: noindex, nofollow');
     $escape = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $appId = (string) ($values['app_id'] ?? ($config['META_APP_ID'] ?? ''));
+    $loginConfigId = (string) ($values['login_config_id'] ?? ($config['META_LOGIN_CONFIG_ID'] ?? ''));
     $loginUsername = (string) ($values['login_username'] ?? ($config['AUTH_USERNAME'] ?? ''));
     $siteBase = rtrim((string) ($values['site_base_url'] ?? ($config['SITE_BASE_URL'] ?? 'https://suite.astrosivam.com')), '/');
     $graphVersion = (string) ($values['graph_version'] ?? ($config['META_GRAPH_VERSION'] ?? 'v26.0'));
@@ -652,7 +656,7 @@ a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba
 <body><main>
   <div class="eyebrow">Astro Sivam · Private setup</div>
   <h1>Meta API and suite login setup</h1>
-  <p>Enter your Meta app credentials and the public HTTPS address for this site. The PHP host saves the credentials privately. The App Secret is never returned to the browser after saving, and user/Page tokens are obtained later through Meta's Connect flow.</p>
+  <p>Enter your Meta App ID and Secret, a Facebook Login for Business Configuration ID when using Unified Login, and the public HTTPS address for this site. The PHP host saves the settings privately. The App Secret is never returned to the browser after saving, and user/Page tokens are obtained later through Meta's Connect flow.</p>
   {{MESSAGE}}
   <div class="notice"><strong>Important:</strong> This saves the website's server settings. It cannot create a Meta developer app, add products, grant permissions, or approve App Review. Complete those items in <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer">Meta for Developers</a> using the copyable values below.</div>
   <form method="post" action="/setup/meta" autocomplete="off">
@@ -662,6 +666,7 @@ a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba
       <div><label for="meta_app_secret">Meta App Secret</label><input id="meta_app_secret" name="meta_app_secret" type="password" autocomplete="new-password" placeholder="Paste the Secret from App settings → Basic"><small>{{SECRET_HINT}}</small></div>
       <div><label for="site_base_url">Public site HTTPS origin</label><input id="site_base_url" name="site_base_url" type="url" value="{{SITE_BASE}}" required placeholder="https://suite.astrosivam.com"><small>Origin only — no path, query, or trailing slash. Must be the same public host visitors use.</small></div>
       <div><label for="graph_version">Meta Graph API version</label><input id="graph_version" name="graph_version" value="{{GRAPH_VERSION}}" pattern="v[0-9]{1,2}\.[0-9]+" required placeholder="v26.0"><small>Use the version supported by your Meta app. Current project default: v26.0.</small></div>
+      <div><label for="meta_login_config_id">Facebook Login for Business Config ID</label><input id="meta_login_config_id" name="meta_login_config_id" value="{{LOGIN_CONFIG_ID}}" inputmode="numeric" pattern="[0-9]{1,32}" placeholder="Needed for new Unified Login apps"><small>For Meta's new Unified Login flow, paste the ID from Facebook Login for Business → Configurations. Create a User access token configuration with the required assets and permissions below; enable Authorization Code if Meta offers a grant/response choice. This site requests an authorization code for the PHP callback. Leave blank only for a legacy app using classic OAuth scopes.</small></div>
     </div>
     <h2>Suite login</h2>
     <p>Set the username and, if you want to change it, a new login password here with the Meta settings. Leave both new-password fields blank to keep the current password. The password is never re-displayed; new credentials apply to future sign-ins, while active sessions remain until logout or timeout.</p>
@@ -681,9 +686,9 @@ a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba
     <div class="value"><label>Privacy Policy URL</label><div class="copyline"><code id="val-privacy">https://astrosivam.com/privacy-policy</code><button type="button" onclick="copyValue('val-privacy',this)">Copy</button></div></div>
     <div class="value"><label>App Category</label><div class="copyline"><code id="val-category">Lifestyle</code><button type="button" onclick="copyValue('val-category',this)">Copy</button></div></div>
   </div>
-  <h2>Permissions requested by Connect</h2>
+  <h2>Permissions needed by Connect</h2>
   <div class="perms">pages_show_list · pages_read_engagement · pages_manage_posts · instagram_basic · instagram_content_publish</div>
-  <p>Add <strong>Facebook Login for Web</strong> and <strong>Instagram API with Facebook Login</strong> (not the separate Instagram Login flow). In Facebook Login settings, enable Web OAuth/client OAuth if those toggles are shown and paste the exact callback above into <strong>Valid OAuth Redirect URIs</strong>. During Development mode, test with an app Admin/Developer/Tester who can manage the Facebook Page. Broader use may require Meta review/Advanced Access.</p>
+  <p>For apps showing <strong>Unified Login</strong>, configure <strong>Facebook Login for Business</strong> with a <strong>User access token</strong>, the Page/Instagram assets, and all five permissions above; register the exact callback in Meta's redirect settings. The site will send the Configuration ID and omit the legacy <code>scope</code> parameter. For older classic OAuth apps only, leave the Config ID blank, enable Web OAuth if shown, and the site will request the scopes directly. Use <strong>Instagram API with Facebook Login</strong> (not separate Instagram Login). In Development mode, test with an app Admin/Developer/Tester who can manage the Page. Broader use may require Meta review/Advanced Access.</p>
   <div class="foot">The callback is always derived as <code>SITE_BASE_URL + /api/meta/callback</code>. If you change the domain, update App Domains and Valid OAuth Redirect URIs in Meta too. Never paste an access token here; use <strong>Connect Meta account</strong> after saving to authorize the Page. For app creation and troubleshooting, follow the project's Fresh Facebook + Instagram API setup guide.</div>
 </main>
 <script>
@@ -695,6 +700,7 @@ HTML;
         '{{MESSAGE}}' => $message,
         '{{CSRF}}' => $escape($csrf),
         '{{APP_ID}}' => $escape($appId),
+        '{{LOGIN_CONFIG_ID}}' => $escape($loginConfigId),
         '{{LOGIN_USERNAME}}' => $escape($loginUsername),
         '{{SECRET_HINT}}' => $escape($secretHint),
         '{{SITE_BASE}}' => $escape($siteBase),
@@ -1060,6 +1066,7 @@ if (!$authConfigured) {
         $siteBase = rtrim(trim((string) ($_POST['site_base_url'] ?? '')), '/');
         $appId = trim((string) ($_POST['meta_app_id'] ?? ''));
         $appSecret = trim((string) ($_POST['meta_app_secret'] ?? ''));
+        $loginConfigId = trim((string) ($_POST['meta_login_config_id'] ?? ''));
         $siteParts = parse_url($siteBase);
         if ($username === '' || strlen($username) > 64 || preg_match('/[\x00-\x1F\x7F]/', $username)) {
             setup_page('Enter a username of 1 to 64 characters.');
@@ -1071,6 +1078,8 @@ if (!$authConfigured) {
         }
         if (($appId === '') !== ($appSecret === '')) setup_page('Enter both Meta app fields, or leave both blank for now.');
         if ($appId !== '' && !preg_match('/^[0-9]{1,32}$/', $appId)) setup_page('The Meta App ID should be the numeric value shown in App settings → Basic.');
+        if ($loginConfigId !== '' && !preg_match('/^[0-9]{1,32}$/', $loginConfigId)) setup_page('The Facebook Login for Business Configuration ID should be numeric.');
+        if ($loginConfigId !== '' && ($appId === '' || $appSecret === '')) setup_page('Enter the Meta App ID and App Secret when entering a Login Configuration ID.');
         $localConfig = [
             'AUTH_USERNAME' => $username,
             'AUTH_PASSWORD' => $password,
@@ -1083,6 +1092,7 @@ if (!$authConfigured) {
             $localConfig['META_APP_SECRET'] = $appSecret;
             $localConfig['META_REDIRECT_URI'] = $siteBase . '/api/meta/callback';
         }
+        if ($loginConfigId !== '') $localConfig['META_LOGIN_CONFIG_ID'] = $loginConfigId;
         $phpConfig = "<?php\n// Generated by the one-time Astro Sivam installer. Keep this file private.\nreturn " . var_export($localConfig, true) . ";\n";
         $configPath = __DIR__ . '/config.local.php';
         $temporaryConfig = $storageDirectory . '/config-install.tmp-' . bin2hex(random_bytes(6));
@@ -1204,10 +1214,11 @@ if ($uriPath === '/setup/meta' && $method === 'POST') {
     $secretInput = is_string($_POST['meta_app_secret'] ?? null) ? trim((string) $_POST['meta_app_secret']) : '';
     $siteBase = is_string($_POST['site_base_url'] ?? null) ? rtrim(trim((string) $_POST['site_base_url']), '/') : '';
     $graphVersion = is_string($_POST['graph_version'] ?? null) ? trim((string) $_POST['graph_version']) : '';
+    $loginConfigId = is_string($_POST['meta_login_config_id'] ?? null) ? trim((string) $_POST['meta_login_config_id']) : '';
     $loginUsername = is_string($_POST['login_username'] ?? null) ? trim((string) $_POST['login_username']) : '';
     $newLoginPassword = is_string($_POST['login_password'] ?? null) ? (string) $_POST['login_password'] : '';
     $newLoginPasswordConfirm = is_string($_POST['login_password_confirm'] ?? null) ? (string) $_POST['login_password_confirm'] : '';
-    $values = ['app_id' => $appId, 'site_base_url' => $siteBase, 'graph_version' => $graphVersion, 'login_username' => $loginUsername];
+    $values = ['app_id' => $appId, 'site_base_url' => $siteBase, 'graph_version' => $graphVersion, 'login_config_id' => $loginConfigId, 'login_username' => $loginUsername];
     if ($loginUsername === '' || strlen($loginUsername) > 64 || preg_match('/[\\x00-\\x1F\\x7F]/', $loginUsername)) {
         http_response_code(400);
         meta_api_setup_page($csrf, $config, 'Enter a login username of 1 to 64 characters.', false, $values);
@@ -1236,6 +1247,10 @@ if ($uriPath === '/setup/meta' && $method === 'POST') {
         http_response_code(400);
         meta_api_setup_page($csrf, $config, 'Use a Graph API version in the format v26.0.', false, $values);
     }
+    if ($loginConfigId !== '' && !preg_match('/^[0-9]{1,32}$/', $loginConfigId)) {
+        http_response_code(400);
+        meta_api_setup_page($csrf, $config, 'Enter the numeric Configuration ID from Facebook Login for Business, or leave it blank only for a legacy app.', false, $values);
+    }
     if ($secretInput !== '' && (strlen($secretInput) > 512 || preg_match('/[\x00-\x20\x7F]/', $secretInput))) {
         http_response_code(400);
         meta_api_setup_page($csrf, $config, 'The App Secret contains invalid whitespace or is too long. Copy it again from Meta.', false, $values);
@@ -1251,6 +1266,7 @@ if ($uriPath === '/setup/meta' && $method === 'POST') {
             'AUTH_USERNAME' => $loginUsername,
             'META_APP_ID' => $appId,
             'META_APP_SECRET' => $secretInput !== '' ? $secretInput : $currentAppSecret,
+            'META_LOGIN_CONFIG_ID' => $loginConfigId,
             'META_REDIRECT_URI' => $siteBase . '/api/meta/callback',
             'META_GRAPH_VERSION' => $graphVersion,
             'SITE_BASE_URL' => $siteBase,
@@ -1279,16 +1295,26 @@ try {
         $_SESSION['meta_oauth_state'] = bin2hex(random_bytes(32));
         $_SESSION['meta_oauth_state_created_at'] = time();
         // This app uses the Instagram Graph API through Facebook Login and a linked Page.
-        // Add the corresponding Meta products and enable these permissions before connecting;
-        // asking for Page-only scopes would let Facebook work but leave Instagram publishing unauthorized.
+        // New Unified Login apps grant permissions from a Facebook Login for Business
+        // configuration (config_id), so do not send legacy scope parameters for them.
+        // Older classic OAuth apps retain the direct-scope fallback.
         $scopes = 'pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish';
+        $loginConfigId = trim((string) ($config['META_LOGIN_CONFIG_ID'] ?? ''));
+        if ($loginConfigId !== '' && !preg_match('/^[0-9]{1,32}$/', $loginConfigId)) {
+            json_response(['error' => 'META_LOGIN_CONFIG_ID must be the numeric Configuration ID from Facebook Login for Business.'], 503);
+        }
         $params = [
             'client_id' => (string) $config['META_APP_ID'],
             'redirect_uri' => (string) $config['META_REDIRECT_URI'],
             'state' => (string) $_SESSION['meta_oauth_state'],
             'response_type' => 'code',
-            'scope' => $scopes,
         ];
+        if ($loginConfigId !== '') {
+            $params['config_id'] = $loginConfigId;
+            $params['override_default_response_type'] = 'true';
+        } else {
+            $params['scope'] = $scopes;
+        }
         $dialog = 'https://www.facebook.com/' . meta_graph_version() . '/dialog/oauth?' . http_build_query($params);
         header('Location: ' . $dialog, true, 302); exit;
     }

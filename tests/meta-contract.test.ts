@@ -14,6 +14,7 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 const PHP = read("hosting/index.php");
+const PHP_CONFIG = read("hosting/config.php");
 const STATUS = read("src/components/MetaStatus.tsx");
 const PUBLISHER = read("src/components/Publisher.tsx");
 const SUITE = read("src/components/FacebookSuite.tsx");
@@ -99,7 +100,7 @@ test("publishing is still a single deliberate multipart POST with CSRF", () => {
   assert.match(PHP, /require_csrf\(\);/, "the PHP route still enforces CSRF");
 });
 
-test("the OAuth connect flow requests Page access and Instagram publishing scopes", () => {
+test("OAuth uses a Meta login configuration for Unified Login and keeps legacy scope fallback", () => {
   const connectStart = PHP.indexOf("if ($uriPath === '/api/meta/connect' && $method === 'GET')");
   const statusStart = PHP.indexOf("if ($uriPath === '/api/meta/status' && $method === 'GET')", connectStart);
   assert.notEqual(connectStart, -1, "the Meta connect route must exist");
@@ -114,7 +115,12 @@ test("the OAuth connect flow requests Page access and Instagram publishing scope
   ]) {
     assert.ok(connectRoute.includes(permission), `OAuth must request ${permission}`);
   }
-  assert.match(connectRoute, /'scope' => \$scopes/);
+  assert.match(connectRoute, /if \(\$loginConfigId !== ''\)/, "Unified Login should be selected when a configuration ID is saved");
+  assert.match(connectRoute, /\$params\['config_id'\] = \$loginConfigId/);
+  assert.match(connectRoute, /override_default_response_type/);
+  const baseParams = connectRoute.slice(connectRoute.indexOf('$params = ['), connectRoute.indexOf("if ($loginConfigId !== '')"));
+  assert.doesNotMatch(baseParams, /'scope'/, "Unified Login must not receive legacy scopes in the base parameters");
+  assert.match(connectRoute, /else \{\s*\$params\['scope'\] = \$scopes;/, "classic apps retain the scope-based fallback");
 });
 
 test("first-time setup does not pin a previous Meta app ID", () => {
@@ -124,7 +130,10 @@ test("first-time setup does not pin a previous Meta app ID", () => {
   assert.doesNotMatch(setup, /developers\.facebook\.com\/apps\/\d+|value="\d{10,}"/, "a new install must not inherit another app's ID");
   assert.match(setup, /name="meta_app_id"[^>]+placeholder="Your numeric App ID"/);
   assert.match(setup, /name="meta_app_secret"[^>]+type="password"/);
+  assert.match(setup, /name="meta_login_config_id"/);
+  assert.match(PHP, /\$localConfig\['META_LOGIN_CONFIG_ID'\] = \$loginConfigId/);
   assert.match(setup, /SITE_BASE_URL \+ \/api\/meta\/callback/);
+  assert.match(PHP_CONFIG, /'META_LOGIN_CONFIG_ID'/, "the PHP config loader must accept the Unified Login configuration ID");
 });
 
 test("post-install Meta and login setup is authenticated, CSRF protected, and keeps secrets private", () => {
@@ -138,6 +147,7 @@ test("post-install Meta and login setup is authenticated, CSRF protected, and ke
   assert.match(routes, /login_username[\s\S]*login_password_confirm/, "login credentials can be configured beside Meta credentials");
   assert.match(routes, /hash_equals\(\$newLoginPassword, \$newLoginPasswordConfirm\)/, "password changes require a matching confirmation");
   assert.match(routes, /'AUTH_USERNAME' => \$loginUsername/);
+  assert.match(routes, /'META_LOGIN_CONFIG_ID' => \$loginConfigId/);
   assert.match(routes, /\$settings\['AUTH_PASSWORD'\] = \$newLoginPassword/, "blank password fields must preserve the current password");
 
   const formStart = PHP.indexOf("function meta_api_setup_page(");
@@ -152,6 +162,7 @@ test("post-install Meta and login setup is authenticated, CSRF protected, and ke
   assert.doesNotMatch(form, /name="login_password"[^>]*value=/, "the stored login password must never be rendered");
   assert.match(form, /name="site_base_url"/);
   assert.match(form, /name="graph_version"/);
+  assert.match(form, /name="meta_login_config_id" value="\{\{LOGIN_CONFIG_ID\}\}"/);
   assert.match(form, /val-redirect/);
   assert.match(form, /val-deletion/);
   assert.match(STATUS, /href="\/setup\/meta"/, "the signed-in studio links to the protected setup page");

@@ -139,10 +139,13 @@ export function ensureFonts(): Promise<void> {
     const loads = probes.map(([font, sample]) => document.fonts.load(font, sample));
     let timeoutId: number | undefined;
     const timeout = new Promise<void>((resolve) => {
-      timeoutId = window.setTimeout(resolve, 4000);
+      // Shared hosting and mobile networks can take longer than a few seconds to
+      // deliver the full set of script subsets. Keep exports bounded, but avoid
+      // declaring healthy self-hosted fonts missing after a short 4-second race.
+      timeoutId = window.setTimeout(resolve, 10_000);
     });
     // Exports must remain usable if a browser stalls a font request. All shipped
-    // faces are self-hosted; after four seconds canvas rendering falls back safely.
+    // faces are self-hosted; after ten seconds canvas rendering falls back safely.
     fontsPromise = Promise.race([Promise.allSettled(loads).then(() => undefined), timeout])
       .catch(() => undefined)
       .finally(() => {
