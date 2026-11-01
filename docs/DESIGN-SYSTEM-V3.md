@@ -168,6 +168,10 @@ read pixels):
    signature.
 9. **Diversity run** — 20 cards, ≥ 8 structures, never three consecutive cards in
    the same family, and diversity is *not* explained by palettes alone.
+13. **The decoration control is not cosmetic** — `controls-05` and `controls-06`
+    differ from the base card by ~256 000 and ~308 000 pixels respectively
+    (measured with `PIL.ImageChops`), so quiet / balanced / rich are three
+    different pages, not three labels.
 10. **Generate another** — eight consecutive generations, never a repeat from the
     last four.
 11. **Determinism** — the same brief reproduces the same poster.
@@ -186,7 +190,8 @@ The sample sheets are produced by `npm run samples:v3 [compositions|matrix|carou
 | `docs/samples/controls.png` | The base card and nine one-control changes. |
 | `docs/samples/carousel.png` | A five-slide campaign: five different architectures, one palette and one page-count chrome. |
 | `docs/samples/formats.png` | 1:1, 9:16 and A4 across three categories. |
-| `docs/samples/motion-*.png` | Five frames per preset (0 %, 20 %, 40 %, 65 %, 100 %). |
+| `docs/samples/motion-*.png` | Five frames per preset (0 %, 20 %, 40 %, 65 %, 100 %) — one sheet per preset. |
+| `docs/samples/emblems.png` | The twelve deity emblems at plate size. |
 
 Render times, measured on this machine at full export size (1080 × 1350,
 scale 1): 110–660 ms per card; A4 (1748 × 2480) 630–850 ms.

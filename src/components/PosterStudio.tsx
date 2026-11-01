@@ -20,7 +20,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight,
   Clapperboard,
   Download,
   Grid2x2,
@@ -36,7 +35,7 @@ import {
   Type as TypeIcon,
   X,
 } from "lucide-react";
-import { DEITIES, DEITY_MAP } from "../data/deities";
+import { DEITIES } from "../data/deities";
 import type { DeityKey } from "../types";
 import { PALETTE_LIST } from "../design/palettes";
 import { ART_BY_ID, CATEGORY_MAP } from "../design/categories";

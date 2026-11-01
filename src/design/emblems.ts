@@ -488,16 +488,26 @@ const ganesha: SymbolPainter = (ctx, p, reveal) => {
   }
 
   // --- modaka, held in the curl -------------------------------------------
+  // Gold, not accent: on a maroon ground the accent is the same red family and
+  // the sweet read as a tumour on the trunk. As a golden sweet it reads as what
+  // it is — a rounded offering cradled in the curl.
   ctx.beginPath();
-  ctx.arc(126, 150, 46, 0, Math.PI * 2);
-  const sweet = ctx.createRadialGradient(110, 132, 6, 126, 150, 48);
-  sweet.addColorStop(0, "#FFFCEB");
-  sweet.addColorStop(0.55, p.accentSoft);
-  sweet.addColorStop(1, p.accent);
+  ctx.arc(126, 150, 40, 0, Math.PI * 2);
+  const sweet = ctx.createRadialGradient(110, 134, 4, 126, 150, 42);
+  sweet.addColorStop(0, "#FFFDF0");
+  sweet.addColorStop(0.45, p.goldSoft);
+  sweet.addColorStop(1, p.goldDeep);
   ctx.fillStyle = sweet;
   ctx.fill();
-  ctx.strokeStyle = withAlpha(p.goldSoft, 0.9);
+  ctx.strokeStyle = withAlpha(p.goldSoft, 0.95);
   ctx.lineWidth = 5;
+  ctx.stroke();
+  // a single dark seed line, so the form is read as an object rather than a disc
+  ctx.beginPath();
+  ctx.moveTo(112, 140);
+  ctx.quadraticCurveTo(126, 132, 140, 140);
+  ctx.strokeStyle = withAlpha(p.deep, 0.35);
+  ctx.lineWidth = 3;
   ctx.stroke();
 };
 
