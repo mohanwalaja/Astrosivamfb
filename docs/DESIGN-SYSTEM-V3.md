@@ -58,7 +58,7 @@ plates), so it stays sharp from a 190 px thumbnail to an A4 sheet.
 | --- | --- |
 | `src/lib/studioDesign.ts` | The studio's state model: `createStudioDesign`, `applyChange`, `selectCategory`, `generateAnother`, formats, copy flags. One field changes, the rest re-resolve. |
 | `tools/design-samples.mjs` | The review harness: modes `compositions`, `matrix`, `carousel`, `diversity`, `controls`, `motion`. |
-| `tests/design-system.test.ts` | 12 behavioural tests (see §6). |
+| `tests/design-system.test.ts` | 13 behavioural tests (see §6). |
 | `tools/canvas-env.mjs` | node-canvas shim so every render path also runs head-less. |
 
 ---
@@ -144,12 +144,12 @@ and never repeat the last four.
 ```
 npx tsc --noEmit        0 errors
 npm run lint            tsc --noEmit (this repo's lint is the type check) — clean
-npm test                218 tests, 218 pass, 0 fail
+npm test                219 tests, 219 pass, 0 fail
 npm run build           built in ~0.9 s, no warnings
 ```
 
-New coverage in `tests/design-system.test.ts` (all behavioural — they render and
-read pixels):
+New coverage in `tests/design-system.test.ts` (behavioural — they render and read
+pixels, or render the React component itself):
 
 1. **Fifteen families, each with its own architecture** — unique keys, unique
    structure lines, ≥ 8 distinct grounds, ≥ 6 distinct focal points.
@@ -176,6 +176,9 @@ read pixels):
     last four.
 11. **Determinism** — the same brief reproduces the same poster.
 12. **Category copy** — real headlines, one contact line, English-only.
+13. **The studio itself renders head-lessly** — the real component is rendered
+    with `react-dom/server` and every independent control, the English-only
+    notice and at least eight real thumbnail tiles must be present.
 
 The sample sheets are produced by `npm run samples:v3 [compositions|matrix|carousel|diversity|controls|motion]`.
 

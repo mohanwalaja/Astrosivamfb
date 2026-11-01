@@ -259,3 +259,43 @@ test("every category carries real business copy and a single contact line", () =
     assert.equal(auditEnglish(`${sample.headline} ${sample.subline}`).ok, true, `${category.key} copy is not English`);
   }
 });
+
+test("the studio renders every independent control, server-side, without a browser", async () => {
+  // A head-less render of the real component: if a control is dropped from the
+  // UI, or a module it imports breaks, this fails before anyone opens a tab.
+  const g = globalThis as unknown as { window?: unknown };
+  const hadWindow = "window" in g;
+  if (!hadWindow) {
+    g.window = {
+      localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+      setTimeout: () => 0,
+      clearTimeout: () => undefined,
+    };
+  }
+  try {
+    const React = (await import("react")).default;
+    const { renderToString } = await import("react-dom/server");
+    const { PosterStudio } = await import("../src/components/PosterStudio.tsx");
+    const html = renderToString(React.createElement(PosterStudio));
+    assert.ok(html.length > 8000, "the studio rendered almost nothing");
+    for (const label of [
+      "Brief",
+      "Composition",
+      "Illustration",
+      "Palette",
+      "Typeface",
+      "Decoration",
+      "Motion",
+      "Format",
+      "Generate another design",
+      "Play motion",
+    ]) {
+      assert.ok(html.includes(label), `the studio lost its ${label} control`);
+    }
+    assert.ok(html.includes("English only"), "the English-only policy must be visible in the UI");
+    // Composition tiles are rendered thumbnails, not labels on their own.
+    assert.ok((html.match(/aspect-ratio:4 \/ 5/g) ?? []).length >= 8, "composition tiles need thumbnails");
+  } finally {
+    if (!hadWindow) delete g.window;
+  }
+});
