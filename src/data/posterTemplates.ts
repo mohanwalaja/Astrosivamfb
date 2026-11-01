@@ -1,117 +1,134 @@
 import type { PosterLayout, PosterTemplate, TemplateMeta } from "../types";
 
 /**
- * The eight poster compositions, rebuilt for the twelve-style system.
+ * The eight poster compositions, redesigned as a graphic campaign system.
  *
- * Each entry is a genuinely different piece of layout work — a different grid,
- * image treatment, typographic hierarchy and call-to-action — not a recolour.
- * The style chips supply the ground, frame and motif; the template owns where
- * everything sits.
+ * Every entry is its own piece of art direction — grid, artwork treatment,
+ * typographic hierarchy, motion grammar and call-to-action — and each ships
+ * several genuinely different composition variations (recorded in
+ * `variations`), so one campaign can produce a family of posters instead of
+ * one layout in eight colours.
  */
 export const TEMPLATES: TemplateMeta[] = [
   {
     key: "mandapam",
-    name: "Temple Mandapam",
+    name: "South Indian Heritage",
     family: "Heritage",
-    tagline: "Pillared hall: fluted columns, lit arch, lamps at the footing.",
+    tagline: "Temple-silk field, foiled arch window, Tamil-first greeting.",
     description:
-      "A sanctum doorway. Two fluted pillars with lotus capitals carry a stepped lintel, the artwork glows inside a tall arch with a brass halo behind it, and the Tamil line leads above the English headline. Twin lamps and a kolam baseline close the composition.",
-    bestFor: "Muhurtham, Griha Pravesam, temple festivals, deity blessings.",
-    composition: "Pillared arch · script-first copy · lamps and kolam footing",
+      "A heritage plate: flowing zari-silk gradients form the ground, the devotional artwork sits inside a foiled arch window with a halo behind it, and the Tamil line leads above the English headline. A computed pulli-kolam band and two lamp glows close the page — restraint instead of clip-art ornament.",
+    bestFor: "Muhurtham, Griha Pravesam, temple festivals, deity blessings, wedding matching.",
+    composition: "Silk field · foiled arch window · script-first copy · kolam footing",
     usesImage: true,
     defaultTheme: "saffron",
     defaultLayout: "portrait-arch",
+    variations: 2,
+    defaultArtScene: "silk",
   },
   {
     key: "gallery",
-    name: "Gallery Plate",
+    name: "Luxury Editorial",
     family: "Editorial",
-    tagline: "Exhibition label: tall plate above, catalogue caption below.",
+    tagline: "Magazine split: full-height art plate against a type column.",
     description:
-      "A museum wall. The artwork is a tall matted plate occupying the upper two-thirds with a numbered plate caption, and the copy sits beneath it as an exhibition label: kicker rule, headline, a short measure of body text and a hairline footer.",
+      "A magazine spread. The artwork runs full-height as a plate with an inset foil keyline while the type column carries masthead, kicker, display headline and a catalogue caption on a strict rule; a third variation stacks the plate above the type for story formats. Whitespace and alignment do the work.",
     bestFor: "Flagship service launches, sample-report reveals, brand credibility posts.",
-    composition: "Matted plate on top · exhibition label below · plate number",
+    composition: "Full-height plate · ruled type column · catalogue caption",
     usesImage: true,
     defaultTheme: "sand",
     defaultLayout: "split",
+    variations: 3,
+    defaultArtScene: "orbit",
   },
   {
     key: "manifesto",
-    name: "Manifesto",
+    name: "Minimal Typography",
     family: "Editorial",
-    tagline: "Type as the artwork, with a Tamil watermark behind it.",
+    tagline: "Type as the artwork, set as large as the format allows.",
     description:
-      "No picture. The headline is set as large as the page allows, left-ragged on a strict grid, with the Tamil line rendered as a huge translucent watermark behind it. A numbered margin rule, one gold slash and a bottom-anchored footer finish the page.",
+      "No picture at all. The headline is measured and set as large as the page allows on one of three grids — margin rail, centred statement or bottom-weighted billboard — with a translucent Tamil watermark, a single gold slash and generous negative space. Pure typographic impact.",
     bestFor: "Quotes, method statements, 'why exact birth time matters' posts.",
-    composition: "Typographic only · Tamil watermark · margin rule",
+    composition: "Typographic only · Tamil watermark · three type grids",
     usesImage: false,
     defaultTheme: "ink",
     defaultLayout: "type-only",
+    variations: 3,
+    defaultArtScene: "style",
   },
   {
     key: "nocturne",
-    name: "Glass Nocturne",
+    name: "Cinematic Astrology",
     family: "Modern",
-    tagline: "Full-bleed photograph, frosted copy card floating at the base.",
+    tagline: "Full-bleed cosmos, letterbox scrims, headline in the lower third.",
     description:
-      "A night scene. The photograph fills the whole page under a dark colour grade, a frosted glass card floats across the lower third carrying the copy, and the call to action sits inside the card as a filled pill. A single hairline frame holds the edges.",
+      "A film still. A cosmic field of nebula gradients, parallax stars and constellation line work (or the user's photograph under a cinematic grade) fills the page; letterbox scrims carry the headline in the lower third or across a horizon band, with an ephemeris arc accent in the corner. No cards, no glass.",
     bestFor: "Transits, eclipses, retrogrades, reel covers and cinematic announcements.",
-    composition: "Full-bleed art · frosted glass card · hairline frame",
+    composition: "Full-bleed cosmos · letterbox scrim · lower-third headline",
     usesImage: true,
     defaultTheme: "lunar",
     defaultLayout: "full-bleed",
+    variations: 2,
+    defaultArtScene: "cosmic",
   },
   {
     key: "lesson",
-    name: "Guide Slide",
+    name: "Educational Graphic",
     family: "Editorial",
-    tagline: "Chapter numeral, headline, three numbered cards, progress rail.",
+    tagline: "Series header, chart tile, numbered editorial rows.",
     description:
-      "Built to teach. A chapter numeral and series name head the page, the headline sits beside a round art inset, and the subline becomes three numbered cards stacked beneath. A progress rail with the page marker and a link line close the slide.",
-    bestFor: "Explainers, panchangam notes, 'what is Sade Sati' carousels.",
-    composition: "Chapter header · round inset · three cards · progress rail",
+      "Built to teach. A series numeral and kicker rule head the page, the headline sits beside a circular star-chart or orbit tile, and the supporting points become numbered editorial rows separated by hairlines — an information hierarchy that reads like a printed explainer, not a UI list.",
+    bestFor: "Explainers, panchangam notes, 'what is Sade Sati' carousels, navagraha series.",
+    composition: "Series header · chart tile · numbered rows · progress rail",
     usesImage: true,
     defaultTheme: "sand",
     defaultLayout: "split",
+    variations: 2,
+    defaultArtScene: "chart",
   },
   {
     key: "offer",
-    name: "Offer Card",
+    name: "Service Advertisement",
     family: "Campaign",
-    tagline: "Diagonal campaign band, product card, stamp and filled button.",
+    tagline: "Hero band, benefit checklist, one CTA and a foil seal.",
     description:
-      "A commercial layout. A diagonal campaign band sweeps across the top carrying the kicker, the artwork sits in a rounded product card with a soft shadow and a circular 'booking open' stamp, and the headline, three benefit chips and a filled booking button fill the lower half.",
+      "A commercial layout with advertising discipline: a hero band of deco foil rays or the service photograph carries the campaign kicker chip, then a measured headline, a benefit checklist with foil ticks, a single filled call-to-action and a foiled brand seal — every row flowing from the last, nothing colliding.",
     bestFor: "Paid boosts, offer posts, consultation drives, price announcements.",
-    composition: "Diagonal band · product card · benefit chips · filled CTA",
+    composition: "Hero band · kicker chip · benefit ticks · CTA and foil seal",
     usesImage: true,
     defaultTheme: "kumkum",
     defaultLayout: "split",
+    variations: 2,
+    defaultArtScene: "deco",
   },
   {
     key: "blessing",
-    name: "Festival Blessing",
+    name: "Festival Greeting",
     family: "Heritage",
-    tagline: "Radiant medallion, lamp row, the wish before the brand.",
+    tagline: "Devotional medallion in an aura field, greeting first.",
     description:
-      "A ceremonial greeting. Rays fan out behind a petal medallion holding the artwork, a row of five lamps sits beneath it, the Tamil wish leads at full size with the English blessing under it, and the brand is reduced to a footer line.",
+      "A ceremonial greeting. Concentric halo rings and drifting motes form a devotional aura behind a foiled medallion holding the deity, the Tamil or Hindi wish leads at full festive size with the English blessing beneath, and a kolam band with lamp glows closes the page in celebratory colour.",
     bestFor: "Diwali, Pongal, Navaratri, Karthigai Deepam, Varalakshmi greetings.",
-    composition: "Radiant medallion · lamp row · greeting-first hierarchy",
+    composition: "Aura field · foiled medallion · greeting-first hierarchy",
     usesImage: true,
     defaultTheme: "granite",
     defaultLayout: "medallion",
+    variations: 2,
+    defaultArtScene: "aura",
   },
   {
     key: "sequence",
-    name: "Series Cover",
+    name: "Carousel Cover",
     family: "Campaign",
-    tagline: "Art under a sweeping arc, oversized index, swipe prompt.",
+    tagline: "Art cut by a foil seam, index numeral, swipe prompt.",
     description:
-      "The first slide of a swipe sequence. The artwork fills the upper page and is cut by a sweeping arc into the copy field, an oversized index numeral bleeds off the left edge, the headline crosses the seam, and page dots plus a swipe arrow tell the viewer what to do.",
+      "The first slide of a swipe sequence. The artwork fills the upper page and is cut by a clean foil-edged diagonal (or ruled seam) into the copy field, an oversized index numeral sits fully inside the margin beside the headline, and page dots plus a swipe arrow tell the viewer what to do next.",
     bestFor: "First slide of any carousel, story sequences, series covers.",
-    composition: "Arc-cut art · oversized index · swipe affordance",
+    composition: "Seam-cut art · contained index numeral · swipe affordance",
     usesImage: true,
     defaultTheme: "midnight",
     defaultLayout: "full-bleed",
+    variations: 2,
+    defaultArtScene: "cosmic",
   },
 ];
 

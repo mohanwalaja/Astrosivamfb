@@ -50,29 +50,40 @@ one palette family and one component grammar across every screen:
   Each carries its own ornament vocabulary, palette and hashtag set. Export one PNG, a ZIP of all of
   them, or the contact sheet for sign-off.
 - **Poster studio** — build a card from scratch: your own kicker, headline, Tamil and Hindi lines,
-  a deity portrait or an uploaded photo, eight **compositions** (Temple Mandapam, Gallery Plate,
-  Manifesto, Glass Nocturne, Guide Slide, Offer Card, Festival Blessing, Series Cover), five formats
-  including A4 print, four headline faces (Cinzel, Cormorant Garamond, Playfair Display, Inter Tight),
-  three Tamil/Hindi pairings (Noto Serif, Hind, Baloo + Yatra) and twelve palettes — one per art
-  direction. All fonts are bundled locally. The canvas re-renders live and exports a print-resolution
-  PNG. Switching composition changes the layout only — copy, art, palette and fonts are kept.
+  a deity portrait or an uploaded photo, eight **compositions** (Luxury Editorial, South Indian
+  Heritage, Minimal Typography, Cinematic Astrology, Educational Graphic, Service Advertisement,
+  Festival Greeting, Carousel Cover), five formats including A4 print, four headline faces (Cinzel,
+  Cormorant Garamond, Playfair Display, Inter Tight), three Tamil/Hindi pairings (Noto Serif, Hind,
+  Baloo + Yatra) and twelve palettes — one per art direction. All fonts are bundled locally. The
+  canvas re-renders live and exports a print-resolution PNG. Switching composition changes the
+  layout only — copy, art, palette and fonts are kept.
+
+  The 2026 premium redesign made every poster **graphic and animated**: artwork is drawn in-app by
+  `src/lib/graphicKit.ts` (cosmic fields, ephemeris orbits, zari silk, deco foil rays, computed
+  kolam lattice, temple skylines, devotional auras, engraved star charts) and every composition
+  ships 2–3 genuinely different grids (`variation`), plus ten one-tap **campaign directions** in
+  `src/data/categoryDirection.ts`. Painters are layer-routed (ground → art → copy → brand), so
+  `src/lib/motion.ts` can composite the same planes as a campaign film: camera push, parallax,
+  masked type reveals, foil shimmer and motes — live in the studio's **Motion preview** toggle and
+  in the 15 s reel export. `docs/premium-redesign-audit.md` records the audit and the contract.
 
   The eight templates are separate painters, not eight recolours of one skeleton:
 
   | Template | Composition | Best for |
   | --- | --- | --- |
-  | Luxury editorial | Left type column, full-height art plate, catalogue caption | Flagship launches, pinned offers |
-  | South Indian heritage | Mango-leaf toran, carved arch, kolam footing, Tamil-first copy | Muhurtham, Griha Pravesam, temple festivals |
-  | Minimal typography | No image, no frame — headline set as large as the format allows | Quotes, method statements, manifestos |
-  | Cinematic astrology | Full-bleed art, letterbox, deep scrim, studio ident | Transits, eclipses, reel covers |
-  | Educational graphic | Header bar, art inset, numbered bullets, page dots | Explainers, panchangam notes |
-  | Service advertisement | Campaign band, product card, filled CTA, brand seal | Paid boosts, consultation drives |
-  | Festival greeting | Petal medallion, deepam lamps, greeting-first hierarchy | Diwali, Pongal, Navaratri |
-  | Carousel cover | Index numeral, lower art band, swipe prompt, page dots | First slide of any carousel |
+  | Luxury editorial | Full-height art plate with foil keyline against a ruled type column | Flagship launches, pinned offers |
+  | South Indian heritage | Silk field, foiled arch window, Tamil-first copy, kolam footing | Muhurtham, Griha Pravesam, temple festivals |
+  | Minimal typography | No image — headline set as large as the format allows on three type grids | Quotes, method statements, manifestos |
+  | Cinematic astrology | Cosmic field or graded photo, letterbox scrims, lower-third headline | Transits, eclipses, reel covers |
+  | Educational graphic | Series numeral, chart tile, numbered editorial rows, progress rail | Explainers, panchangam notes |
+  | Service advertisement | Hero band, kicker chip, foil-tick benefits, one CTA, foil seal | Paid boosts, consultation drives |
+  | Festival greeting | Aura field, foiled medallion, greeting-first hierarchy, kolam band | Diwali, Pongal, Navaratri |
+  | Carousel cover | Foil-seamed cut, contained index numeral, swipe prompt, page dots | First slide of any carousel |
 
   The old five layouts still work and now select a composition, so saved presets and the other
   screens keep rendering. `npm run samples` renders one representative poster per template to
-  `.samples/` at export resolution.
+  `.samples/` at export resolution; `npm run gallery` renders the full regression gallery
+  (variations, campaign directions, stress cases, motion strips) to `.samples/premium/`.
 - **Festival wishes** — 45 occasions: the Hindu and Tamil calendar (Tamil, pan-Indian, North Indian
   and Kerala sets) plus global days — New Year, Valentine's Day, Women's Day, Mother's Day, Father's
   Day, Friendship Day, Teachers' Day, Children's Day and Christmas. Four style families, each a

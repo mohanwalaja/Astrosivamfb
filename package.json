@@ -12,7 +12,8 @@
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "samples": "tsx tools/samples.mjs",
-    "audit:export": "tsx tools/export-audit.mjs"
+    "audit:export": "tsx tools/export-audit.mjs",
+    "gallery": "tsx tools/premium-gallery.mjs"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

@@ -28,12 +28,17 @@ import {
   DISPLAY_FONTS,
   SCRIPT_FONTS,
   renderPoster,
+  renderPosterLayers,
   type PosterOptions,
 } from "../lib/poster";
+import { paintMotionFrame } from "../lib/motion";
+import { themeFor } from "../lib/posterKit";
+import { GRAPHIC_SCENES, type GraphicSceneKey } from "../lib/graphicKit";
+import { CATEGORY_DIRECTIONS, type CategoryKey } from "../data/categoryDirection";
 import { downloadCanvas, exportFileName, saveBlob, slugify } from "../lib/export";
 import { brandPostCaptions } from "../lib/publishCaptions";
 import { fileToImageSource } from "../lib/imageUpload";
-import { Button, Callout, CopyButton, Field, Input, PageHeader, Panel, PreviewFrame, SectionLabel, Textarea, Toggle, useToast } from "./ui";
+import { Button, Callout, CopyButton, Field, Input, PageHeader, Panel, PreviewFrame, SectionLabel, Select, Textarea, Toggle, useToast } from "./ui";
 import { ExportLibrary } from "./ExportLibrary";
 import { PublishCanvasButton } from "./PublishCanvasButton";
 import { recordReel, reelFileName, reelSupport, type ReelStage } from "../lib/reel";
@@ -164,6 +169,8 @@ export const PosterStudio: React.FC = () => {
   const [deityKey, setDeityKey] = useState<DeityKey | null>(initial.deityKey);
   const [libraryKey, setLibraryKey] = useState(0);
   const [reel, setReel] = useState<{ progress: number; stage: ReelStage } | null>(null);
+  /** Animated preview of the depth-plane composite — the reel, live. */
+  const [motion, setMotion] = useState(false);
   const reelAbort = useRef<AbortController | null>(null);
   const announced = useRef(false);
   const support = useRef(reelSupport()).current;
@@ -199,6 +206,28 @@ export const PosterStudio: React.FC = () => {
    */
   const selectTemplate = (key: PosterTemplate) => {
     setState((current) => (current.template === key ? current : { ...current, template: key }));
+  };
+
+  /**
+   * A campaign register applies its whole art direction in one tap —
+   * composition, palette, graphic scene, type pairing and variation. Copy and
+   * imagery stay untouched, and every control remains overridable afterwards.
+   */
+  const applyCategory = (key: CategoryKey) => {
+    const direction = CATEGORY_DIRECTIONS.find((item) => item.key === key);
+    if (!direction) return;
+    setState((current) => ({
+      ...current,
+      category: key,
+      template: direction.template,
+      layout: layoutForTemplate(direction.template),
+      themeKey: direction.themeKey,
+      artScene: direction.artScene,
+      display: direction.display,
+      script: direction.script,
+      variation: direction.variation,
+    }));
+    toast(`${direction.label} direction applied — ${direction.note}.`);
   };
 
   const chooseFormat = (id: string) => {
@@ -500,6 +529,60 @@ export const PosterStudio: React.FC = () => {
               })}
             </div>
             <p className="mt-2 text-[10px] leading-relaxed text-[#A2937D]">{activeTemplate.composition}</p>
+
+            <div className="mt-3">
+              <SectionLabel>Variation</SectionLabel>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Composition variation">
+                {Array.from({ length: Math.max(1, activeTemplate.variations) }, (_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => set("variation", index)}
+                    aria-pressed={(state.variation ?? 0) === index}
+                    className={`chip ${(state.variation ?? 0) === index ? "chip-gold" : ""}`}
+                    title={`Composition variation ${index + 1} — a different grid, not a recolour`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Select
+                label="Campaign direction"
+                value={state.category ?? ""}
+                onChange={(event) => {
+                  const key = event.target.value as CategoryKey | "";
+                  if (key) applyCategory(key);
+                  else set("category", null);
+                }}
+              >
+                <option value="">Manual</option>
+                {CATEGORY_DIRECTIONS.map((direction) => (
+                  <option key={direction.key} value={direction.key}>
+                    {direction.label}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                label="Graphic artwork"
+                value={state.artScene ?? activeTemplate.defaultArtScene}
+                onChange={(event) => set("artScene", event.target.value as GraphicSceneKey | "style")}
+              >
+                {GRAPHIC_SCENES.map((scene) => (
+                  <option key={scene.key} value={scene.key}>
+                    {scene.label}
+                  </option>
+                ))}
+                <option value="style">Style motif</option>
+              </Select>
+            </div>
+            <p className="mt-1.5 text-[9.5px] leading-relaxed text-[#A2937D]">
+              Graphic scenes are drawn in-app: layered cosmic fields, silk, deco rays, kolam lattice,
+              orbits, temple skylines and devotional auras — animated in reels and the motion preview.
+            </p>
+
             {!activeTemplate.usesImage && state.image ? (
               <Callout tone="quiet">
                 This template sets no image. Your photo is kept — switch back and it returns.
@@ -667,8 +750,11 @@ export const PosterStudio: React.FC = () => {
                 <span className="h-1.5 w-1.5 rotate-45 bg-gold" aria-hidden="true" />
                 Live preview
               </span>
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-[#A2937D]">
-                {state.width} × {state.height}
+              <span className="inline-flex items-center gap-3">
+                <Toggle checked={motion} onChange={setMotion} label="Motion preview" />
+                <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-[#A2937D]">
+                  {state.width} × {state.height}
+                </span>
               </span>
             </div>
             <div className="checker flex justify-center p-4 sm:p-7">
@@ -677,7 +763,7 @@ export const PosterStudio: React.FC = () => {
                 label="Poster"
                 meta={`${state.width} × ${state.height} px`}
               >
-                <LivePoster options={state} />
+                <LivePoster options={state} motion={motion} />
               </PreviewFrame>
             </div>
           </Panel>
@@ -805,11 +891,13 @@ export const PosterStudio: React.FC = () => {
 
 /* ------------------------------ live preview ------------------------------ */
 
-const LivePoster: React.FC<{ options: Omit<PosterOptions, "scale"> }> = ({ options }) => {
+const LivePoster: React.FC<{ options: Omit<PosterOptions, "scale">; motion?: boolean }> = ({ options, motion = false }) => {
   const holder = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
 
+  /* Still preview: one render of the finished poster. */
   useEffect(() => {
+    if (motion) return;
     let cancelled = false;
     const timer = window.setTimeout(() => {
       const scale = Math.min(1, 880 / options.width);
@@ -831,6 +919,7 @@ const LivePoster: React.FC<{ options: Omit<PosterOptions, "scale"> }> = ({ optio
       window.clearTimeout(timer);
     };
   }, [
+    motion,
     options.width,
     options.height,
     options.themeKey,
@@ -848,6 +937,75 @@ const LivePoster: React.FC<{ options: Omit<PosterOptions, "scale"> }> = ({ optio
     options.cta,
     options.footer,
     options.showLogo,
+    options.variation,
+    options.artScene,
+    options.category,
+  ]);
+
+  /*
+   * Motion preview: the same four depth planes the reel recorder uses,
+   * composited live on a rAF loop — what you see here is what the video
+   * export contains, frame for frame.
+   */
+  useEffect(() => {
+    if (!motion) return;
+    let cancelled = false;
+    let raf = 0;
+    const scale = Math.min(1, 640 / options.width);
+    const width = Math.round(options.width * scale);
+    const height = Math.round(options.height * scale);
+    renderPosterLayers({ ...options, width, height })
+      .then(({ layers, manifest }) => {
+        if (cancelled || !holder.current) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+        canvas.style.display = "block";
+        holder.current.replaceChildren(canvas);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const template = options.template ?? templateForLayout(options.layout);
+        const started = performance.now();
+        const loop = (now: number) => {
+          if (cancelled) return;
+          paintMotionFrame({ ctx, layers, manifest, template, theme: themeFor(options.themeKey), t: (now - started) / 1000 });
+          raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+        setReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setReady(false);
+      });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, [
+    motion,
+    options.width,
+    options.height,
+    options.themeKey,
+    options.style,
+    options.layout,
+    options.template,
+    options.display,
+    options.script,
+    options.image,
+    options.imageFit,
+    options.kicker,
+    options.headline,
+    options.tamil,
+    options.hindi,
+    options.subline,
+    options.cta,
+    options.footer,
+    options.showLogo,
+    options.variation,
+    options.artScene,
+    options.category,
   ]);
 
   return (

@@ -73,6 +73,10 @@ export interface TemplateMeta {
   usesImage: boolean;
   defaultTheme: ThemeKey;
   defaultLayout: PosterLayout;
+  /** How many genuinely different grids this composition ships. */
+  variations: number;
+  /** The graphic scene used when no photograph is chosen. */
+  defaultArtScene: string;
 }
 
 /**

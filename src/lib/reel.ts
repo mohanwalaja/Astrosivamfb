@@ -1,14 +1,18 @@
-import { renderPoster, type PosterOptions } from "./poster";
+import { renderPoster, renderPosterLayers, type PosterOptions } from "./poster";
 import { slugify } from "./export";
+import { paintMotionFrame, type PosterLayers, type PosterManifest } from "./motion";
+import { themeFor } from "./posterKit";
+import { templateForLayout } from "../data/posterTemplates";
 
 /**
  * 15-second Reels / Story clip, built from the poster the user already made.
  *
- * There is no second drawing engine here. The poster is rendered twice through
- * `renderPoster` — once with `reveal: 0` (background, art, logo, nothing else)
- * and once complete — and every video frame is those two images composited
- * with a camera move, a glow pulse and a text reveal. That keeps the reel
- * pixel-identical to the PNG, including the style art and the Indic shaping.
+ * The redesign replaced the old two-still crossfade with a real motion
+ * pipeline: the poster is painted once into four depth planes (ground, art,
+ * copy, brand) and every video frame composites those planes with a camera
+ * push, parallax between them, a masked type reveal and live light overlays.
+ * Because the planes come from the same painter as the PNG export, a reel
+ * frame and the still are the same artwork at different times.
  *
  * 450 frames at 30 fps is far too much to pre-render and store, so frames are
  * painted live into a canvas capture stream and handed to MediaRecorder.
@@ -67,15 +71,9 @@ export function reelSupport(): { ok: boolean; reason?: string } {
   return { ok: true };
 }
 
-const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
-/** 0 before `from`, 1 after `to`, eased between. */
-const windowed = (t: number, from: number, to: number) => easeOutCubic(clamp01((t - from) / (to - from)));
-
 /**
  * One animation frame — but never wait forever. A hidden tab stops firing
- * rAF entirely, and a recorder that waits on it would hang instead of failing.
+ * rAF entirely, and a recorder that waited on it would hang instead of failing.
  */
 const nextFrame = () =>
   new Promise<void>((resolve) => {
@@ -89,77 +87,18 @@ const nextFrame = () =>
     setTimeout(finish, 250);
   });
 
-/**
- * One frame of the reel, as a pure function of `t` (0–1). Kept out of the
- * recorder so it can be rendered and inspected without a MediaRecorder.
- */
-export function paintReelFrame({
-  ctx,
-  plate,
-  full,
-  t,
-  bg,
-}: {
+export interface ReelFrameInput {
   ctx: CanvasRenderingContext2D;
-  plate: CanvasImageSource;
-  full: CanvasImageSource;
+  layers: PosterLayers;
+  manifest: PosterManifest;
+  template: ReturnType<typeof templateForLayout>;
+  themeKey: PosterOptions["themeKey"];
   t: number;
-  bg: string;
-}): void {
-  const { width: W, height: H } = REEL_SIZE;
-  const zoom = 1 + 0.07 * easeInOut(t);
-  const drift = (t - 0.5) * H * 0.012;
-  const reveal = windowed(t, 0.16, 0.62);
+}
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = "source-over";
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // ---- camera: slow push-in with a touch of drift ----
-  ctx.save();
-  ctx.translate(W / 2, H / 2);
-  ctx.scale(zoom, zoom);
-  ctx.translate(-W / 2, -H / 2 + drift);
-  ctx.drawImage(plate, 0, 0, W, H);
-  // Drawing the finished poster over its own plate at alpha = reveal is exactly
-  // "the type fades in": where the two match, alpha compositing is a no-op.
-  if (reveal > 0) {
-    ctx.globalAlpha = reveal;
-    ctx.drawImage(full, 0, 0, W, H);
-    ctx.globalAlpha = 1;
-  }
-  ctx.restore();
-
-  // ---- glow pulse over the art ----
-  const pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 3.2);
-  const glow = ctx.createRadialGradient(W / 2, H * 0.3, 0, W / 2, H * 0.3, W * 0.72);
-  glow.addColorStop(0, `rgba(255, 198, 96, ${0.05 + pulse * 0.07})`);
-  glow.addColorStop(0.55, `rgba(255, 176, 64, ${0.02 + pulse * 0.03})`);
-  glow.addColorStop(1, "rgba(255, 160, 48, 0)");
-  ctx.globalCompositeOperation = "lighter";
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
-  ctx.globalCompositeOperation = "source-over";
-
-  // ---- vignette, so the push-in has an edge to fall against ----
-  const vignette = ctx.createRadialGradient(W / 2, H * 0.46, W * 0.28, W / 2, H * 0.46, W * 0.92);
-  vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
-  vignette.addColorStop(1, "rgba(0, 0, 0, 0.28)");
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, W, H);
-
-  // ---- open on a short fade from the poster's own ground colour ----
-  // No fade-out: the clip has to end on the finished card, ready to be looped
-  // or paused on. Ending on a black frame loses the last thing the viewer sees.
-  const fadeIn = 1 - clamp01(t / 0.05);
-  if (fadeIn > 0) {
-    ctx.globalAlpha = fadeIn;
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = 1;
-  }
+/** One frame of the reel as a pure function of time — inspectable without a recorder. */
+export function paintReelFrame({ ctx, layers, manifest, template, themeKey, t }: ReelFrameInput) {
+  paintMotionFrame({ ctx, layers, manifest, template, theme: themeFor(themeKey), t });
 }
 
 export async function recordReel(options: ReelOptions): Promise<ReelResult> {
@@ -174,20 +113,12 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
 
   options.onProgress?.(0, "rendering");
 
-  // Two renders of the same poster: the plate without type, and the finished card.
-  const plate = await renderPoster({ ...options.poster, width: W, height: H, reveal: 0 });
-  const full = await renderPoster({ ...options.poster, width: W, height: H, reveal: 1 });
-  options.onProgress?.(0.04, "rendering");
-
-  // The frame's own background colour, sampled from the plate — used for the fades.
-  let bg = "#0b0f1a";
-  try {
-    const probe = plate.getContext("2d");
-    const pixel = probe?.getImageData(2, 2, 1, 1).data;
-    if (pixel) bg = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
-  } catch {
-    /* tainted or unavailable — the default is close enough */
-  }
+  // One layered render of the poster: four depth planes plus the manifest.
+  const poster: PosterOptions = { ...options.poster, width: W, height: H };
+  const { layers, manifest } = await renderPosterLayers(poster);
+  const finished = await renderPoster({ ...poster, reveal: 1 });
+  const template = poster.template ?? templateForLayout(poster.layout);
+  options.onProgress?.(0.08, "rendering");
 
   const out = document.createElement("canvas");
   out.width = W;
@@ -196,7 +127,7 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
   if (!ctx) throw new Error("Could not open a 2D context for the video canvas.");
   ctx.imageSmoothingQuality = "high";
 
-  const drawFrame = (t: number) => paintReelFrame({ ctx, plate, full, t, bg });
+  const drawFrame = (t: number) => paintReelFrame({ ctx, layers, manifest, template, themeKey: poster.themeKey, t });
 
   // A still first frame makes the recorder start on real pixels, not a blank canvas.
   drawFrame(0);
@@ -225,7 +156,7 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
 
   const startedAt = performance.now();
   recorder.start(250);
-  options.onProgress?.(0.05, "recording");
+  options.onProgress?.(0.1, "recording");
 
   let frames = 0;
   const hiddenMessage = "Recording paused — keep this tab visible until it finishes.";
@@ -244,10 +175,10 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
         if (waits > fps * 30) throw new Error(hiddenMessage);
       }
       const t = frame / Math.max(1, totalFrames - 1);
-      drawFrame(t);
+      drawFrame(t * seconds);
       if (manual) track.requestFrame();
       frames += 1;
-      if (frame % 5 === 0) options.onProgress?.(0.05 + 0.9 * t, "recording");
+      if (frame % 5 === 0) options.onProgress?.(0.1 + 0.85 * t, "recording");
     }
     // the loop already ends on the final frame — do not paint a duplicate
     options.onProgress?.(0.97, "encoding");
@@ -270,7 +201,7 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
   const blob = new Blob(chunks, { type: mimeType });
   if (!blob.size) throw new Error("Recording produced an empty file — try again.");
   options.onProgress?.(1, "encoding");
-  return { blob, mimeType, frames, durationMs, thumbnailCanvas: full };
+  return { blob, mimeType, frames, durationMs, thumbnailCanvas: finished };
 }
 
 export const reelFileName = (headline: string, stamp = new Date()) => {
