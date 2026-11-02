@@ -1,4 +1,5 @@
 import type { PosterLayout, PosterTemplate, TemplateMeta } from "../types";
+import { COMPOSITIONS } from "./designBriefs";
 
 /**
  * The eight poster compositions, rebuilt for the twelve-style system.
@@ -8,7 +9,7 @@ import type { PosterLayout, PosterTemplate, TemplateMeta } from "../types";
  * The style chips supply the ground, frame and motif; the template owns where
  * everything sits.
  */
-export const TEMPLATES: TemplateMeta[] = [
+export const LEGACY_TEMPLATES: TemplateMeta[] = [
   {
     key: "mandapam",
     name: "Temple Mandapam",
@@ -114,6 +115,14 @@ export const TEMPLATES: TemplateMeta[] = [
     defaultLayout: "full-bleed",
   },
 ];
+
+const NEW_TEMPLATES: TemplateMeta[] = COMPOSITIONS.map((item) => ({
+  key: item.key, name: item.name, family: item.family === "immersive" ? "Immersive" : item.family === "editorial" ? "Editorial" : item.family === "geometric" ? "Geometric" : item.family === "narrative" ? "Narrative" : "Information",
+  tagline: item.description, description: item.description, bestFor: "Category-aware social posters in portrait, square, landscape and story formats.",
+  composition: item.structure, usesImage: item.imageRole !== "none", defaultTheme: "midnight", defaultLayout: "split",
+}));
+/** New composition systems first; the eight legacy painters remain available. */
+export const TEMPLATES: TemplateMeta[] = [...NEW_TEMPLATES, ...LEGACY_TEMPLATES];
 
 export const TEMPLATE_MAP: Record<string, TemplateMeta> = Object.fromEntries(
   TEMPLATES.map((template) => [template.key, template]),

@@ -49,30 +49,45 @@ one palette family and one component grammar across every screen:
 
   Each carries its own ornament vocabulary, palette and hashtag set. Export one PNG, a ZIP of all of
   them, or the contact sheet for sign-off.
-- **Poster studio** — build a card from scratch: your own kicker, headline, Tamil and Hindi lines,
-  a deity portrait or an uploaded photo, eight **compositions** (Temple Mandapam, Gallery Plate,
-  Manifesto, Glass Nocturne, Guide Slide, Offer Card, Festival Blessing, Series Cover), five formats
-  including A4 print, four headline faces (Cinzel, Cormorant Garamond, Playfair Display, Inter Tight),
-  three Tamil/Hindi pairings (Noto Serif, Hind, Baloo + Yatra) and twelve palettes — one per art
-  direction. All fonts are bundled locally. The canvas re-renders live and exports a print-resolution
-  PNG. Switching composition changes the layout only — copy, art, palette and fonts are kept.
+- **Poster studio** — a category-aware social design studio. Pick one of seven service identities
+  (Birth Jathagam, Wedding Matching, Baby Naming Letters, Subha Muhurtham, Navagraha, Festival
+  Greetings, Murugan Devotional), each with three occasion briefs, then edit the kicker, service
+  title, headline, supporting line, three facts, CTA and footer. **Posters are English-only** — the
+  renderer strips Tamil/Hindi at every canvas boundary and the language selectors were removed.
+  Choose from **twelve structurally distinct composition systems**, six formats (Instagram portrait
+  and square, Facebook portrait, landscape, story/reel and A4 print), four headline faces and six
+  curated palettes. All fonts are bundled locally. The canvas re-renders live, previews a 15-second
+  layered motion graphic, and exports a print-resolution PNG or an MP4/WebM clip. Switching
+  composition changes the layout only — copy, art, palette and fonts are kept.
 
-  The eight templates are separate painters, not eight recolours of one skeleton:
+  The twelve systems are separate painters with their own geometry, not twelve recolours of one
+  skeleton. A pure planner (`compositionPlan.ts`) lays out safe areas, art shapes and text boxes per
+  format; a measured fitter (`compositionRender.ts`) sizes every line and throws rather than clip;
+  and a scored selector (`designSelector.ts`) never repeats a composition consecutively and never
+  uses one family three times in a row:
 
-  | Template | Composition | Best for |
+  | System | Structure | Family |
   | --- | --- | --- |
-  | Luxury editorial | Left type column, full-height art plate, catalogue caption | Flagship launches, pinned offers |
-  | South Indian heritage | Mango-leaf toran, carved arch, kolam footing, Tamil-first copy | Muhurtham, Griha Pravesam, temple festivals |
-  | Minimal typography | No image, no frame — headline set as large as the format allows | Quotes, method statements, manifestos |
-  | Cinematic astrology | Full-bleed art, letterbox, deep scrim, studio ident | Transits, eclipses, reel covers |
-  | Educational graphic | Header bar, art inset, numbered bullets, page dots | Explainers, panchangam notes |
-  | Service advertisement | Campaign band, product card, filled CTA, brand seal | Paid boosts, consultation drives |
-  | Festival greeting | Petal medallion, deepam lamps, greeting-first hierarchy | Diwali, Pongal, Navaratri |
-  | Carousel cover | Index numeral, lower art band, swipe prompt, page dots | First slide of any carousel |
+  | Hero illustration | Full-bleed art, bottom scrim, lower-left type | Immersive |
+  | Type-led editorial | Rules, folio and a left type column, small art inset | Editorial |
+  | Asymmetric luxury | Off-centre colour block, art plate, right type column | Editorial |
+  | Mandala centrepiece | Concentric rings and 24 dots around a centred art medallion | Geometric |
+  | Diagonal geometry | Hard diagonal wedge splitting art and type | Geometric |
+  | Cosmic astrology | Dark atlas, orbits and particles, forced dark palette | Immersive |
+  | Split screen | Two fields — art above/beside, type below/beside | Narrative |
+  | Illustrated story | Arched art panel with a captioned story block | Narrative |
+  | Minimal luxury | Generous whitespace, small art stamp, centred type | Editorial |
+  | Infographic | Numbered fact rows with an art inset | Information |
+  | Layered collage | Rotated paper plates, shadow and a type band | Narrative |
+  | Cinematic devotional | Letterboxed art band, refined devotional type | Immersive |
 
-  The old five layouts still work and now select a composition, so saved presets and the other
-  screens keep rendering. `npm run samples` renders one representative poster per template to
-  `.samples/` at export resolution.
+  The eight legacy templates (Temple Mandapam, Gallery Plate, Manifesto, Glass Nocturne, Guide Slide,
+  Offer Card, Festival Blessing, Series Cover) and the old five layouts still render, so saved
+  presets and the other screens keep working. `npm run samples` renders the legacy set;
+  `npx tsx tools/design-samples.mjs` renders 36 audited posters (24 category/occasion/format proofs
+  plus one per composition system) with a legibility/overflow report and two contact sheets.
+  `node tools/browser-audit.mjs` drives the real app in Chromium on desktop and Android viewports and
+  downloads a real PNG and motion file from each.
 - **Festival wishes** — 45 occasions: the Hindu and Tamil calendar (Tamil, pan-Indian, North Indian
   and Kerala sets) plus global days — New Year, Valentine's Day, Women's Day, Mother's Day, Father's
   Day, Friendship Day, Teachers' Day, Children's Day and Christmas. Four style families, each a

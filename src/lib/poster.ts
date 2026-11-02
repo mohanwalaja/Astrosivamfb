@@ -12,6 +12,9 @@ import { LAYOUT_TEMPLATE, TEMPLATE_MAP, TEMPLATES, layoutForTemplate, templateFo
 import { createCanvas, ensureFonts, loadImageSource, loadLogo } from "./canvas";
 import { displayFaceFor } from "./posterKit";
 import { paintPosterTemplate } from "./posterTemplates";
+import { isComposition, BRIEF_MAP, getOccasion, type DesignCategory } from "../data/designBriefs";
+import { renderComposition } from "./compositionRender";
+import { englishCopy } from "./englishCopy";
 
 export interface PosterOptions {
   width: number;
@@ -43,6 +46,14 @@ export interface PosterOptions {
    * existing export is unchanged.
    */
   reveal?: number;
+  /** New composition engine brief. Legacy callers keep working without these. */
+  category?: DesignCategory;
+  occasion?: string;
+  serviceTitle?: string;
+  facts?: string[];
+  seed?: number;
+  imageIsLibrary?: boolean;
+  useGlobalBrandPlacement?: boolean;
 }
 
 /* --------------------------------- fonts ---------------------------------- */
@@ -93,6 +104,19 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
 
   const resolvedTemplate: PosterTemplate = template ?? templateForLayout(layout);
 
+  if (isComposition(resolvedTemplate)) {
+    const category = options.category ?? "birth";
+    const brief = BRIEF_MAP[category];
+    const occasion = getOccasion(category, options.occasion);
+    return renderComposition({
+      width, height, composition: resolvedTemplate, category, occasion: occasion.key,
+      themeKey, style, display, image: image === undefined ? (occasion.image ?? brief.image) : image,
+      imageIsLibrary: options.imageIsLibrary, showLogo, seed: options.seed, scale,
+      useGlobalBrandPlacement: options.useGlobalBrandPlacement,
+      copy: englishCopy({ kicker, headline, subline, cta, footer, serviceTitle: options.serviceTitle ?? kicker, facts: options.facts ?? occasion.copy.facts, tamil: "", hindi: "" }),
+    });
+  }
+
   await ensureFonts();
   const theme = THEMES[themeKey] ? themeKey : "midnight";
   const { canvas, ctx } = createCanvas(width, height, scale);
@@ -111,7 +135,7 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
     template: resolvedTemplate,
     imageFit,
     style,
-    copy: {
+    copy: englishCopy({
       kicker: kicker ?? "",
       headline: headline ?? "",
       tamil: tamil ?? "",
@@ -119,7 +143,7 @@ export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasEl
       subline: subline ?? "",
       cta: cta ?? "",
       footer: footer ? (footer.includes("Email:") || footer.includes("@astrosivam.com") ? "astrosivam.com" : footer) : "",
-    },
+    }),
     img,
     logo,
     display: displayFaceFor(display),

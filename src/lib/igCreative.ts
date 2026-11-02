@@ -1,4 +1,5 @@
 import type { MotifKey, StyleKey, ThemeKey } from "../types";
+import { englishCopy, englishText } from "./englishCopy";
 import {
   type ImageBox,
   accent,
@@ -895,6 +896,7 @@ const PAINTERS: Record<IgLayout, (scene: Scene) => void> = {
 };
 
 export async function renderIgCreative(input: IgCreativeInput): Promise<IgRender> {
+  input = { ...input, content: englishCopy(input.content) };
   // Fonts must be resident before the first measurement: `fitLines` and
   // `measureText` are what decide the size, and a face that arrives late makes
   // every wrapped line the wrong length — which shows up as overflow in export.

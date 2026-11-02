@@ -3,8 +3,9 @@
  *
  *   npm run samples
  *
- * This is the contact-sheet harness used to check the artwork by eye: eight
- * 1080 × 1350 posts, plus a story and an A4 sheet to prove the layout scales.
+ * Legacy-template contact sheet: eight 1080 × 1350 posts, plus a story and an
+ * A4 sheet. The twelve new composition systems are audited by
+ * `npx tsx tools/design-samples.mjs`.
  * Output is git-ignored — it is a review tool, not a shipped asset.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -12,7 +13,7 @@ import { installCanvasEnv } from "./canvas-env.mjs";
 
 installCanvasEnv();
 const { renderPoster } = await import("../src/lib/poster.ts");
-const { TEMPLATES } = await import("../src/data/posterTemplates.ts");
+const { LEGACY_TEMPLATES: TEMPLATES } = await import("../src/data/posterTemplates.ts");
 
 const OUT = ".samples/samples";
 mkdirSync(OUT, { recursive: true });
@@ -20,8 +21,8 @@ mkdirSync(OUT, { recursive: true });
 const copy = {
   kicker: "Jathagam",
   headline: "Your life, mapped from the moment you were born.",
-  tamil: "உங்கள் ஜாதகம்",
-  hindi: "आपकी जन्म कुंडली",
+  tamil: "",
+  hindi: "",
   subline: "Lahiri sidereal calculations · reviewed by a priest · 7 days of chat support.",
   cta: "astrosivam.com",
   footer: "Astro Sivam · Vedic astrology, Chennai",

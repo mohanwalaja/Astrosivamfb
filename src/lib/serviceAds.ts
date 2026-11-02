@@ -1,4 +1,5 @@
 import type { StyleKey, Theme, ThemeKey } from "../types";
+import { englishCopy, englishText } from "./englishCopy";
 import { drawGlyphSafe, drawMotif, ensureFonts, loadImageSource, loadLogo, needsFallback } from "./canvas";
 import { TypeLog, type TypedDraw, type TypeRole } from "./legibility";
 import {
@@ -919,6 +920,7 @@ const PAINTERS: Record<AdLayout, (scene: Scene) => void> = {
 };
 
 export async function renderServiceAd(input: ServiceAdInput): Promise<ServiceAdRender> {
+  input = { ...input, lang: "en", copy: englishCopy(input.copy) };
   // Fonts must be resident before the first measurement: `fitLines` and
   // `measureText` are what decide the size, and a face that arrives late makes
   // every wrapped line the wrong length — which shows up as overflow in export.

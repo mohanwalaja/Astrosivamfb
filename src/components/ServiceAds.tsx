@@ -24,7 +24,7 @@ const styleFor = (layout: string) => (layout.startsWith("edu") ? "mono" : layout
 
 export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
   const [role, setRole] = useState<Role>("ad");
-  const [lang, setLang] = useState<Lang>("en");
+  const lang: Lang = "en";
   const toast = useToast();
 
   const ads = adsFor(service.id);
@@ -114,24 +114,11 @@ export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
                 { value: "edu", label: "Reference plates", count: referenceScenes.length },
               ]}
             />
-            <div className="flex flex-wrap items-center gap-2">
-              <Languages className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
-              <Segmented
-                label="Language"
-                value={lang}
-                onChange={setLang}
-                options={LANGUAGES.map((item) => ({
-                  value: item.value,
-                  label: item.label,
-                  lang: item.value === "en" ? undefined : item.value,
-                }))}
-              />
-            </div>
           </div>
 
           <p className="mt-3 text-[11.5px] leading-relaxed text-[#A2937D]">
             {role === "ad"
-              ? "One report, one action, one price read from the service record. The headline stays in English; the line beneath it follows the language you pick."
+              ? "One report, one action, one price read from the service record. All poster text is English only."
               : "Reference plates teach one idea and sell nothing. The copy is quoted from this service's own explainer, the source is printed on the plate, and no price or action ever appears."}
           </p>
         </Panel>
@@ -209,30 +196,8 @@ export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
         </Panel>
 
         <Panel>
-          <SectionLabel>Language coverage</SectionLabel>
-          <p className="text-[11px] leading-relaxed text-[#B4A58F]">
-            {locale ? (
-              <>
-                This service ships one prepared Tamil and one prepared Hindi line, both shown beneath the English headline. Service names, prices and
-                the reference plates stay in English.
-              </>
-            ) : (
-              <>This service has no localised line yet, so the language switch leaves the plate in English rather than inventing a translation.</>
-            )}
-          </p>
-          {locale ? (
-            <div className="mt-2 space-y-1">
-              <div lang="ta" className="font-tamil text-[12.5px] text-cream">
-                {locale.tamil}
-              </div>
-              <div lang="hi" className="font-hindi text-[12.5px] text-cream">
-                {locale.hindi}
-              </div>
-              <div className="text-[10px] uppercase tracking-[0.12em] text-[#A2937D]">
-                {locale.review === "source" ? "From the service record" : "Prepared copy · needs a native read"}
-              </div>
-            </div>
-          ) : null}
+          <SectionLabel>English-only posters</SectionLabel>
+          <p className="text-[11px] leading-relaxed text-[#B4A58F]">Poster text is English only. Prepared Tamil and Hindi lines remain in the service record for captions and reports, but are not drawn on these creatives.</p>
         </Panel>
 
         <Callout tone="quiet" icon={<Info className="h-3.5 w-3.5" aria-hidden="true" />} title="Price and action are never typed">

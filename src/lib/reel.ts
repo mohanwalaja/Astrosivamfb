@@ -1,5 +1,8 @@
 import { renderPoster, type PosterOptions } from "./poster";
-import { slugify } from "./export";
+import { slugify, releaseCanvas } from "./export";
+import { isComposition } from "../data/designBriefs";
+import { renderCompositionLayers, type CompositionLayers } from "./compositionRender";
+import { paintMotionFrame } from "./motion";
 
 /**
  * 15-second Reels / Story clip, built from the poster the user already made.
@@ -22,6 +25,8 @@ export interface ReelOptions {
   fps?: number;
   onProgress?: (fraction: number, stage: ReelStage) => void;
   signal?: AbortSignal;
+  /** Defaults to 1080×1920 for legacy callers; the upgraded studio preserves its selected format. */
+  width?: number; height?: number;
 }
 
 export type ReelStage = "rendering" | "recording" | "encoding";
@@ -40,11 +45,11 @@ export const REEL_SECONDS = 15;
 export const REEL_FPS = 30;
 
 const MIME_CANDIDATES = [
+  "video/mp4;codecs=avc1.42E01E",
+  "video/mp4",
   "video/webm;codecs=vp9",
   "video/webm;codecs=vp8",
   "video/webm",
-  "video/mp4;codecs=avc1.42E01E",
-  "video/mp4",
 ];
 
 export function pickMimeType(): string | null {
@@ -170,114 +175,148 @@ export async function recordReel(options: ReelOptions): Promise<ReelResult> {
   const fps = options.fps ?? REEL_FPS;
   const durationMs = seconds * 1000;
   const totalFrames = Math.round(seconds * fps);
-  const { width: W, height: H } = REEL_SIZE;
+  const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
+  const W = even(options.width ?? REEL_SIZE.width), H = even(options.height ?? REEL_SIZE.height);
+  const template = options.poster.template;
+  const layered = isComposition(template);
 
   options.onProgress?.(0, "rendering");
 
-  // Two renders of the same poster: the plate without type, and the finished card.
-  const plate = await renderPoster({ ...options.poster, width: W, height: H, reveal: 0 });
-  const full = await renderPoster({ ...options.poster, width: W, height: H, reveal: 1 });
+  let layers: CompositionLayers | null = null;
+  let plate: HTMLCanvasElement | null = null;
+  let full: HTMLCanvasElement | null = null;
+  let bg = "#0b0f1a";
+  if (layered) {
+    layers = await renderCompositionLayers({
+      width: W, height: H, composition: template, category: options.poster.category ?? "birth", occasion: options.poster.occasion,
+      themeKey: options.poster.themeKey, style: options.poster.style, display: options.poster.display,
+      image: options.poster.image, imageIsLibrary: options.poster.imageIsLibrary, showLogo: options.poster.showLogo,
+      seed: options.poster.seed, useGlobalBrandPlacement: options.poster.useGlobalBrandPlacement,
+      copy: { kicker: options.poster.kicker, serviceTitle: options.poster.serviceTitle ?? options.poster.kicker, headline: options.poster.headline, subline: options.poster.subline, cta: options.poster.cta, footer: options.poster.footer, facts: options.poster.facts ?? [] },
+    });
+  } else {
+    // Legacy compositions keep their existing export path.
+    plate = await renderPoster({ ...options.poster, width: W, height: H, reveal: 0 });
+    full = await renderPoster({ ...options.poster, width: W, height: H, reveal: 1 });
+    try {
+      const pixel = plate.getContext("2d")?.getImageData(2, 2, 1, 1).data;
+      if (pixel) bg = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+    } catch { /* default background */ }
+  }
   options.onProgress?.(0.04, "rendering");
 
-  // The frame's own background colour, sampled from the plate — used for the fades.
-  let bg = "#0b0f1a";
-  try {
-    const probe = plate.getContext("2d");
-    const pixel = probe?.getImageData(2, 2, 1, 1).data;
-    if (pixel) bg = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
-  } catch {
-    /* tainted or unavailable — the default is close enough */
-  }
-
-  const out = document.createElement("canvas");
-  out.width = W;
-  out.height = H;
-  const ctx = out.getContext("2d");
-  if (!ctx) throw new Error("Could not open a 2D context for the video canvas.");
-  ctx.imageSmoothingQuality = "high";
-
-  const drawFrame = (t: number) => paintReelFrame({ ctx, plate, full, t, bg });
-
-  // A still first frame makes the recorder start on real pixels, not a blank canvas.
-  drawFrame(0);
-
-  const stream = out.captureStream(0) as MediaStream;
-  const [track] = stream.getVideoTracks() as Array<CanvasCaptureMediaStreamTrack & MediaStreamTrack>;
-  const manual = typeof track?.requestFrame === "function";
-  if (!manual) {
-    stream.getTracks().forEach((t) => t.stop());
-  }
-  const capture = manual ? stream : out.captureStream(fps);
-
-  const mimeType = pickMimeType() ?? "video/webm";
-  const recorder = new MediaRecorder(capture, { mimeType, videoBitsPerSecond: 9_000_000 });
-  const chunks: BlobPart[] = [];
-  recorder.ondataavailable = (event) => {
-    if (event.data && event.data.size > 0) chunks.push(event.data);
+  const releaseAll = () => {
+    if (layers) [layers.background, layers.art, layers.effects, layers.type, layers.brand].forEach(releaseCanvas);
+    releaseCanvas(plate);
+    // `full` becomes the caller's thumbnail on success; only release it on failure.
   };
-
-  const stopped = new Promise<void>((resolve, reject) => {
-    recorder.onstop = () => resolve();
-    recorder.onerror = () => reject(new Error("The recorder stopped with an error."));
-  });
-  // A cancel throws past the await below; keep that rejection handled anyway.
-  void stopped.catch(() => undefined);
-
-  const startedAt = performance.now();
-  recorder.start(250);
-  options.onProgress?.(0.05, "recording");
-
-  let frames = 0;
-  const hiddenMessage = "Recording paused — keep this tab visible until it finishes.";
   try {
-    for (let frame = 0; frame < totalFrames; frame += 1) {
-      if (options.signal?.aborted) throw new Error("Recording cancelled.");
-      // Pace to wall-clock time: a capture stream timestamps frames as they
-      // arrive, so painting 450 frames as fast as the CPU allows would produce
-      // a half-second video instead of a 15-second one.
-      const target = startedAt + (frame / fps) * 1000;
-      let waits = 0;
-      while (performance.now() < target) {
-        await nextFrame();
-        if (document.hidden) throw new Error(hiddenMessage);
-        waits += 1;
-        if (waits > fps * 30) throw new Error(hiddenMessage);
-      }
-      const t = frame / Math.max(1, totalFrames - 1);
-      drawFrame(t);
-      if (manual) track.requestFrame();
-      frames += 1;
-      if (frame % 5 === 0) options.onProgress?.(0.05 + 0.9 * t, "recording");
+    const out = document.createElement("canvas");
+    out.width = W;
+    out.height = H;
+    const ctx = out.getContext("2d");
+    if (!ctx) throw new Error("Could not open a 2D context for the video canvas.");
+    ctx.imageSmoothingQuality = "high";
+
+    const drawFrame = (t: number) => {
+      if (layers) paintMotionFrame(ctx, layers, t);
+      else paintReelFrame({ ctx, plate: plate!, full: full!, t, bg });
+    };
+
+    // A still first frame makes the recorder start on real pixels, not a blank canvas.
+    drawFrame(0);
+
+    const stream = out.captureStream(0) as MediaStream;
+    const [track] = stream.getVideoTracks() as Array<CanvasCaptureMediaStreamTrack & MediaStreamTrack>;
+    const manual = typeof track?.requestFrame === "function";
+    if (!manual) {
+      stream.getTracks().forEach((t) => t.stop());
     }
-    // the loop already ends on the final frame — do not paint a duplicate
-    options.onProgress?.(0.97, "encoding");
-  } finally {
-    if (recorder.state !== "inactive") recorder.stop();
-    capture.getTracks().forEach((t) => t.stop());
-  }
+    const capture = manual ? stream : out.captureStream(fps);
 
-  let stopTimer: number | undefined;
-  try {
-    await Promise.race([
-      stopped,
-      new Promise<void>((_resolve, reject) => {
-        stopTimer = window.setTimeout(() => reject(new Error("Video encoding took too long. Try again in a supported browser.")), 30000);
-      }),
-    ]);
-  } finally {
-    if (stopTimer !== undefined) window.clearTimeout(stopTimer);
+    const mimeType = pickMimeType() ?? "video/webm";
+    const recorder = new MediaRecorder(capture, { mimeType, videoBitsPerSecond: 9_000_000 });
+    const chunks: BlobPart[] = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) chunks.push(event.data);
+    };
+
+    const stopped = new Promise<void>((resolve, reject) => {
+      recorder.onstop = () => resolve();
+      recorder.onerror = () => reject(new Error("The recorder stopped with an error."));
+    });
+    // A cancel throws past the await below; keep that rejection handled anyway.
+    void stopped.catch(() => undefined);
+
+    const startedAt = performance.now();
+    recorder.start(250);
+    options.onProgress?.(0.05, "recording");
+
+    let frames = 0;
+    const hiddenMessage = "Recording paused — keep this tab visible until it finishes.";
+    try {
+      for (let frame = 0; frame < totalFrames; frame += 1) {
+        if (options.signal?.aborted) throw new Error("Recording cancelled.");
+        // Pace to wall-clock time: a capture stream timestamps frames as they
+        // arrive, so painting 450 frames as fast as the CPU allows would produce
+        // a half-second video instead of a 15-second one.
+        const target = startedAt + (frame / fps) * 1000;
+        let waits = 0;
+        while (performance.now() < target) {
+          await nextFrame();
+          if (document.hidden) throw new Error(hiddenMessage);
+          waits += 1;
+          if (waits > fps * 30) throw new Error(hiddenMessage);
+        }
+        const t = frame / Math.max(1, totalFrames - 1);
+        drawFrame(t);
+        if (manual) track.requestFrame();
+        frames += 1;
+        if (frame % 5 === 0) options.onProgress?.(0.05 + 0.9 * t, "recording");
+      }
+      // the loop already ends on the final frame — do not paint a duplicate
+      options.onProgress?.(0.97, "encoding");
+    } finally {
+      if (recorder.state !== "inactive") recorder.stop();
+      capture.getTracks().forEach((t) => t.stop());
+    }
+
+    let stopTimer: number | undefined;
+    try {
+      await Promise.race([
+        stopped,
+        new Promise<void>((_resolve, reject) => {
+          stopTimer = window.setTimeout(() => reject(new Error("Video encoding took too long. Try again in a supported browser.")), 30000);
+        }),
+      ]);
+    } finally {
+      if (stopTimer !== undefined) window.clearTimeout(stopTimer);
+    }
+    const blob = new Blob(chunks, { type: mimeType });
+    if (!blob.size) throw new Error("Recording produced an empty file — try again.");
+    let thumbnailCanvas: HTMLCanvasElement;
+    if (layers) {
+      thumbnailCanvas = document.createElement("canvas"); thumbnailCanvas.width = W; thumbnailCanvas.height = H;
+      paintMotionFrame(thumbnailCanvas.getContext("2d")!, layers, 1);
+      [layers.background, layers.art, layers.effects, layers.type, layers.brand].forEach(releaseCanvas);
+    } else {
+      thumbnailCanvas = full!;
+      releaseCanvas(plate);
+    }
+    options.onProgress?.(1, "encoding");
+    return { blob, mimeType, frames, durationMs, thumbnailCanvas };
+  } catch (error) {
+    releaseAll();
+    releaseCanvas(full);
+    throw error;
   }
-  const blob = new Blob(chunks, { type: mimeType });
-  if (!blob.size) throw new Error("Recording produced an empty file — try again.");
-  options.onProgress?.(1, "encoding");
-  return { blob, mimeType, frames, durationMs, thumbnailCanvas: full };
 }
 
-export const reelFileName = (headline: string, stamp = new Date()) => {
+export const reelFileName = (headline: string, stamp = new Date(), width: number = REEL_SIZE.width, height: number = REEL_SIZE.height) => {
   // `slugify` folds accents and falls back to a stable fingerprint for Tamil or
   // Hindi headlines, which used to slug to "" and lose the reel's only name.
   const slug = slugify(headline).slice(0, 40) || "astrosivam-reel";
   const date = stamp.toISOString().slice(0, 10);
   const ext = pickMimeType()?.includes("mp4") ? "mp4" : "webm";
-  return `${slug}-1080x1920-${date}.${ext}`;
+  return `${slug}-${width}x${height}-${date}.${ext}`;
 };

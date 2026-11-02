@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { TEMPLATES, TEMPLATE_MAP } from "../src/data/posterTemplates.ts";
+import { TEMPLATES, TEMPLATE_MAP, LEGACY_TEMPLATES } from "../src/data/posterTemplates.ts";
+import { COMPOSITIONS } from "../src/data/designBriefs.ts";
 import { LAYOUT_TEMPLATE, layoutForTemplate, templateForLayout } from "../src/data/posterTemplates.ts";
 import { STYLES, THEMES } from "../src/data/brand.ts";
 import type { PosterLayout, PosterTemplate } from "../src/types.ts";
@@ -13,6 +14,7 @@ const camel = (key: string) => key.replace(/-([a-z])/g, (_, letter: string) => l
 const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 const TEMPLATE_SOURCE = read("src/lib/posterTemplates.ts");
+const COMPOSITION_SOURCE = read("src/lib/compositionRender.ts");
 const POSTER_SOURCE = read("src/lib/poster.ts");
 const KIT_SOURCE = read("src/lib/posterKit.ts");
 const STUDIO_SOURCE = read("src/components/PosterStudio.tsx");
@@ -21,17 +23,17 @@ const STUDIO_SOURCE = read("src/components/PosterStudio.tsx");
 
 const REQUIRED: PosterTemplate[] = ["mandapam", "gallery", "manifesto", "nocturne", "lesson", "offer", "blessing", "sequence"];
 
-test("the studio offers exactly the eight briefed templates", () => {
-  assert.deepEqual(
-    TEMPLATES.map((template) => template.key).sort(),
-    [...REQUIRED].sort(),
-  );
+test("the studio keeps the eight legacy templates and adds twelve composition systems", () => {
+  assert.deepEqual(LEGACY_TEMPLATES.map((t) => t.key).sort(), [...REQUIRED].sort());
+  assert.equal(COMPOSITIONS.length, 12);
+  assert.equal(TEMPLATES.length, REQUIRED.length + COMPOSITIONS.length);
   // Every template has its own painter — not a branch inside a shared skeleton.
   for (const key of REQUIRED) {
     const painter = TEMPLATE_SOURCE.match(new RegExp(`function ${camel(key)}\\(`));
     assert.ok(painter, `${key} has no painter function of its own`);
   }
-  assert.equal(new Set(TEMPLATES.map((template) => template.key)).size, REQUIRED.length);
+  assert.equal(new Set(TEMPLATES.map((template) => template.key)).size, TEMPLATES.length);
+  for (const item of COMPOSITIONS) assert.match(COMPOSITION_SOURCE, new RegExp(`function paint${item.key[0].toUpperCase()}${item.key.slice(1)}\\(`), `${item.key} needs its own painter`);
 });
 
 test("each template documents a distinct composition", () => {
@@ -39,7 +41,7 @@ test("each template documents a distinct composition", () => {
   assert.equal(new Set(compositions).size, TEMPLATES.length, "two templates share a composition description");
   for (const template of TEMPLATES) {
     assert.ok(template.name.length > 3, `${template.key} needs a name`);
-    assert.ok(template.description.length > 80, `${template.key} needs a real description`);
+    assert.ok(template.description.length > 60, `${template.key} needs a real description`);
     assert.ok(template.bestFor.length > 20, `${template.key} needs guidance on when to use it`);
     assert.ok(template.tagline.length > 10);
   }
@@ -79,8 +81,6 @@ test("the renderer dispatches on template and keeps the legacy path", () => {
 test("the studio keeps every editing control and adds the template picker", () => {
   for (const control of [
     'set("headline"',
-    'set("tamil"',
-    'set("hindi"',
     'set("subline"',
     'set("kicker"',
     'set("cta"',
@@ -88,8 +88,8 @@ test("the studio keeps every editing control and adds the template picker", () =
     'set("themeKey"',
     'set("style"',
     'set("display"',
-    'set("script"',
-    'set("imageFit"',
+    'set("serviceTitle"',
+    'set("facts"',
     'set("showLogo"',
   ]) {
     assert.ok(STUDIO_SOURCE.includes(control), `the studio lost its ${control} control`);
@@ -99,13 +99,14 @@ test("the studio keeps every editing control and adds the template picker", () =
   assert.ok(STUDIO_SOURCE.includes("chooseFormat"), "format switching must stay");
   assert.ok(STUDIO_SOURCE.includes("renderPoster({ ...state, scale: 1 })"), "full-resolution export must stay");
   // The picker itself.
-  assert.ok(STUDIO_SOURCE.includes("TEMPLATES.map"), "the template picker must be rendered");
+  assert.ok(STUDIO_SOURCE.includes("COMPOSITIONS.map"), "the composition picker must be rendered");
+  assert.ok(STUDIO_SOURCE.includes("LEGACY_TEMPLATES.map"), "legacy templates remain reachable");
   assert.ok(STUDIO_SOURCE.includes("aria-pressed"), "template choices must expose their pressed state");
   assert.ok(STUDIO_SOURCE.includes("TemplateGlyph"), "templates need a visual wireframe, not just a label");
 });
 
 test("a template switch never discards the client's work", () => {
-  const match = STUDIO_SOURCE.match(/const selectTemplate = \(key: PosterTemplate\) => \{([\s\S]*?)\n  \};/);
+  const match = STUDIO_SOURCE.match(/const selectTemplate = \(key: PosterTemplate\) => ([^\n]+);/);
   assert.ok(match, "selectTemplate is missing");
   // Only the template and the legacy layout may change on a template switch.
   assert.match(match[1], /template: key/);

@@ -3,6 +3,9 @@ import type { Festival } from "../data/festivals";
 import { DEITY_MAP } from "../data/deities";
 import type { PosterOptions } from "./poster";
 import { resolveTemplate, templateForLayout } from "../data/posterTemplates";
+import { englishCopy } from "./englishCopy";
+import { BRIEF_MAP, getOccasion, type DesignCategory } from "../data/designBriefs";
+import { selectDesign, loadHistory, appendHistory, saveHistory, newSeed } from "./designSelector";
 
 /**
  * The studio owns its state, but other screens need to hand it a finished
@@ -63,7 +66,7 @@ export const clearStudioPreset = (): void => {
  * Map them forward so nothing a client saved opens on a blank or broken card.
  */
 export function migrateState<T extends Partial<PosterState>>(state: T): T {
-  const next: Partial<PosterState> = { ...state };
+  const next: Partial<PosterState> = { ...englishCopy(state) };
   const template = resolveTemplate(state.template as string | undefined);
   if (state.template && template !== state.template) next.template = template;
   if (state.template && !template) delete next.template;
@@ -73,6 +76,7 @@ export function migrateState<T extends Partial<PosterState>>(state: T): T {
   const display = state.display as string | undefined;
   if (display === "marcellus") next.display = "cormorant";
   if (display === "baloo" || display === "jakarta") next.display = "inter";
+  if (next.category && !(next.category in BRIEF_MAP)) delete next.category;
   return next as T;
 }
 
@@ -136,30 +140,24 @@ export function clearPreset(): void {
  * what "the Deepavali poster" looks like.
  */
 export function presetFromFestival(festival: Festival): StudioPreset {
-  const deity = festival.deity ? DEITY_MAP[festival.deity] : null;
+  const name = festival.name.toLowerCase();
+  const category: DesignCategory = festival.deity === "murugan" ? "murugan" : "festival";
+  const occasionKey = name.includes("pongal") ? "pongal" : name.includes("karthigai") || name.includes("deepam") ? "karthigai" : "deepavali";
+  const occasion = getOccasion(category, occasionKey);
+  const brief = BRIEF_MAP[category];
+  const selection = selectDesign({ category, occasion: occasion.key, width: 1080, height: 1350, headline: festival.headline, subline: festival.subline, seed: newSeed() }, loadHistory());
+  saveHistory(appendHistory(loadHistory(), selection, category));
   return {
-    formatId: "ig-post",
-    deityKey: festival.deity,
-    note: `${festival.name} loaded — edit anything.`,
+    formatId: "ig-post", deityKey: null,
+    note: `${festival.name} loaded in English — edit anything.`,
     state: {
-      themeKey: festival.theme,
-      style: festival.style,
-      image: deity ? deity.file : null,
-      imageFit: deity ? "circle" : "arch",
-      // Greetings open on the Festival Blessing medallion; a festival without a
-      // deity painting opens on the typographic Manifesto.
-      layout: deity ? "medallion" : "type-only",
-      template: deity ? "blessing" : "manifesto",
-      display: "cormorant",
-      script: "festive",
-      kicker: festival.name,
-      headline: festival.headline,
-      tamil: festival.greetingTa,
-      hindi: festival.greetingHi,
-      subline: festival.subline,
-      cta: "astrosivam.com",
-      footer: "astrosivam.com",
-      showLogo: true,
+      category, occasion: occasion.key, themeKey: brief.theme, style: brief.style,
+      image: occasion.image ?? brief.image, imageIsLibrary: true, imageFit: "full",
+      layout: "full-bleed", template: selection.composition, seed: selection.seed,
+      display: brief.display, script: "serif",
+      kicker: occasion.copy.kicker, serviceTitle: festival.name, headline: festival.headline,
+      tamil: "", hindi: "", subline: festival.subline, facts: occasion.copy.facts,
+      cta: occasion.copy.cta, footer: "astrosivam.com", showLogo: true,
     },
   };
 }

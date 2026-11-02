@@ -12,6 +12,7 @@ export type ThemeKey =
   | "ink"
   // nature register
   | "dawn"
+  | "rose"
   | "lagoon"
   // space register
   | "cosmos"
@@ -52,6 +53,8 @@ export type ImageFit = "arch" | "circle" | "full" | "square";
  * every existing caller keeps working.
  */
 export type PosterTemplate =
+  | "hero" | "editorial" | "asymmetric" | "mandala" | "diagonal" | "cosmic"
+  | "split" | "story" | "minimal" | "infographic" | "collage" | "devotional"
   | "mandapam"
   | "gallery"
   | "manifesto"
@@ -64,7 +67,7 @@ export type PosterTemplate =
 export interface TemplateMeta {
   key: PosterTemplate;
   name: string;
-  family: "Editorial" | "Heritage" | "Modern" | "Campaign";
+  family: "Editorial" | "Heritage" | "Modern" | "Campaign" | "Immersive" | "Geometric" | "Narrative" | "Information";
   tagline: string;
   description: string;
   bestFor: string;

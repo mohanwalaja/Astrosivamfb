@@ -1,4 +1,5 @@
 import type { DisplayFontKey, ScriptFontKey, ThemeKey } from "../types";
+import { englishText } from "./englishCopy";
 import { BRAND } from "../data/brand";
 import { drawMotif, ensureFonts, hasGlyph, loadImageSource, loadLogo } from "./canvas";
 import { TypeLog, type TypedDraw, type TypeRole } from "./legibility";
@@ -1434,6 +1435,11 @@ const PAINTERS: Record<FestivalStyle, (scene: Scene) => void> = {
 };
 
 export async function renderFestivalCard(input: FestivalCardInput): Promise<FestivalCardRender> {
+  input = { ...input, language: "en", copy: { ...input.copy,
+    name: { en: englishText(input.copy.name.en), ta: "", hi: "" },
+    greeting: { en: englishText(input.copy.greeting.en), ta: "", hi: "" },
+    subline: englishText(input.copy.subline), footer: englishText(input.copy.footer), site: englishText(input.copy.site),
+  } };
   // Fonts must be resident before the first measurement: `fitLines` and
   // `measureText` are what decide the size, and a face that arrives late makes
   // every wrapped line the wrong length — which shows up as overflow in export.

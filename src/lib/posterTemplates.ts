@@ -994,7 +994,7 @@ function sequence(scene: Scene) {
   footerRow(scene, scene.copy.footer, { baselineFromBottom: H * 0.024 });
 }
 
-const PAINTERS: Record<PosterTemplate, (scene: Scene) => void> = {
+const PAINTERS: Record<string, (scene: Scene) => void> = {
   mandapam,
   gallery,
   manifesto,

@@ -71,7 +71,7 @@ export const FestivalWishes: React.FC = () => {
   const [festivalId, setFestivalId] = useState("deepavali");
   const [formatId, setFormatId] = useState<CardFormat>("ig-post");
   const [style, setStyle] = useState<FestivalStyle>("traditional");
-  const [language, setLanguage] = useState<CardLanguage>("trilingual");
+  const language: CardLanguage = "en";
   const [theme, setTheme] = useState<ThemeKey | null>(null);
   const [display, setDisplay] = useState<DisplayFontKey | null>(null);
   const [script, setScript] = useState<ScriptFontKey | null>(null);
@@ -485,24 +485,6 @@ export const FestivalWishes: React.FC = () => {
               <p className="mt-2 text-[10px] leading-relaxed text-[#A2937D]">{format.cropNote}</p>
             </div>
 
-            <div className="mt-4 border-t border-line pt-3">
-              <SectionLabel>Language on the card</SectionLabel>
-              <div className="flex flex-wrap gap-1.5">
-                {CARD_LANGUAGES.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setLanguage(item.key)}
-                    aria-pressed={language === item.key}
-                    className={`chip ${language === item.key ? "chip-gold" : ""}`}
-                    title={item.note}
-                    lang={item.key === "ta" ? "ta" : item.key === "hi" ? "hi" : undefined}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </Panel>
 
           <Panel>
@@ -550,20 +532,7 @@ export const FestivalWishes: React.FC = () => {
                   ))}
                 </select>
               </label>
-              <label className="block">
-                <span className="mb-1 block text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">Script face</span>
-                <select
-                  value={effectiveScript}
-                  onChange={(event) => setScript(event.target.value as ScriptFontKey)}
-                  className="w-full rounded-lg border border-line bg-[#191314] px-2 py-1.5 text-[11px] text-cream"
-                >
-                  {CARD_TYPE.script.map((item) => (
-                    <option key={item.key} value={item.key}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+
             </div>
 
             <div className="mt-3">

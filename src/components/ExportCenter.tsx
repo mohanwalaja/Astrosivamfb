@@ -48,7 +48,7 @@ export const ExportCenter: React.FC = () => {
   const [progress, setProgress] = useState<{ label: string; done: number; total: number } | null>(null);
   const [festivalId, setFestivalId] = useState("deepavali");
   const [festivalStyle, setFestivalStyle] = useState<FestivalStyle>("traditional");
-  const [festivalLanguage, setFestivalLanguage] = useState<CardLanguage>("trilingual");
+  const festivalLanguage: CardLanguage = "en";
 
   const runBrand = async () => {
     setBusy("brand");
@@ -315,20 +315,7 @@ export const ExportCenter: React.FC = () => {
                 ))}
               </select>
             </label>
-            <label className="block">
-              <span className="mb-1 block text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">Language</span>
-              <select
-                value={festivalLanguage}
-                onChange={(event) => setFestivalLanguage(event.target.value as CardLanguage)}
-                className="rounded-lg border border-line bg-[#191314] px-2 py-1.5 text-[11px] text-cream"
-              >
-                {CARD_LANGUAGES.map((item) => (
-                  <option key={item.key} value={item.key}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+
             <button type="button" className="btn btn-gold" onClick={runFestival} disabled={Boolean(busy)}>
               {busy === `festival-${festivalId}` ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

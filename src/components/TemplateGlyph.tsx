@@ -1,4 +1,6 @@
 import type { PosterTemplate } from "../types";
+import { isComposition } from "../data/designBriefs";
+import { CompositionGlyph } from "./CompositionGlyph";
 
 /**
  * A 24 × 30 wireframe of each composition. The whole point of the templates is
@@ -11,7 +13,8 @@ export function TemplateGlyph({ template, className = "" }: { template: PosterTe
   const type = "rgba(251,245,233,0.62)";
   const faint = "rgba(251,245,233,0.28)";
 
-  const shapes: Record<PosterTemplate, React.ReactNode> = {
+  if (isComposition(template)) return <CompositionGlyph composition={template} className={className} />;
+  const shapes: Partial<Record<PosterTemplate, React.ReactNode>> = {
     mandapam: (
       <>
         {/* pillars, lintel, arch, lamps */}
