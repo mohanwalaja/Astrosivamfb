@@ -1,4 +1,5 @@
 import type { CreativeContent, CreativeFormat, Service, StyleKey, Theme, ThemeKey } from "../types";
+import { englishCopy, englishText } from "./englishCopy";
 import { STYLES, STYLE_MAP, THEMES } from "../data/brand";
 import { IG_HIGHLIGHTS } from "../data/instagram";
 import { PANCHANGAM_ROWS } from "../data/panchangam";
@@ -68,7 +69,7 @@ function brandRow(
   y: number,
   theme: Theme,
   logo: HTMLImageElement,
-  rightLabel = "EN · தமிழ் · हिंदी",
+  rightLabel = "English",
   size = 40,
 ) {
   // The lockup follows the studio-wide placement setting; the side label keeps
@@ -89,7 +90,7 @@ function brandRow(
     return;
   }
   const labelOnLeft = spot.align === "right";
-  if (rightLabel === "EN · தமிழ் · हिंदी") {
+  if (rightLabel === "English") {
     drawLanguages(ctx, labelOnLeft ? pad : W - pad, y + 1, size * 0.29, withAlpha(theme.gold, 0.92), labelOnLeft ? "left" : "right");
   } else {
     ctx.fillStyle = withAlpha(theme.gold, 0.9);
@@ -102,39 +103,8 @@ function brandRow(
   }
 }
 
-function drawLanguages(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  color: string,
-  align: "left" | "right" = "right",
-) {
-  const parts = [
-    { text: "EN", font: SANS(size, 600) },
-    { text: " · ", font: SANS(size, 500) },
-    { text: "தமிழ்", font: TAMIL(size * 1.06) },
-    { text: " · ", font: SANS(size, 500) },
-    { text: "हिंदी", font: DEVA(size * 0.96, 500) },
-  ];
-  const widths = parts.map((part) => {
-    ctx.font = part.font;
-    return ctx.measureText(part.text).width;
-  });
-  const total = widths.reduce((sum, width) => sum + width, 0);
-  let cursor = align === "right" ? x - total : x;
-  const previous = ctx.textAlign;
-  ctx.textAlign = "left";
-  ctx.fillStyle = color;
-  ctx.textBaseline = "middle";
-  parts.forEach((part, index) => {
-    ctx.font = part.font;
-    ctx.fillText(part.text, cursor, y);
-    cursor += widths[index];
-  });
-  ctx.textAlign = previous;
-  ctx.textBaseline = "alphabetic";
-  return total;
+function drawLanguages(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, align: "left" | "right" = "right") {
+  ctx.save(); ctx.font = SANS(size, 600); ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "middle"; ctx.fillText("English", x, y); const width = ctx.measureText("English").width; ctx.restore(); return width;
 }
 
 function halo(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, theme: Theme) {
@@ -1281,6 +1251,7 @@ function renderCoverGuide(ctx: CanvasRenderingContext2D, W: number, H: number, t
 /* --------------------------------- render --------------------------------- */
 
 export async function renderCreative(options: RenderOptions): Promise<HTMLCanvasElement> {
+  options = { ...options, content: englishCopy(options.content) };
   const {
     format,
     themeKey,

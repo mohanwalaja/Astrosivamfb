@@ -1,4 +1,5 @@
 import type { StyleKey, ThemeKey } from "../types";
+import { englishCopy, englishText } from "./englishCopy";
 import {
   type ImageOptions,
   type ImageBox,
@@ -951,6 +952,7 @@ const PAINTERS: Record<FbLayout, (scene: Scene) => void> = {
 /* --------------------------------- render -------------------------------- */
 
 export async function renderFbCreative(input: FbCreativeInput): Promise<FbRender> {
+  input = { ...input, content: englishCopy(input.content) };
   // Fonts must be resident before the first measurement: `fitLines` and
   // `measureText` are what decide the size, and a face that arrives late makes
   // every wrapped line the wrong length — which shows up as overflow in export.

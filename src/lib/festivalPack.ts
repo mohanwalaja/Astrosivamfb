@@ -30,7 +30,7 @@ export interface FestivalPackConfig {
 
 export const DEFAULT_PACK: FestivalPackConfig = {
   style: "traditional",
-  language: "trilingual",
+  language: "en",
   format: "ig-post",
   theme: null,
   display: null,

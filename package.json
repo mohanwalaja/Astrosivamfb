@@ -22,6 +22,8 @@
     "react-dom": "^19.0.1"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^0.1.80",
+    "@sparticuz/chromium": "^153.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
@@ -30,10 +32,10 @@
     "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.28.0",
+    "playwright": "^1.64.1",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.0",
-    "@napi-rs/canvas": "^0.1.80"
+    "vite": "^8.3.0"
   }
 }

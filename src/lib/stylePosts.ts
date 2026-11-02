@@ -1925,7 +1925,7 @@ function renderKolam(c: Ctx) {
   ctx.textBaseline = "alphabetic";
   ctx.fillText(BRAND.ephemeris, metaX, my);
   my += H * 0.024;
-  ctx.fillText(BRAND.languages, metaX, my);
+  ctx.fillText("English", metaX, my);
   my += H * 0.024;
   ctx.fillText(c.service.kind, metaX, my);
   ctx.restore();
@@ -2098,7 +2098,7 @@ function renderPaper(c: Ctx) {
   ctx.textBaseline = "alphabetic";
   drawTracked(ctx, BRAND.wordmark, left, metaY, 3, "left");
   ctx.fillStyle = withAlpha(inkColor, 0.6);
-  drawTracked(ctx, `${c.service.kind}  ·  ${BRAND.languages}`.toUpperCase(), right, metaY, 2, "right");
+  drawTracked(ctx, `${c.service.kind}  ·  English`.toUpperCase(), right, metaY, 2, "right");
   ctx.restore();
   rule(ctx, left, metaY + H * 0.016, right - left, withAlpha(inkColor, 0.5), "none");
   // plate in the right column panel
