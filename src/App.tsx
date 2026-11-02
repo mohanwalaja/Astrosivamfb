@@ -11,6 +11,7 @@ import {
   Instagram,
   Layers,
   LogOut,
+  Megaphone,
   Menu,
   MonitorSmartphone,
   Palette,
@@ -51,6 +52,7 @@ const PosterStudio = lazy(() => import("./components/PosterStudio").then((m) => 
 const Panchangam = lazy(() => import("./components/Panchangam").then((m) => ({ default: m.Panchangam })));
 const ServicePosts = lazy(() => import("./components/ServicePosts").then((m) => ({ default: m.ServicePosts })));
 const StyleGallery = lazy(() => import("./components/StyleGallery").then((m) => ({ default: m.StyleGallery })));
+const PlainWords = lazy(() => import("./components/PlainWords").then((m) => ({ default: m.PlainWords })));
 import { ensureFonts, fontHealth } from "./lib/canvas";
 import { getCsrfToken } from "./lib/csrf";
 import { PublishContextProvider, type PublisherDraft } from "./lib/publishContext";
@@ -69,6 +71,7 @@ const NAV = [
     group: "Create",
     items: [
       { id: "assets", label: "Asset studio", icon: Layers },
+      { id: "plain-words", label: "Plain-words posters", icon: Megaphone },
       { id: "styles", label: "Style gallery", icon: Shapes },
       { id: "poster", label: "Poster studio", icon: PenLine },
       { id: "panchangam", label: "Panchangam", icon: Sunrise },
@@ -526,6 +529,7 @@ function Shell() {
                 {section === "brand" ? <BrandSystem /> : null}
                 {section === "profile-cover" ? <ProfileCover /> : null}
                 {section === "assets" ? <AssetStudio /> : null}
+                {section === "plain-words" ? <PlainWords onNavigate={navigate} /> : null}
                 {section === "styles" ? <StyleGallery onNavigate={navigate} /> : null}
                 {section === "poster" ? <PosterStudio /> : null}
                 {section === "panchangam" ? <Panchangam /> : null}
