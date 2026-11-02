@@ -88,6 +88,29 @@ one palette family and one component grammar across every screen:
   plus one per composition system) with a legibility/overflow report and two contact sheets.
   `node tools/browser-audit.mjs` drives the real app in Chromium on desktop and Android viewports and
   downloads a real PNG and motion file from each.
+
+  Every category brief also states the service plainly: the kicker says what happens
+  (`A written report, by email`), the subline says what you send and what arrives, and the call to
+  action names the purchase (`Order your jathagam`). The hook can still be beautiful — the
+  explanation underneath it is not allowed to be vague.
+- **Plain-words campaign** — twelve posters written for a first-time reader. Astro Sivam is a new
+  service, so each plate answers three questions before it decorates anything: what it is, why
+  someone who cannot reach their own priest should use it, and what happens after they pay.
+
+  The campaign opens on the hook the whole set is built around — **“Your priest is busy. Our priests
+  are ready.”** — then runs *No time to visit the temple? Send your details instead.*, *Three details.
+  One clear report.*, *What we do*, *US$5 for one report. No subscription.*, *Read the full report
+  before you pay.*, *The temple is far. Your jathagam is not.*, *What does a jathagam tell you?*,
+  *Marriage matching, explained in plain words.*, *Need a date? We check six months for you.*, *You
+  can ask questions after the report arrives.* and *The right report for every age.*
+
+  The screen (`Plain-words posters`) renders every plate live, exports a 1080 × 1350 PNG, hands any
+  plate to the poster studio with one click, and keeps the Facebook caption and the Instagram cut
+  beside it. `npx tsx tools/plain-words.mjs` writes the same set to `posters/plain-words/` — twelve
+  feed PNGs, the two lead hooks re-cut at 1080 × 1920 for stories, a contact sheet, a captions file
+  and a legibility/overflow audit. Those files are deliverables and are committed on purpose.
+  `tests/plain-words.test.ts` holds the contract: English-only, three facts at most, no headline over
+  72 characters, a real composition and artwork for every plate, captions under Instagram's 2,200.
 - **Festival wishes** — 45 occasions: the Hindu and Tamil calendar (Tamil, pan-Indian, North Indian
   and Kerala sets) plus global days — New Year, Valentine's Day, Women's Day, Mother's Day, Father's
   Day, Friendship Day, Teachers' Day, Children's Day and Christmas. Four style families, each a
