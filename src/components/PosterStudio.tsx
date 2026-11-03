@@ -19,9 +19,9 @@ import { appendHistory, loadHistory, newSeed, saveHistory, selectDesign } from "
 import { englishCopy, validatePosterCopy } from "../lib/englishCopy";
 import { renderCompositionLayers, type CompositionLayers } from "../lib/compositionRender";
 import { paintMotionFrame, MOTION_SECONDS } from "../lib/motion";
-import { CompositionGlyph } from "./CompositionGlyph";
 import { TemplateGlyph } from "./TemplateGlyph";
 import { useBrandPlacementVersion } from "../lib/brandPlacement";
+import { LAYOUT_LABEL, designsFor, getDesign } from "../data/library";
 
 const FORMATS = [
   { id: "ig-post", label: "Portrait", width: 1080, height: 1350 },
@@ -35,6 +35,7 @@ const startBrief = BRIEF_MAP.birth;
 const startOccasion = startBrief.occasions[0];
 const DEFAULT: PosterState = {
   width: 1080, height: 1350, themeKey: startBrief.theme, style: startBrief.style, layout: "split", template: "editorial",
+  designId: "birth-traditional-jathagam-sanctum",
   display: startBrief.display, script: "serif", image: startBrief.image, imageIsLibrary: true, imageFit: "full",
   category: "birth", occasion: startOccasion.key, serviceTitle: startOccasion.copy.serviceTitle,
   kicker: startOccasion.copy.kicker, headline: startOccasion.copy.headline, tamil: "", hindi: "",
@@ -54,7 +55,7 @@ const studioCaption = (state: PosterState) => [state.headline, state.subline, st
 const STAGE_LABEL: Record<ReelStage, string> = { rendering: "Preparing motion layers", recording: "Recording layered animation", encoding: "Finishing the video" };
 type Tab = "content" | "design" | "artwork" | "export";
 
-export const PosterStudio: React.FC = () => {
+export const PosterStudio: React.FC<{ onNavigate?: (id: string) => void }> = ({ onNavigate }) => {
   const toast = useToast();
   const [initial] = useState(readInitial);
   const [state, setState] = useState<PosterState>(initial.state);
@@ -75,7 +76,8 @@ export const PosterStudio: React.FC = () => {
   const category = resolveCategory(state.category);
   const brief = BRIEF_MAP[category];
   const occasion = getOccasion(category, state.occasion);
-  const activeComposition = isComposition(state.template) ? state.template : null;
+  const design = getDesign(state.designId);
+  const activeComposition = design ? null : isComposition(state.template) ? state.template : null;
   const activeTemplate = TEMPLATES.find((item) => item.key === state.template) ?? TEMPLATES[0];
   const errors = validatePosterCopy(state);
   const canExport = errors.length === 0 && !busy && !reel;
@@ -86,20 +88,37 @@ export const PosterStudio: React.FC = () => {
 
   const set = <K extends keyof PosterState>(key: K, value: PosterState[K]) => setState((current) => ({ ...current, [key]: value }));
   const chooseFormat = (id: string) => { const format = FORMATS.find((item) => item.id === id)!; setFormatId(id); setState((current) => ({ ...current, width: format.width, height: format.height })); };
-  const selectTemplate = (key: PosterTemplate) => setState((current) => ({ ...current, template: key, layout: layoutForTemplate(key) }));
+  const selectTemplate = (key: PosterTemplate) => setState((current) => ({ ...current, template: key, layout: layoutForTemplate(key), designId: undefined }));
 
   const applyBrief = (nextCategory: DesignCategory, occasionKey?: string) => {
     const nextBrief = BRIEF_MAP[nextCategory];
     const nextOccasion = getOccasion(nextCategory, occasionKey);
     const selection = selectDesign({ category: nextCategory, occasion: nextOccasion.key, width: state.width, height: state.height, headline: nextOccasion.copy.headline, subline: nextOccasion.copy.subline, seed: newSeed() }, loadHistory());
     saveHistory(appendHistory(loadHistory(), selection, nextCategory));
-    setDeityKey(null); setReason(selection.reason);
-    setState((current) => ({ ...current, category: nextCategory, occasion: nextOccasion.key, themeKey: nextBrief.theme, style: nextBrief.style, display: nextBrief.display,
-      image: nextOccasion.image ?? nextBrief.image, imageIsLibrary: true, template: selection.composition, layout: layoutForTemplate(selection.composition), seed: selection.seed,
-      kicker: nextOccasion.copy.kicker, serviceTitle: nextOccasion.copy.serviceTitle, headline: nextOccasion.copy.headline, subline: nextOccasion.copy.subline,
-      cta: nextOccasion.copy.cta, facts: nextOccasion.copy.facts, tamil: "", hindi: "" }));
+    setDeityKey(null);
+    // Moving service keeps the register and picks a design drawn for the new brief.
+    const register = getDesign(state.designId)?.register ?? "traditional";
+    const pool = designsFor(nextCategory, register);
+    const design = pool[selection.seed % pool.length];
+    setReason(`${design.name} — ${LAYOUT_LABEL[design.layout]}.`);
+    setDeityKey(null);
+    setState((current) => ({ ...current, category: nextCategory, occasion: nextOccasion.key, themeKey: design.theme, style: nextBrief.style, display: nextBrief.display,
+      image: design.image, imageIsLibrary: true, template: selection.composition, layout: layoutForTemplate(selection.composition), seed: selection.seed,
+      designId: design.id,
+      kicker: design.copy.kicker, serviceTitle: design.copy.serviceTitle, headline: design.copy.headline, subline: design.copy.subline,
+      cta: design.copy.cta, facts: design.copy.facts, tamil: "", hindi: "" }));
   };
   const generate = () => {
+    const currentDesign = getDesign(state.designId);
+    if (currentDesign) {
+      const pool = designsFor(currentDesign.category, currentDesign.register).filter((item) => item.id !== currentDesign.id);
+      const next = pool[Math.floor(Math.random() * pool.length)];
+      setState((current) => ({ ...current, designId: next.id, seed: next.number }));
+      setReason(`${next.name} — ${LAYOUT_LABEL[next.layout]}. Your words are kept.`);
+      setMode("static");
+      toast(`${next.name} — your words and artwork are kept.`);
+      return;
+    }
     const selection = selectDesign({ category, occasion: occasion.key, width: state.width, height: state.height, headline: state.headline, subline: state.subline, hasArtwork: Boolean(state.image), seed: newSeed() }, loadHistory());
     saveHistory(appendHistory(loadHistory(), selection, category));
     setState((current) => ({ ...current, template: selection.composition, layout: layoutForTemplate(selection.composition), seed: selection.seed }));
@@ -132,7 +151,7 @@ export const PosterStudio: React.FC = () => {
     finally { setBusy(false); }
   };
   const record = async () => {
-    if (reel || !activeComposition) return;
+    if (reel || !activeComposition || design) return;
     const controller = new AbortController(); reelAbort.current = controller; setReel({ progress: 0, stage: "rendering" });
     const width = formatId === "print" ? 1080 : state.width, height = formatId === "print" ? 1350 : state.height;
     try {
@@ -150,9 +169,9 @@ export const PosterStudio: React.FC = () => {
 
   return (
     <div className="poster-studio-v3">
-      <PageHeader eyebrow="Astrosivam · Social design studio" title={<>One brief. <span className="gold-text">A different point of view.</span></>} description="Category-aware artwork, twelve distinct composition systems and layered motion. English-only posters, planned for the way Facebook and Instagram actually crop."
+      <PageHeader eyebrow="Astrosivam · Social design studio" title={<>One brief. <span className="gold-text">A different point of view.</span></>} description="A library of 150 curated designs — seventy-five traditional, seventy-five modern — plus layered motion for the legacy systems. English-only posters, planned for the way Facebook and Instagram actually crop."
         actions={<><Button variant="gold" icon={<Shuffle className="h-4 w-4" />} onClick={generate} disabled={Boolean(reel)}>Generate a new design</Button><Button variant="quiet" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={reset}>Reset</Button></>}
-        meta={<><span className="chip chip-gold">English only</span><span className="chip">12 composition systems</span><span className="chip">Static + layered motion</span></>}
+        meta={<><span className="chip chip-gold">English only</span><span className="chip">150 designs</span><span className="chip">Static + layered motion</span></>}
       />
 
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2 scroll-thin" role="group" aria-label="Poster category">
@@ -163,10 +182,10 @@ export const PosterStudio: React.FC = () => {
         <div className="space-y-4 lg:sticky lg:top-5">
           <Panel padded={false} className="overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rotate-45 bg-gold" /><span className="font-display text-[13px] text-cream">{activeTemplate.name}</span></div>
+              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rotate-45 bg-gold" /><span className="font-display text-[13px] text-cream">{design ? design.name : activeTemplate.name}</span></div>
               <div className="flex items-center gap-1 rounded-lg border border-line p-1" role="group" aria-label="Preview mode">
                 <button type="button" className={`px-3 py-1.5 text-[11px] ${mode === "static" ? "rounded-md bg-gold/15 text-gold-soft" : "text-[#A2937D]"}`} aria-pressed={mode === "static"} onClick={() => setMode("static")}>Static</button>
-                <button type="button" className={`px-3 py-1.5 text-[11px] ${mode === "motion" ? "rounded-md bg-gold/15 text-gold-soft" : "text-[#A2937D]"}`} aria-pressed={mode === "motion"} onClick={() => { setMode("motion"); setPlaying(true); }} disabled={!activeComposition}>Motion</button>
+                <button type="button" className={`px-3 py-1.5 text-[11px] ${mode === "motion" ? "rounded-md bg-gold/15 text-gold-soft" : "text-[#A2937D]"}`} aria-pressed={mode === "motion"} onClick={() => { setMode("motion"); setPlaying(true); }} disabled={!activeComposition} title={design ? "Library designs export as stills." : undefined}>Motion</button>
               </div>
             </div>
             <div className="checker flex justify-center p-4 sm:p-7">
@@ -182,7 +201,7 @@ export const PosterStudio: React.FC = () => {
           {errors.length ? <Callout tone="warn" title="Copy needs attention">{errors.join(" ")}</Callout> : null}
           <div className="grid gap-3 sm:grid-cols-3">
             <Panel className="!p-4"><div className="eyebrow mb-1">Art direction</div><p className="text-[11px] leading-relaxed text-[#B4A58F]">{brief.direction}</p></Panel>
-            <Panel className="!p-4"><div className="eyebrow mb-1">Composition</div><p className="text-[11px] leading-relaxed text-[#B4A58F]">{activeComposition ? COMPOSITION_MAP[activeComposition].structure : "Legacy composition. Choose a new system for layered motion."}</p></Panel>
+            <Panel className="!p-4"><div className="eyebrow mb-1">Design</div><p className="text-[11px] leading-relaxed text-[#B4A58F]">{design ? `${LAYOUT_LABEL[design.layout]} · design ${design.number} of 150 · ${design.register}` : activeComposition ? COMPOSITION_MAP[activeComposition].structure : "Legacy composition."}</p></Panel>
             <Panel className="!p-4"><div className="eyebrow mb-1">Export</div><p className="text-[11px] leading-relaxed text-[#B4A58F]">Full-resolution PNG. 15-second video in your selected format, MP4 where the browser supports it.</p></Panel>
           </div>
         </div>
@@ -210,11 +229,29 @@ export const PosterStudio: React.FC = () => {
 
           {tab === "design" ? <>
             <Panel>
-              <SectionLabel right={<span className="text-[10px] text-[#A2937D]">12 systems</span>}>Composition</SectionLabel>
-              <div className="grid grid-cols-3 gap-2" role="group" aria-label="Composition system">
-                {COMPOSITIONS.map((item) => <button key={item.key} type="button" onClick={() => { selectTemplate(item.key); setReason(item.description); }} aria-pressed={state.template === item.key} title={item.description} className={`choice flex flex-col items-center gap-2 p-2 ${state.template === item.key ? "choice-active" : ""}`}><CompositionGlyph composition={item.key} category={category} className="h-16 w-full text-gold-soft" /><span className="text-[9.5px] leading-tight text-cream">{item.name}</span></button>)}
-              </div>
-              <Button className="mt-3 w-full" variant="ghost" icon={<Sparkles className="h-3.5 w-3.5" />} onClick={generate}>Choose for this brief</Button>
+              <SectionLabel right={<span className="text-[10px] text-[#A2937D]">150 designs</span>}>{design ? "Your design" : "Design"}</SectionLabel>
+              {design ? (
+                <>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-display text-[15px] text-cream">{design.name}</p>
+                      <p className="mt-1 text-[11px] text-[#A2937D]">{LAYOUT_LABEL[design.layout]} · design {design.number} of 150 · {design.register} · {design.category}</p>
+                    </div>
+                    <span className="chip chip-gold shrink-0">№ {String(design.number).padStart(3, "0")}</span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button className="flex-1" variant="gold" icon={<Sparkles className="h-3.5 w-3.5" />} onClick={generate}>Another design</Button>
+                    <Button className="flex-1" variant="ghost" icon={<Layers className="h-3.5 w-3.5" />} onClick={() => onNavigate?.("designs")}>Library</Button>
+                  </div>
+                  <Button className="mt-2 w-full" variant="quiet" icon={<X className="h-3.5 w-3.5" />} onClick={() => set("designId", undefined)}>Leave the design library</Button>
+                  <p className="mt-3 text-[10.5px] leading-relaxed text-[#A2937D]">This design owns the layout, palette, type and artwork. Your words, footer and format still apply — edit them under Content. Library designs export as stills.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[11.5px] leading-relaxed text-[#B4A58F]">You are on a legacy composition. The 150-design library is the studio's default; open it to pick a design, or stay here for layered motion.</p>
+                  <Button className="mt-3 w-full" variant="gold" icon={<Layers className="h-3.5 w-3.5" />} onClick={() => onNavigate?.("designs")}>Browse the 150 designs</Button>
+                </>
+              )}
             </Panel>
             <Panel>
               <SectionLabel>Format</SectionLabel>

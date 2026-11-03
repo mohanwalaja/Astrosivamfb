@@ -41,32 +41,50 @@ one palette family and one component grammar across every screen:
 - **Asset Studio** — 18 formats rendered on canvas: profile photos, two Facebook covers, link card,
   feed posts, a 7-slide carousel, stories, reel covers, seven highlight covers, panchangam card,
   quote card, offer card, review card and the twelve-style contact sheet. Download a single PNG or a ZIP pack.
-- **Style gallery** — 12 art directions in two families, each with its own post layout, backdrop,
-  frame, palette and hashtag set, rendered side by side for every service:
-  - *Heritage* — Signature Gold, Thanjavur Court, Kolam Morning, Kanchipuram Silk, Gopuram Dusk,
-    Karthigai Deepam
-  - *Modern* — Mono Editorial, Paper Studio, Ephemeris, Aurum Minimal, Glass Nocturne, Orbit
+- **Design library** — 150 art directions in two registers, grouped by the service they were drawn
+  for: **75 traditional** (sanctum arches, carved pillars, palm-leaf scrolls, medallions, lamp rows,
+  kolam, jasmine, torans) and **75 modern** (modular grids, hard fields, negative space, atlas
+  diagrams, halftone, Swiss typography). Twenty-two designs per service, eleven in each register.
 
-  Each carries its own ornament vocabulary, palette and hashtag set. Export one PNG, a ZIP of all of
-  them, or the contact sheet for sign-off.
+  A design is a curated recipe, not a recolour: one of ten structural layouts × a palette × a type
+  stack × a background treatment × a frame × an ornament kit × an art treatment, pinned per entry in
+  `src/data/library.ts`. Seven services share one design language, so each category rotates the
+  palette, type, ground, frame, ornament and art treatment by its own stride — all 150 complete
+  recipes are unique, and no two services dress a layout the same way.
+
+  The screen (`Design library`) filters by service register, layout and free text, renders every
+  tile with the production engine as it scrolls into view, exports a 1080 × 1350 PNG or a
+  1080 × 1920 story cut, publishes through the shared publisher, and hands any design to the poster
+  studio with one click.
+
+  `npm run designs` writes the same set to `posters/design-library/` — 150 feed PNGs in per-service
+  folders, a contact sheet per category, the whole library on one page, a catalogue (`index.md`)
+  listing every design and its recipe, and `audit.json`. Those files are deliverables and are
+  committed on purpose. `tests/design-library.test.ts` holds the contract: 150 designs, 75/75,
+  unique recipes, valid English copy that fits the smallest format, real artwork per service, and
+  every quoted price equal to the price in the service record.
+
 - **Poster studio** — a category-aware social design studio. Pick one of seven service identities
   (Birth Jathagam, Wedding Matching, Baby Naming Letters, Subha Muhurtham, Navagraha, Festival
   Greetings, Murugan Devotional), each with three occasion briefs, then edit the kicker, service
   title, headline, supporting line, three facts, CTA and footer. **Posters are English-only** — the
   renderer strips Tamil/Hindi at every canvas boundary and the language selectors were removed.
-  Choose from **twelve structurally distinct composition systems**, six formats (Instagram portrait
-  and square, Facebook portrait, landscape, story/reel and A4 print), four headline faces and six
-  curated palettes. All fonts are bundled locally. The canvas re-renders live, previews a 15-second
+  Layout comes from the **150-design library** — pick a design, or ask for another and the studio
+  keeps your words and artwork. Six formats (Instagram portrait and square, Facebook portrait,
+  landscape, story/reel and A4 print), four headline faces and six curated palettes remain. All fonts are bundled locally. The canvas re-renders live, previews a 15-second
   layered motion graphic, and exports a print-resolution PNG or an MP4/WebM clip. Switching
   composition changes the layout only — copy, art, palette and fonts are kept.
 
-  The twelve systems are separate painters with their own geometry, not twelve recolours of one
-  skeleton. A pure planner (`compositionPlan.ts`) lays out safe areas, art shapes and text boxes per
+  The library engine (`src/lib/libraryRender.ts`) measures every line, lays copy out as a block,
+  records any line it cannot fit, checks the mobile legibility floor, and samples the pixels each
+  line actually sits on — laying a veil when a palette would otherwise sit too close to its ground.
+  A design either passes that audit or fails the build. The twelve earlier composition systems are
+  still compiled: saved presets use them and they remain the only path to layered motion. A pure planner (`compositionPlan.ts`) lays out safe areas, art shapes and text boxes per
   format; a measured fitter (`compositionRender.ts`) sizes every line and throws rather than clip;
   and a scored selector (`designSelector.ts`) never repeats a composition consecutively and never
   uses one family three times in a row:
 
-  | System | Structure | Family |
+  | Legacy system | Structure | Family |
   | --- | --- | --- |
   | Hero illustration | Full-bleed art, bottom scrim, lower-left type | Immersive |
   | Type-led editorial | Rules, folio and a left type column, small art inset | Editorial |

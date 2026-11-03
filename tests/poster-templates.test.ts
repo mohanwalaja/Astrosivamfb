@@ -78,7 +78,7 @@ test("the renderer dispatches on template and keeps the legacy path", () => {
   }
 });
 
-test("the studio keeps every editing control and adds the template picker", () => {
+test("the studio keeps every editing control and hands layout to the design library", () => {
   for (const control of [
     'set("headline"',
     'set("subline"',
@@ -98,8 +98,11 @@ test("the studio keeps every editing control and adds the template picker", () =
   assert.ok(STUDIO_SOURCE.includes("onUpload"), "image upload must stay");
   assert.ok(STUDIO_SOURCE.includes("chooseFormat"), "format switching must stay");
   assert.ok(STUDIO_SOURCE.includes("renderPoster({ ...state, scale: 1 })"), "full-resolution export must stay");
-  // The picker itself.
-  assert.ok(STUDIO_SOURCE.includes("COMPOSITIONS.map"), "the composition picker must be rendered");
+  // The twelve art directions are gone; the 150-design library owns layout.
+  assert.doesNotMatch(STUDIO_SOURCE, /COMPOSITIONS\.map/, "the twelve composition picker must be gone");
+  assert.ok(STUDIO_SOURCE.includes("getDesign"), "the studio must read the chosen library design");
+  assert.ok(STUDIO_SOURCE.includes('onNavigate?.("designs")'), "the studio must link to the design library");
+  assert.ok(STUDIO_SOURCE.includes("designId"), "library designs must be addressable from studio state");
   assert.ok(STUDIO_SOURCE.includes("LEGACY_TEMPLATES.map"), "legacy templates remain reachable");
   assert.ok(STUDIO_SOURCE.includes("aria-pressed"), "template choices must expose their pressed state");
   assert.ok(STUDIO_SOURCE.includes("TemplateGlyph"), "templates need a visual wireframe, not just a label");

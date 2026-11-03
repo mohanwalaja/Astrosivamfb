@@ -86,8 +86,11 @@ interface TextOptions {
 
 const measure = (ctx: CanvasRenderingContext2D, text: string, font: string, tracking = 0) => {
   ctx.font = font;
-  const width = ctx.measureText(text).width;
-  return width + Math.max(0, text.length - 1) * tracking;
+  // drawTracked advances after every glyph, so allow tracking on every glyph and
+  // keep a 1.5 % safety margin: a line that measures exactly to the box is one
+  // rounding error away from crossing the frame.
+  const width = ctx.measureText(text).width + text.length * tracking;
+  return width * 1.015;
 };
 
 const wrap = (ctx: CanvasRenderingContext2D, text: string, width: number, font: string, tracking: number): string[] => {
@@ -250,13 +253,15 @@ function render(scene: Scene, role: string, placed: Placed | null, box: Box, opt
 }
 
 function text(scene: Scene, role: string, value: string, x: number, y: number, w: number, options: TextOptions & { color?: string }): number {
-  const box: Box = { x, y, w, h: options.max * (options.maxLines ?? 3) * (options.lineHeight ?? 1.16) + 2 };
+  const align = options.align ?? "left";
+  const boxX = align === "center" ? x - w / 2 : align === "right" ? x - w : x;
+  const box: Box = { x: boxX, y, w, h: options.max * (options.maxLines ?? 3) * (options.lineHeight ?? 1.16) + 2 };
   const placed = place(scene.ctx, value, box, options);
   if (!placed) {
     scene.audit.overflow.push(`${role}: ${value.slice(0, 44)}`);
     return y;
   }
-  return render(scene, role, placed, { x, y, w, h: placed.height }, options, y);
+  return render(scene, role, placed, { x: boxX, y, w, h: placed.height }, options, y);
 }
 
 /** Headline + subline as one measured block; the headline shrinks to fit. */
@@ -643,7 +648,7 @@ function paintArt(scene: Scene, box: Box, key: ArtKey) {
   }
   if (key === "duotone") {
     ctx.save();
-    drawImageIn(ctx, image, box, { inset: 0.03, focusY: 0.44, radius: 2 });
+    drawImageIn(ctx, image, box, { inset: 0.07, focusY: 0.44, radius: 2 });
     ctx.globalCompositeOperation = "multiply";
     ctx.fillStyle = withAlpha(theme.light ? theme.gold : theme.bgTo, 0.32);
     ctx.fillRect(box.x, box.y, box.w, box.h);
@@ -654,21 +659,21 @@ function paintArt(scene: Scene, box: Box, key: ArtKey) {
     return;
   }
   if (key === "arch") {
-    drawImageIn(ctx, image, box, { inset: 0.04, shape: "arch", focusY: 0.42, outline: withAlpha(theme.gold, 0.6), outlineWidth: Math.max(1, box.w * 0.003) });
+    drawImageIn(ctx, image, box, { inset: 0.09, shape: "arch", focusY: 0.42, outline: withAlpha(theme.gold, 0.6), outlineWidth: Math.max(1, box.w * 0.003) });
     return;
   }
   if (key === "circle" || key === "cornerCrop") {
-    drawImageIn(ctx, image, box, { inset: 0.04, shape: "circle", focusY: 0.44, outline: withAlpha(theme.gold, 0.55), outlineWidth: Math.max(1, box.w * 0.0026) });
+    drawImageIn(ctx, image, box, { inset: 0.09, shape: "circle", focusY: 0.44, outline: withAlpha(theme.gold, 0.55), outlineWidth: Math.max(1, box.w * 0.0026) });
     return;
   }
   if (key === "plate") {
     drawImageIn(ctx, image, box, {
-      inset: 0.04, focusY: 0.44, radius: Math.min(box.w, box.h) * 0.02,
+      inset: 0.06, focusY: 0.44, radius: Math.min(box.w, box.h) * 0.02,
       outline: withAlpha(theme.gold, 0.5), outlineWidth: Math.max(1, box.w * 0.002),
     });
     return;
   }
-  drawImageIn(ctx, image, box, { inset: 0.04, focusY: 0.42, vignette: 0.16 });
+  drawImageIn(ctx, image, box, { inset: 0.08, focusY: 0.42, vignette: 0.16 });
 }
 
 /* --------------------------------- brand ---------------------------------- */
@@ -686,8 +691,11 @@ function drawLogo(scene: Scene, x: number, y: number, align: CanvasTextAlign = "
   ctx.textAlign = align;
   const tracking = W * 0.0042;
   const width = measure(ctx, label, SANS(size, 600), tracking);
-  const originX = align === "right" ? x - width - size * 1.9 : align === "center" ? x - width / 2 - size * 0.95 : x;
-  const markX = align === "right" ? x - width - size * 0.75 : align === "center" ? x - width / 2 - size * 0.1 : x + width + size * 0.75;
+  const gap = size * 1.75;
+  const group = width + gap;
+  const start = align === "right" ? x - group : align === "center" ? x - group / 2 : x;
+  const originX = start + gap;
+  const markX = start + size * 0.5;
   ctx.globalAlpha = 0.95;
   drawTracked(ctx, label, originX, y, tracking, "left");
   const r = size * 0.52;
@@ -770,7 +778,8 @@ function drawFacts(
   const { W, H, ctx, theme, faces, copy } = scene;
   const facts = copy.facts;
   if (mode === "inline") {
-    text(scene, "facts", facts.join("  ·  "), x, y, w, {
+    const anchorX = align === "center" ? x + w / 2 : align === "right" ? x + w : x;
+    text(scene, "facts", facts.join("  ·  "), anchorX, y, w, {
       face: faces.body, max: W * 0.0195, min: W * 0.0155, maxLines: 2, weight: 500,
       color: withAlpha(theme.ink, 0.72), align,
     });
@@ -834,10 +843,10 @@ const sanctum: Painter = (scene) => {
   if (scene.design.ornament !== "none") ornament(scene, "lampRow", W / 2, m * 1.85 + artH + u * 1.4, W * 0.2, 0.85);
   const copyTop = m * 1.85 + artH + u * 3.2;
   const ctaY = H - m * 1.5;
-  const copyBottom = copyBlock(scene, m * 1.1, copyTop, W - m * 2.2, ctaY - u * 4.6 - copyTop, {
-    headlineMax: W * 0.062, headlineLines: 3, subMax: W * 0.0205, subLines: 3, align: "center",
+  const copyBottom = copyBlock(scene, m * 1.6, copyTop, W - m * 3.2, ctaY - u * 4.6 - copyTop, {
+    headlineMax: W * 0.062, headlineLines: 3, subMax: W * 0.0205, subLines: 3, align: "center", anchor: "center",
   });
-  drawFacts(scene, m * 1.1, Math.min(copyBottom + u * 1.6, ctaY - u * 3.2), W - m * 2.2, "inline", "center");
+  drawFacts(scene, m * 1.6, Math.min(copyBottom + u * 1.8, ctaY - u * 3.2), W - m * 3.2, "inline", "center");
   drawCta(scene, scene.copy.cta, W / 2, ctaY, W * 0.5, "center");
   drawFooter(scene, H - m * 0.35, "center");
 };
@@ -847,12 +856,12 @@ const pillars: Painter = (scene) => {
   const u = W * 0.024;
   drawLogo(scene, W / 2, m * 0.62, "center");
   drawKicker(scene, scene.copy.kicker, W / 2, m * 1.15, W * 0.62, "center");
-  const artW = W * 0.62;
-  paintArt(scene, { x: (W - artW) / 2, y: m * 1.8, w: artW, h: H * 0.3 }, "plate");
-  const copyTop = m * 1.8 + H * 0.3 + u * 2.6;
+  const artW = W * 0.7;
+  paintArt(scene, { x: (W - artW) / 2, y: m * 1.7, w: artW, h: H * 0.32 }, "plate");
+  const copyTop = m * 1.7 + H * 0.32 + u * 2.4;
   const ctaY = H - m * 1.5;
-  const bottom = copyBlock(scene, m * 1.25, copyTop, W - m * 2.5, ctaY - u * 4.4 - copyTop, {
-    headlineMax: W * 0.06, headlineLines: 3, subMax: W * 0.0205, subLines: 3, align: "center",
+  const bottom = copyBlock(scene, m * 1.4, copyTop, W - m * 2.8, ctaY - u * 4.4 - copyTop, {
+    headlineMax: W * 0.064, headlineLines: 3, subMax: W * 0.0205, subLines: 3, align: "center", anchor: "center",
   });
   drawFacts(scene, m * 1.25, Math.min(bottom + u * 1.5, ctaY - u * 3), W - m * 2.5, "inline", "center");
   drawCta(scene, scene.copy.cta, W / 2, ctaY, W * 0.5, "center");
@@ -864,12 +873,13 @@ const scroll: Painter = (scene) => {
   const u = W * 0.026;
   drawLogo(scene, m, m * 0.7, "left");
   drawKicker(scene, scene.copy.kicker, m, m * 1.2, W * 0.5);
-  const artSize = W * 0.42;
-  paintArt(scene, { x: W - m - artSize, y: m * 1.6, w: artSize, h: artSize }, "circle");
-  const copyTop = m * 1.6 + u * 2;
+  const artSize = W * 0.36;
+  const artX = W - m * 0.7 - artSize;
+  paintArt(scene, { x: artX, y: m * 1.55, w: artSize, h: artSize }, "circle");
+  const copyTop = m * 1.55 + artSize + u * 2.2;
   const ctaY = H - m * 1.6;
-  const width = W - m * 2 - artSize * 0.1;
-  const bottom = copyBlock(scene, m, copyTop, width, ctaY - u * 7.4 - copyTop, {
+  const width = W - m * 2.2;
+  const bottom = copyBlock(scene, m, copyTop, width, ctaY - u * 8.4 - copyTop, {
     headlineMax: W * 0.058, headlineLines: 4, subMax: W * 0.0205, subLines: 4,
   });
   drawFacts(scene, m, Math.min(bottom + u * 2, ctaY - u * 4.6), width, "rows");
@@ -880,7 +890,7 @@ const scroll: Painter = (scene) => {
 const medallion: Painter = (scene) => {
   const { W, H, m } = scene;
   const u = W * 0.024;
-  const size = W * 0.62;
+  const size = W * 0.56;
   drawLogo(scene, W / 2, m * 0.62, "center");
   drawKicker(scene, scene.copy.kicker, W / 2, m * 1.1, W * 0.64, "center");
   paintArt(scene, { x: (W - size) / 2, y: m * 1.7, w: size, h: size }, "circle");
@@ -965,7 +975,7 @@ const ledger: Painter = (scene) => {
   const colX = W * 0.56;
   drawLogo(scene, m, m * 0.7, "left");
   drawKicker(scene, scene.copy.kicker, m, m * 1.2, W * 0.44);
-  const artBox: Box = { x: colX, y: m * 1.5, w: W - colX - m * 0.6, h: H * 0.46 };
+  const artBox: Box = { x: colX, y: 0, w: W - colX, h: H };
   paintArt(scene, artBox, "sideColumn");
   const serviceBottom = text(scene, "service", scene.copy.serviceTitle, m, m * 2.4, colX - m * 2.2, {
     face: scene.faces.display, max: W * 0.030, min: W * 0.020, maxLines: 3, weight: scene.faces.weight,
@@ -1018,9 +1028,9 @@ const corner: Painter = (scene) => {
     color: withAlpha(theme.ink, 0.5), caps: true, tracking: W * 0.0022,
   });
   const ctaY = H - m * 1.3;
-  const copyTop = H * 0.6;
-  const bottom = copyBlock(scene, m, copyTop, W * 0.68, ctaY - u * 5.2 - copyTop, {
-    headlineMax: W * 0.058, headlineLines: 3, subMax: W * 0.0205, subLines: 3,
+  const copyTop = H * 0.54;
+  const bottom = copyBlock(scene, m, copyTop, W * 0.72, ctaY - u * 5.2 - copyTop, {
+    headlineMax: W * 0.064, headlineLines: 3, subMax: W * 0.0205, subLines: 3, anchor: "center",
   });
   drawFacts(scene, m, Math.min(bottom + u * 1.8, ctaY - u * 3.4), W * 0.62, "inline");
   drawCta(scene, scene.copy.cta, m, ctaY, W * 0.55);
@@ -1042,8 +1052,11 @@ const grid: Painter = (scene) => {
   const cardX = m + col * 7 + gap * 0.4;
   const cardW = col * 5 - gap * 0.4;
   ctx.save();
-  ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.12 : 0.1);
+  ctx.fillStyle = withAlpha(theme.bgTo, 0.72);
   ctx.fillRect(cardX, H * 0.09, cardW, H * 0.29);
+  ctx.strokeStyle = withAlpha(theme.gold, 0.42);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cardX, H * 0.09, cardW, H * 0.29);
   ctx.restore();
   const serviceBottom = text(scene, "service", scene.copy.serviceTitle, cardX + gap, H * 0.12, cardW - gap * 2, {
     face: scene.faces.display, max: W * 0.028, min: W * 0.019, maxLines: 3, weight: scene.faces.weight,
@@ -1055,7 +1068,7 @@ const grid: Painter = (scene) => {
   });
   drawLogo(scene, W - m, m * 0.62, "right");
   const ctaY = H - m * 1.3;
-  const cardsH = H * 0.125;
+  const cardsH = H * 0.112;
   const copyTop = artBox.y + artBox.h + u * 2.4;
   copyBlock(scene, m, copyTop, col * 7 - gap, ctaY - cardsH - u * 2.4 - copyTop, {
     headlineMax: W * 0.054, headlineLines: 3, subMax: W * 0.0205, subLines: 3, anchor: "center",

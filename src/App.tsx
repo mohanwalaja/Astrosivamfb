@@ -51,7 +51,7 @@ const FestivalWishes = lazy(() =>
 const PosterStudio = lazy(() => import("./components/PosterStudio").then((m) => ({ default: m.PosterStudio })));
 const Panchangam = lazy(() => import("./components/Panchangam").then((m) => ({ default: m.Panchangam })));
 const ServicePosts = lazy(() => import("./components/ServicePosts").then((m) => ({ default: m.ServicePosts })));
-const StyleGallery = lazy(() => import("./components/StyleGallery").then((m) => ({ default: m.StyleGallery })));
+const DesignLibrary = lazy(() => import("./components/DesignLibrary").then((m) => ({ default: m.DesignLibrary })));
 const PlainWords = lazy(() => import("./components/PlainWords").then((m) => ({ default: m.PlainWords })));
 import { ensureFonts, fontHealth } from "./lib/canvas";
 import { getCsrfToken } from "./lib/csrf";
@@ -72,7 +72,7 @@ const NAV = [
     items: [
       { id: "assets", label: "Asset studio", icon: Layers },
       { id: "plain-words", label: "Plain-words posters", icon: Megaphone },
-      { id: "styles", label: "Style gallery", icon: Shapes },
+      { id: "designs", label: "Design library", icon: Shapes },
       { id: "poster", label: "Poster studio", icon: PenLine },
       { id: "panchangam", label: "Panchangam", icon: Sunrise },
       { id: "festivals", label: "Festival wishes", icon: PartyPopper },
@@ -530,8 +530,8 @@ function Shell() {
                 {section === "profile-cover" ? <ProfileCover /> : null}
                 {section === "assets" ? <AssetStudio /> : null}
                 {section === "plain-words" ? <PlainWords onNavigate={navigate} /> : null}
-                {section === "styles" ? <StyleGallery onNavigate={navigate} /> : null}
-                {section === "poster" ? <PosterStudio /> : null}
+                {section === "designs" ? <DesignLibrary onNavigate={navigate} /> : null}
+                {section === "poster" ? <PosterStudio onNavigate={navigate} /> : null}
                 {section === "panchangam" ? <Panchangam /> : null}
                 {section === "festivals" ? <FestivalWishes /> : null}
                 {section === "services" ? <ServicePosts onNavigate={navigate} /> : null}

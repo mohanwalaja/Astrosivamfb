@@ -108,7 +108,7 @@ test("publishing sends per-platform captions in one CSRF-protected multipart POS
 test("single-image creative surfaces open the shared publisher with the rendered design", () => {
   for (const path of [
     "src/components/ServicePosts.tsx",
-    "src/components/StyleGallery.tsx",
+    "src/components/DesignLibrary.tsx",
     "src/components/FestivalWishes.tsx",
     "src/components/PosterStudio.tsx",
     "src/components/ServiceAds.tsx",

@@ -12,7 +12,7 @@ const CREATIVE = read("src/components/CreativeCanvas.tsx");
 const IG = read("src/components/IgCanvas.tsx");
 
 const workflowSections = [
-  "launch", "brand", "profile-cover", "assets", "styles", "poster", "panchangam",
+  "launch", "brand", "profile-cover", "assets", "designs", "poster", "panchangam",
   "festivals", "services", "instagram", "facebook", "calendar", "hashtags", "mockups", "export",
 ];
 

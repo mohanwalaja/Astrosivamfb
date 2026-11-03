@@ -7,6 +7,8 @@ import type {
   StyleKey,
   ThemeKey,
 } from "../types";
+import { getDesign } from "../data/library";
+import { renderLibraryDesign } from "./libraryRender";
 import { THEMES } from "../data/brand";
 import { LAYOUT_TEMPLATE, TEMPLATE_MAP, TEMPLATES, layoutForTemplate, templateForLayout } from "../data/posterTemplates";
 import { createCanvas, ensureFonts, loadImageSource, loadLogo } from "./canvas";
@@ -27,6 +29,8 @@ export interface PosterOptions {
    * absent the template is derived from `layout`.
    */
   template?: PosterTemplate;
+  /** A design from the 150-design library. When present it owns the layout. */
+  designId?: string;
   display: DisplayFontKey;
   script: ScriptFontKey;
   image?: string | null;
@@ -79,6 +83,26 @@ export type { TemplateMeta } from "../types";
 /* --------------------------------- render --------------------------------- */
 
 export async function renderPoster(options: PosterOptions): Promise<HTMLCanvasElement> {
+  const libraryDesign = getDesign(options.designId);
+  if (libraryDesign) {
+    return renderLibraryDesign({
+      design: libraryDesign,
+      width: options.width,
+      height: options.height,
+      copy: {
+        kicker: options.kicker,
+        serviceTitle: options.serviceTitle,
+        headline: options.headline,
+        subline: options.subline,
+        facts: options.facts as [string, string, string] | undefined,
+        cta: options.cta,
+      },
+      image: options.image,
+      footer: options.footer,
+      showLogo: options.showLogo,
+      scale: options.scale,
+    });
+  }
   const {
     width,
     height,
