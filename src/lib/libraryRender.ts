@@ -170,7 +170,7 @@ const contrast = (a: string, b: string) => {
  * This is what lets a light palette sit on a dark photograph — and why the
  * contrast audit below can be a hard pass/fail.
  */
-function protectGround(scene: Scene, box: Box, color: string, y: number) {
+function protectGround(scene: Scene, box: Box, color: string, y: number): string {
   const { ctx, W, H, scale, theme } = scene;
   const sx = Math.max(0, Math.round(box.x * scale));
   const sy = Math.max(0, Math.round((y - 8) * scale));
@@ -180,7 +180,7 @@ function protectGround(scene: Scene, box: Box, color: string, y: number) {
   try {
     data = ctx.getImageData(sx, sy, sw, sh).data;
   } catch {
-    return;
+    return color;
   }
   let r = 0;
   let g = 0;
@@ -192,12 +192,18 @@ function protectGround(scene: Scene, box: Box, color: string, y: number) {
     b += data[i + 2];
     count += 1;
   }
-  if (!count) return;
+  if (!count) return color;
   const ground = luminanceOf([r / count, g / count, b / count]);
   const ink = parseColor(color);
-  if (!ink) return;
-  const ratio = (Math.max(ground, luminanceOf(ink)) + 0.05) / (Math.min(ground, luminanceOf(ink)) + 0.05);
-  if (ratio >= 3.6) return;
+  if (!ink) return color;
+  const against = (value: number) => (Math.max(ground, value) + 0.05) / (Math.min(ground, value) + 0.05);
+  if (against(luminanceOf(ink)) >= 3.6) return color;
+  // Before covering the artwork, see whether the opposing tone can carry the
+  // line: a light palette on a dark photograph simply switches that line to
+  // ivory, which is honest editorial practice and leaves the picture intact.
+  const flip = ground > 0.45 ? "#14100E" : "#FBF5E9";
+  const flipped = parseColor(flip);
+  if (flipped && against(luminanceOf(flipped)) >= 4.2) return flip;
   const pad = 10;
   const veil = ctx.createLinearGradient(0, y - pad, 0, y + box.h + pad);
   veil.addColorStop(0, withAlpha(theme.bgFrom, 0.6));
@@ -207,6 +213,7 @@ function protectGround(scene: Scene, box: Box, color: string, y: number) {
   ctx.fillStyle = veil;
   ctx.fillRect(box.x - pad, y - pad, box.w + pad * 2, box.h + pad * 2);
   ctx.restore();
+  return color;
 }
 
 /* --------------------------------- scene ---------------------------------- */
@@ -231,8 +238,7 @@ interface Scene {
 function render(scene: Scene, role: string, placed: Placed | null, box: Box, options: TextOptions, y = box.y): number {
   if (!placed) return y;
   const { ctx } = scene;
-  const color = options.color ?? scene.theme.ink;
-  protectGround(scene, box, color, y);
+  const color = protectGround(scene, box, options.color ?? scene.theme.ink, y);
   ctx.save();
   ctx.font = options.face(placed.size, options.weight);
   ctx.fillStyle = color;
@@ -615,7 +621,7 @@ function paintOrnamentFrame(scene: Scene) {
   if (key === "kolam") {
     if (design.layout !== "pillars") {
       ornament(scene, "kolam", m * 1.05, H - m * 1.05, W * 0.11, 0.34);
-      ornament(scene, "kolam", W - m * 1.05, m * 1.05, W * 0.11, 0.3);
+      ornament(scene, "kolam", W - m * 1.05, H - m * 1.05, W * 0.11, 0.3);
     }
   } else if (key === "lampRow") {
     if (design.layout !== "sanctum" && design.layout !== "horizon") ornament(scene, "lampRow", W / 2, H - m * 0.95, W * 0.24, 0.8);
@@ -624,7 +630,7 @@ function paintOrnamentFrame(scene: Scene) {
   } else if (key === "jasmine") {
     if (design.layout !== "scroll") ornament(scene, "jasmine", W - m * 1.15, H * 0.5, W * 0.17, 0.75);
   } else if (key === "starMap") {
-    ornament(scene, "starMap", W * 0.84, H * 0.13, W * 0.28, 0.45);
+    ornament(scene, "starMap", W * 0.82, H * 0.74, W * 0.26, 0.35);
   } else if (key === "mandalaRings") {
     ornament(scene, "mandalaRings", W * 0.5, H * 0.33, W * 0.9, 0.14);
   }
@@ -945,10 +951,11 @@ const band: Painter = (scene) => {
     caps: scene.faces.caps, tracking: scene.faces.display === DISPLAY ? W * 0.0016 : 0, lineHeight: 1.08,
   });
   if (placed) {
-    render(scene, "headline", placed, { x: m, y: headlineTop, w: W - m * 2, h: placed.height }, {
+    const centredTop = headlineTop + Math.max(0, (artY - headlineTop - placed.height) / 2 - u);
+    render(scene, "headline", placed, { x: m, y: centredTop, w: W - m * 2, h: placed.height }, {
       face: scene.faces.display, max: W * 0.068, min: W * 0.036, maxLines: 3, weight: scene.faces.weight,
       caps: scene.faces.caps, tracking: scene.faces.display === DISPLAY ? W * 0.0016 : 0, lineHeight: 1.08,
-    }, headlineTop);
+    }, centredTop);
   } else {
     scene.audit.overflow.push(`headline: ${scene.copy.headline.slice(0, 40)}`);
   }
