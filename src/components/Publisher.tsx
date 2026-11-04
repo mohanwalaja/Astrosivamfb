@@ -54,6 +54,7 @@ type PostResult = {
   platform: "facebook" | "instagram";
   success: boolean;
   id?: string;
+  permalinkUrl?: string;
   error?: string;
   graph?: GraphError | null;
   hint?: string;
@@ -809,11 +810,28 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
                         )}
                         <span>
                           <strong className="capitalize">{result.platform}</strong>
-                          {result.success ? ` · published (id ${result.id || "not returned"})` : ` · ${result.error || "failed"}`}
+                          {result.success
+                            ? ` · ${result.platform === "facebook" ? "Page post created" : "published"} (id ${result.id || "not returned"})`
+                            : ` · ${result.error || "failed"}`}
                         </span>
                       </div>
+                      {result.success && result.permalinkUrl ? (
+                        <a
+                          href={result.permalinkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1.5 ml-6 inline-flex items-center gap-1 font-semibold text-[#C7E5D5] underline decoration-[rgba(143,191,165,0.5)] underline-offset-2"
+                        >
+                          Open Facebook post <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                        </a>
+                      ) : null}
+                      {result.success && result.platform === "facebook" ? (
+                        <p className="mt-1.5 pl-6 text-[10px] text-[#B4D5C4]">
+                          Meta returned a Page post ID, not just a photo ID. Check the post while logged out; if others cannot see it, complete Meta’s required review/access steps and switch the app from Development to Live mode.
+                        </p>
+                      ) : null}
                       {!result.success && result.category ? <p className="mt-1.5 pl-6 text-[9.5px] uppercase tracking-wide">{result.category.replaceAll("_", " ")}</p> : null}
-                      {!result.success && result.outcomeUnknown ? <p className="mt-1.5 pl-6 font-semibold text-[#F0C3A2]">Meta may have accepted this post before the connection failed. Check the Page/Instagram account before retrying to avoid a duplicate.</p> : null}
+                      {!result.success && result.outcomeUnknown ? <p className="mt-1.5 pl-6 font-semibold text-[#F0C3A2]">Meta may have accepted content even though the result is not confirmed. Check the Page/Instagram account before retrying to avoid a duplicate.</p> : null}
                       {!result.success && result.graph ? (
                         <dl className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-0.5 pl-6 text-[9.5px] text-[#E6C9A8]">
                           {result.graph.type ? (
