@@ -8,7 +8,7 @@ export const transits: Service = {
   kind: "Paid report",
   badge: "Current sky",
   price: "US$5 · ₹470",
-  priceNote: "Read with your Birth Jathagam · US$5 · ₹470 · 1st report FREE (Beta)",
+  priceNote: "Read with your Birth Jathagam · US$5 · ₹470 · First order FREE (Beta)",
   path: "/birth-jathagam",
   url: "https://astrosivam.com/birth-jathagam",
   promise:
@@ -51,7 +51,7 @@ export const transits: Service = {
       "Jupiter windows for new beginnings",
       "Rahu–Ketu axis and remedies",
     ],
-    cta: "Read the sky against your chart at astrosivam.com/birth-jathagam — US$5 · ₹470 · 1st report FREE (Beta).",
+    cta: "Read the sky against your chart at astrosivam.com/birth-jathagam — US$5 · ₹470 · First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#SadeSati", "#EzharaiSani", "#SaturnTransit", "#Gocharam"],
   },
   ig: {
@@ -59,7 +59,7 @@ export const transits: Service = {
     body: [
       "Saturn transits one sign every two and a half years. What it means for you depends on the house it touches in your own chart.",
       "Our transit reading maps the stage you are in, when it lifts, and the Jupiter windows worth planning around.",
-      "Read with your Birth Jathagam · US$5 · ₹470 · first report FREE (Beta).",
+      "Read with your Birth Jathagam · US$5 · ₹470 · first order FREE (Beta).",
     ],
     cta: "Get your Birth Jathagam → link in bio · astrosivam.com/birth-jathagam",
     hashtags: [

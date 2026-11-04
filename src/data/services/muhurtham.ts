@@ -8,7 +8,7 @@ export const muhurtham: Service = {
   kind: "Paid report",
   badge: "Six-month calendar",
   price: "US$10 · ₹940",
-  priceNote: "US$10 · ₹940 · 18 ceremonies · Nalla Neram timings included · 1st report FREE (Beta)",
+  priceNote: "US$10 · ₹940 · 18 ceremonies · Nalla Neram timings included · First order FREE (Beta)",
   path: "/muhurtham",
   url: "https://astrosivam.com/muhurtham",
   promise:
@@ -51,7 +51,7 @@ export const muhurtham: Service = {
       "Tara Balam and Chandrashtama star checks",
       "English, Tamil or Hindi PDF",
     ],
-    cta: "Plan with clarity at astrosivam.com/muhurtham — US$10 · ₹940 · 1st report FREE (Beta).",
+    cta: "Plan with clarity at astrosivam.com/muhurtham — US$10 · ₹940 · First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#SubhaMuhurtham", "#Muhurtham", "#GrihaPravesam", "#AuspiciousDates"],
   },
   ig: {
@@ -59,7 +59,7 @@ export const muhurtham: Service = {
     body: [
       "Tithi, nakshatra, the lagna at the ceremony, and the strength of Guru and Sukra. A muhurtham is when all four agree.",
       "Our report returns six months of windows for eighteen ceremonies — with Nalla Neram and Rahu Kalam timings for each.",
-      "PDF in English, Tamil or Hindi · US$10 · ₹940 · first report FREE (Beta).",
+      "PDF in English, Tamil or Hindi · US$10 · ₹940 · first order FREE (Beta).",
     ],
     cta: "Order the six-month calendar → link in bio · astrosivam.com/muhurtham",
     hashtags: [

@@ -379,7 +379,7 @@ function igService(scene: Scene) {
   }
 
   // Price, split into amount and qualifier — the same rule the FB cards follow.
-  const raw = content.price || "First report free";
+  const raw = content.price || "First order free";
   const parts = raw.split(/\s*·\s*/).filter(Boolean);
   const amount = parts.length > 1 ? parts.slice(0, 2).join(" · ") : raw;
   const note = parts.length > 1 ? parts.slice(2).join(" · ") : "";

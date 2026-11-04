@@ -8,7 +8,7 @@ export const studentsJathagam: Service = {
   kind: "Paid report",
   badge: "Ages 11–18 · Vidya Jathagam",
   price: "US$5 · ₹470",
-  priceNote: "US$5 · ₹470 · auto-selected when age 11–18 · 1st report FREE (Beta) · 7 days of astrologer chat",
+  priceNote: "US$5 · ₹470 · auto-selected when age 11–18 · First order FREE (Beta) · 7 days of astrologer chat",
   path: "/birth-jathagam",
   url: "https://astrosivam.com/birth-jathagam",
   promise:
@@ -53,7 +53,7 @@ export const studentsJathagam: Service = {
       "Subject & stream hints; competitive-exam dasa windows",
       "Sports/arts/peer lens + study timeline + 7 days of chat",
     ],
-    cta: "Order Students Jadagam at astrosivam.com/birth-jathagam — US$5 · ₹470, 1st report FREE (Beta).",
+    cta: "Order Students Jadagam at astrosivam.com/birth-jathagam — US$5 · ₹470, First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#StudentsJathagam", "#VidyaJathagam", "#StudentHoroscope", "#VedicAstrology"],
     pinned: false,
   },
@@ -62,7 +62,7 @@ export const studentsJathagam: Service = {
     body: [
       "Students Jadagam (11–18) — auto-selected from DOB. Vidya, focus & memory, subject/stream affinities, exam dasa windows, habits & peer patterns.",
       "Rasi + D-9 + D-24 summary in plain language, plus a 6–7 year study timeline and study remedies that actually fit school life.",
-      "Lahiri + priest-reviewed · PDF EN/தமிழ்/हिंदी · US$5 · ₹470 · 1st FREE (Beta) · 7 days chat.",
+      "Lahiri + priest-reviewed · PDF EN/தமிழ்/हिंदी · US$5 · ₹470 · First order FREE (Beta) · 7 days chat.",
     ],
     cta: "Link in bio → astrosivam.com/birth-jathagam (enter DOB, the right plan appears)",
     hashtags: [
@@ -137,7 +137,7 @@ export const studentsJathagam: Service = {
       {
         kicker: "What arrives",
         headline: "A student PDF, not an adult one.",
-        body: "Rasi + Navamsa + D-24 summary, study timeline, EN/தமிழ்/हिंदी. US$5 · ₹470 · 1st FREE (Beta) · astrosivam.com/birth-jathagam",
+        body: "Rasi + Navamsa + D-24 summary, study timeline, EN/தமிழ்/हिंदी. US$5 · ₹470 · First order FREE (Beta) · astrosivam.com/birth-jathagam",
       },
     ],
   },
@@ -156,7 +156,7 @@ export const studentsJathagam: Service = {
       "Vidya · focus · memory",
       "Numbers vs words vs making",
       "Exam dasa window → when to push",
-      "US$5 · ₹470 · 1st FREE (Beta)",
+      "US$5 · ₹470 · First order FREE (Beta)",
     ],
     cta: "Enter birth details — the right plan shows · astrosivam.com/birth-jathagam",
     audio: "Upbeat study-room ambience (pages, soft tabla) + calm English/Tamil voiceover; burned-in captions.",

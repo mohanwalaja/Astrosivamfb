@@ -38,7 +38,7 @@ interface LocaleLine {
 }
 
 /**
- * One trilingual line per service, reused by every composition so the six
+ * One trilingual line per service, reused by every composition so the
  * services stay recognisable across a campaign.
  */
 export const SERVICE_LOCALES: Record<string, LocaleLine> = {
@@ -47,6 +47,7 @@ export const SERVICE_LOCALES: Record<string, LocaleLine> = {
   "baby-naming": { tamil: "பிறந்த நட்சத்திரம் பெயரின் முதல் எழுத்து", hindi: "जन्म नक्षत्र, नाम की पहली ध्वनि।", review: "prepared" },
   muhurtham: { tamil: "சுப முகூர்த்தம் ஆறு மாத நாட்கள்", hindi: "शुभ मुहूर्त, छह महीने की तिथियाँ।", review: "prepared" },
   panchangam: { tamil: "இன்றைய பஞ்சாங்கம் இலவசமாக", hindi: "आज का पंचांग, मुफ़्त।", review: "prepared" },
+  rasipalan: { tamil: "இன்றைய ராசி பலன் இங்கே", hindi: "आज का राशिफल यहाँ पढ़ें।", review: "prepared" },
   transits: { tamil: "சனி பெயர்ச்சி தேதியுடன்", hindi: "शनि की चाल, तारीख़ के साथ।", review: "prepared" },
   trust: { tamil: "பணம் செலுத்தும் முன் முழு மாதிரி", hindi: "भुगतान से पहले पूरा नमूना।", review: "prepared" },
 };
@@ -485,6 +486,72 @@ export const SERVICE_ADS: ServiceAd[] = [
     use: "The house line, set as type. Use it as the pinned post on the profile.",
   },
 
+  /* ------------------------------- Rasi Palan ----------------------------- */
+  {
+    ...ad(
+      "rasipalan",
+      "ad-statement",
+      "lagoon",
+      {
+        kicker: "Rasi Palan · Moon sign",
+        headline: "Four timeframes. One current reading.",
+        subline: "Choose Daily, Weekly, Monthly or Yearly, then tap your Moon sign.",
+        cta: "Read your Rasi Palan",
+        facts: ["Daily, Weekly, Monthly & Yearly periods", "All 12 Moon signs, Aries to Pisces", "Read full palan from each sign card"],
+      },
+      "krishna",
+    ),
+    use: "The lead plate for the new service. It explains the four views without freezing a prediction into the artwork.",
+  },
+  {
+    ...ad(
+      "rasipalan",
+      "ad-checklist",
+      "ivory",
+      {
+        kicker: "Rasi Palan · Moon sign",
+        headline: "What your sign card shows.",
+        subline: "",
+        cta: "Choose your Moon sign",
+        facts: ["Five-star period summary for each sign", "Period labels including Normal period and Care needed", "Money & Wealth or Career & Business", "Read full palan from each sign card"],
+      },
+      "krishna",
+    ),
+    use: "A product walkthrough for people seeing Rasi Palan for the first time. Use the live page for any dated reading.",
+  },
+  {
+    ...ad(
+      "rasipalan",
+      "ad-plate",
+      "midnight",
+      {
+        kicker: "Rasi Palan · 12 Moon signs",
+        headline: "Your Moon sign has its own page.",
+        subline: "Scan the summary, see the focus highlight, then open the full palan.",
+        cta: "Open the full palan",
+        facts: ["All 12 Moon signs, Aries to Pisces", "Five-star period summary for each sign", "Read full palan from each sign card"],
+      },
+      "krishna",
+    ),
+    use: "A simple conversion plate after the service has been introduced. Do not print a rating that belongs to another date.",
+  },
+  {
+    ...ad(
+      "rasipalan",
+      "ad-split",
+      "lagoon",
+      {
+        kicker: "Daily · Weekly · Monthly · Yearly",
+        headline: "A quick check or the longer view.",
+        subline: "Money, career, relationships and travel highlights vary by sign and period.",
+        cta: "Check the current palan",
+        facts: ["Daily, Weekly, Monthly & Yearly periods", "Love & Relations or Travel", "Read full palan from each sign card"],
+      },
+      "krishna",
+    ),
+    use: "Use for the weekly and monthly habit. Pair it with a caption copied from the current live period, never an old forecast.",
+  },
+
   /* ----------------------------- Samples & Trust -------------------------- */
   {
     ...ad(
@@ -525,8 +592,8 @@ export const adsFor = (serviceId: string): ServiceAd[] => SERVICE_ADS.filter((it
 
 export const adById = (id: string): ServiceAd | undefined => SERVICE_ADS.find((item) => item.id === id);
 
-/** The six briefed services, in the order the studio lists them. */
-export const AD_SERVICE_IDS = ["jathagam", "marriage", "baby-naming", "muhurtham", "panchangam", "transits", "trust"];
+/** The briefed services, in the order the studio lists them; trust stays last. */
+export const AD_SERVICE_IDS = ["jathagam", "marriage", "baby-naming", "muhurtham", "panchangam", "rasipalan", "transits", "trust"];
 
 /* ------------------------------ reference plates -------------------------- */
 
@@ -577,7 +644,7 @@ export function referencePlates(serviceId: string): ReferencePlate[] {
 
 export const AD_RULES = [
   "One action per plate. If a headline needs a second CTA, it needs a second plate.",
-  "Price, URL and tier names come from the service record — never retyped on a layout.",
+  "Price or public-reading label, URL and tier names come from the service record — never retyped on a layout.",
   "Two or three facts, each traceable to the service data. No testimonials, no counts we cannot show.",
   "No promise of an outcome, no “guaranteed”, no urgency that we invented.",
   "English is the display line. Tamil and Hindi sit beneath it, never competing for the first read.",

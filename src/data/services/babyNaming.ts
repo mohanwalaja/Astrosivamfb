@@ -8,7 +8,7 @@ export const babyNaming: Service = {
   kind: "Paid report",
   badge: "Namakaranam",
   price: "US$5 · ₹470",
-  priceNote: "US$5 · ₹470 · printable naming certificate included · 1st report FREE (Beta)",
+  priceNote: "US$5 · ₹470 · printable naming certificate included · First order FREE (Beta)",
   path: "/baby-naming",
   url: "https://astrosivam.com/baby-naming",
   promise:
@@ -51,7 +51,7 @@ export const babyNaming: Service = {
       "Curated names with meanings in three languages",
       "Printable ASTRO SIVAM naming certificate",
     ],
-    cta: "Order Baby Naming at astrosivam.com/baby-naming — US$5 · ₹470 · 1st report FREE (Beta).",
+    cta: "Order Baby Naming at astrosivam.com/baby-naming — US$5 · ₹470 · First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#BabyNaming", "#Namakaranam", "#NakshatraNames", "#TamilBabyNames"],
   },
   ig: {
@@ -59,7 +59,7 @@ export const babyNaming: Service = {
     body: [
       "The Moon's nakshatra and pada at birth decide the sound a name should begin with.",
       "We send all four pada syllables, a curated shortlist with meanings in English, Tamil and Hindi, and a printable naming certificate.",
-      "US$5 · ₹470 · reviewed by our priest team · first report FREE (Beta).",
+      "US$5 · ₹470 · reviewed by our priest team · first order FREE (Beta).",
     ],
     cta: "Link in bio → astrosivam.com/baby-naming",
     hashtags: [
@@ -166,7 +166,7 @@ export const babyNaming: Service = {
     },
     {
       title: "Certificate",
-      body: "Printable naming certificate included · US$5 · ₹470 · 1st report FREE (Beta).",
+      body: "Printable naming certificate included · US$5 · ₹470 · First order FREE (Beta).",
       sticker: "Link sticker → baby naming",
     },
   ],

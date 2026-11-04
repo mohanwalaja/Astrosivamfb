@@ -70,6 +70,7 @@ const DEFAULT_STYLE: Record<string, StyleKey> = {
   "baby-naming": "kolam",
   muhurtham: "gopuram",
   panchangam: "kolam",
+  rasipalan: "ephemeris",
   transits: "ephemeris",
   trust: "aurum",
 };
@@ -189,7 +190,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
     <div>
       <PageHeader
         eyebrow="Service posts · 12 art directions"
-        title="Seven services. One copy contract. Twelve ways to dress it."
+        title={`${SERVICES.length} services. One copy contract. Twelve ways to dress it.`}
         description="Pick a service, then dress the same kicker, headline, Tamil line, chips, price and CTA in any of the twelve art directions — six rooted in Tamil heritage, six modern. The copy is final; the artwork rotates."
         actions={
           <>
@@ -210,7 +211,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
       />
 
       {/* service switcher */}
-      <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         {SERVICES.map((item) => {
           const active = item.id === serviceId;
           return (

@@ -3,18 +3,23 @@ import type { GridSlot, HighlightPlan } from "../types";
 export const IG_BIO_OPTIONS = [
   {
     label: "Primary — services + proof",
-    text: "Authentic Vedic astrology by Tamil Nadu temple priests 🪔 Jathagam · Porutham · Baby Naming · Muhurtham. First report free. PDF: EN / தமிழ் / हिंदी.",
+    text: "Authentic Vedic astrology by Tamil Nadu temple priests 🪔 Jathagam · Porutham · Baby Naming · Muhurtham. First order free. PDF: EN / தமிழ் / हिंदी.",
     note: "All four services, the free offer and the languages inside Instagram's 150-character limit.",
   },
   {
     label: "Method-led — for a discerning audience",
-    text: "Lahiri sidereal charts, reviewed by Tamil Nadu Vedic priests. Birth Jathagam · 10 Poruthams · Subha Muhurtham. First report free · 7 days of chat.",
+    text: "Lahiri sidereal charts, reviewed by Tamil Nadu Vedic priests. Birth Jathagam · 10 Poruthams · Subha Muhurtham. First order free · 7 days of chat.",
     note: "Leads with the calculation method. Use if the audience already knows astrology.",
   },
   {
     label: "Tamil-first — for the diaspora",
-    text: "துல்லிய லஹிரி ஜாதகம் 🪔 Birth Jathagam, 10 Poruthams, Baby Naming & Muhurtham by Tamil Nadu priests. First report free. PDF in தமிழ் / EN / हिंदी.",
+    text: "துல்லிய லஹிரி ஜாதகம் 🪔 Birth Jathagam, 10 Poruthams, Baby Naming & Muhurtham by Tamil Nadu priests. First order free in Beta. PDF in தமிழ் / EN / हिंदी.",
     note: "Tamil first line, English keywords after — strong for Malaysia, Singapore and Gulf audiences.",
+  },
+  {
+    label: "Free reading — Panjangam + Rasi Palan",
+    text: "Daily Panjangam + Rasi Palan 🌙 Daily to Yearly for all 12 Moon signs. Reports: EN / தமிழ் / हिंदी. First order free in Beta.",
+    note: "Leads with the two public reading pages; pair it with the Panjangam and Rasi Palan links below.",
   },
 ];
 
@@ -25,7 +30,7 @@ export const IG_NAME_OPTIONS = [
 ];
 
 export const IG_LINK_STACK = [
-  { label: "Birth Jathagam · US$5 · ₹470", url: "https://astrosivam.com/birth-jathagam", note: "Flagship. First link. 1st report FREE (Beta)." },
+  { label: "Birth Jathagam · from US$5 · ₹470", url: "https://astrosivam.com/birth-jathagam", note: "Flagship. Basic US$5; Bhava/Varga US$10. First order FREE (Beta)." },
   {
     label: "Marriage Compatibility — 10 Poruthams",
     url: "https://astrosivam.com/marriage-compatibility",
@@ -35,6 +40,7 @@ export const IG_LINK_STACK = [
   { label: "Subha Muhurtham — 6 months · US$10 · ₹940", url: "https://astrosivam.com/muhurtham", note: "Seasonal spikes." },
   { label: "Compare services, prices & samples", url: "https://astrosivam.com/services", note: "The trust link — every order page opens a full sample PDF." },
   { label: "Free Daily Panjangam", url: "https://astrosivam.com/panjangam", note: "The daily habit link — any location & timezone." },
+  { label: "Rasi Palan — Daily to Yearly", url: "https://astrosivam.com/rasipalan", note: "All 12 Moon signs · current summary and full palan." },
 ];
 
 export const IG_HIGHLIGHTS: HighlightPlan[] = [
@@ -47,7 +53,7 @@ export const IG_HIGHLIGHTS: HighlightPlan[] = [
     stories: [
       "What is inside the 2-page report — page-by-page screenshots.",
       "Why the exact birth minute changes the Lagna.",
-      "Sample PDF link sticker + 'first report free'.",
+      "Sample PDF link sticker + 'first order free'.",
     ],
   },
   {
@@ -165,7 +171,7 @@ export const IG_GRID: GridSlot[] = [
     serviceId: "trust",
     theme: "midnight",
     type: "Offer",
-    caption: "First report free. Read a full sample before you pay anything.",
+    caption: "First order free. Read a full sample before you pay anything.",
   },
   {
     serviceId: "jathagam",
@@ -186,7 +192,7 @@ export const IG_DM_KEYWORDS = [
     keyword: "JATHAGAM",
     intent: "Order the birth chart",
     reply:
-      "Namaste 🙏 For your Birth Jathagam we need: name, date of birth, exact time of birth, and birth place. Order here — astrosivam.com/birth-jathagam (US$5 · ₹470). First report FREE (Beta). Your PDF arrives by email after priest review, with 7 days of chat.",
+      "Namaste 🙏 For your Birth Jathagam we need: name, date of birth, exact time of birth, and birth place. Order here — astrosivam.com/birth-jathagam (Basic US$5 · ₹470; Bhava/Varga US$10 · ₹940). First order FREE (Beta). Your PDF arrives by email after priest review, with 7 days of chat.",
     link: "https://astrosivam.com/birth-jathagam",
   },
   {
@@ -221,7 +227,7 @@ export const IG_DM_KEYWORDS = [
     keyword: "PRICE",
     intent: "Pricing question",
     reply:
-      "Birth Jathagam, Porutham & Baby Naming: US$5 · ₹470 each · Subha Muhurtham: US$10 · ₹940. Your first report is FREE during the Beta, one per customer. 90% refund before approval. No subscription, no auto-renewal. 🪔",
+      "Basic/Kids/Students Jathagam, Porutham & Baby Naming: US$5 · ₹470 · Bhava/Varga & Subha Muhurtham: US$10 · ₹940. First order FREE in Beta — one per account, email and IP; later orders use standard prices. 90% refund before approval. No subscription or auto-renewal. 🪔",
     link: "https://astrosivam.com/services",
   },
   {
@@ -230,6 +236,13 @@ export const IG_DM_KEYWORDS = [
     reply:
       "Today's Panjangam is free for any place and date: astrosivam.com/panjangam. Follow the page — we post the Chennai card every morning. 🌅",
     link: "https://astrosivam.com/panjangam",
+  },
+  {
+    keyword: "RASI",
+    intent: "Rasi Palan by Moon sign",
+    reply:
+      "Read Daily, Weekly, Monthly or Yearly Rasi Palan for any of the 12 Moon signs: astrosivam.com/rasipalan. Choose your rasi and period for the current summary, highlight and full palan. 🌙",
+    link: "https://astrosivam.com/rasipalan",
   },
   {
     keyword: "SADE SATI",
@@ -286,14 +299,14 @@ export const IG_CADENCE = [
   { day: "Thursday", feed: "Carousel — second service", stories: "2 (review + link)", reel: "1 — comment reply" },
   { day: "Friday", feed: "Quote or review", stories: "2 (behind the scenes)", reel: "1 — read this before" },
   { day: "Saturday", feed: "Offer / free beta", stories: "2 (poll + countdown)", reel: "—" },
-  { day: "Sunday", feed: "Panchangam weekly recap", stories: "2 (week ahead)", reel: "1 — festival/transit" },
+  { day: "Sunday", feed: "Panchangam + weekly Rasi Palan", stories: "2 (week ahead + Moon sign)", reel: "1 — festival/transit" },
 ];
 
 export const IG_TIMES = [
   {
     slot: "6:30–7:30 AM IST",
     audience: "India morning routine",
-    best: "Panchangam, Rahu Kalam, festival cards",
+    best: "Panchangam, daily Rasi Palan, Rahu Kalam, festival cards",
     note: "The daily habit slot. Consistency matters more than the exact minute.",
   },
   {
@@ -325,6 +338,7 @@ export const IG_STORY_IDEAS = [
   "Countdown to the next muhurtham window.",
   "Swipe-up sample PDF — no email required.",
   "Quiz: which zodiac is sidereal?",
+  "Moon-sign poll, then a link sticker to the current Daily, Weekly, Monthly or Yearly Rasi Palan.",
 ];
 
 export const IG_GROWTH_ACTIONS = [

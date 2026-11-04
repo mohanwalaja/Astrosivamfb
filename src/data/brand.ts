@@ -12,13 +12,14 @@ export const BRAND = {
   location: "Walajapet, Ranipet District, Tamil Nadu, India",
   Address: "No 4 Thiruttani Thettu Street, Kamakshi Puram, Walajapet, Ranipet District, PIN 632513, Tamil Nadu, India",
   registration: "Udyam Reg. No. UDYAM-TN-35-0058124 · Registered MSME, Govt. of India",
-  delivery: "Reports checked every 6 hours · PDF + tax invoice emailed after admin approval",
+  delivery: "Reports checked every 6 hours · PDF + tax invoice emailed after admin approval · order history in the Customer Dashboard",
+  ordering: "Google or email sign-in · optional saved profiles/family members · up to 6 orders in cart · place the next order after payment",
   languages: "English · தமிழ் · हिंदी",
-  pricing: "Birth Jathagam US$5 · ₹470 · Bhava/Varga US$10 · ₹940 · Kids (0–10) US$5 · ₹470 · Students (11–18) US$5 · ₹470 · Subha Muhurtham US$10 · ₹940 · Daily Panjangam free",
+  pricing: "Basic/Kids/Students, Marriage & Baby Naming US$5 · ₹470 · Bhava/Varga & Subha Muhurtham US$10 · ₹940 · Daily Panjangam free · Rasi Palan online",
   pricingNote: "All Birth Jathagam plans: Basic US$5 · ₹470 · Bhava US$10 · ₹940 · Varga US$10 · ₹940 · Kids Jadagam (0–10) US$5 · ₹470 · Students Jadagam (11–18) US$5 · ₹470 · auto-selected from birth date",
   ageGating: "Age-gated Birth Jathagam: Kids Jadagam for 0–10 years, Students Jadagam for 11–18 years — auto-selected when birth details are entered; adult reports use Basic/Bhava/Varga",
-  firstReport: "1st report FREE (Beta) — one per customer",
-  reviews: "Invite customers to share feedback after delivery",
+  firstReport: "First order FREE (Beta) — one per account, email address and IP address; later orders at standard price",
+  reviews: "Website reviews are checked · reuse customer words in creative only with permission",
   refund: "90% refund before approval · processed within 3 working days",
   chat: "7 days of personal astrologer chat",
   ephemeris: "Chitra Paksha Lahiri ayanamsa",
@@ -573,7 +574,7 @@ export const VOICE_PRINCIPLES = [
   },
   {
     title: "Clear about money",
-    body: "State the fee in every post: Birth Jathagam, Marriage Compatibility and Baby Naming US$5 · ₹470; Subha Muhurtham US$10 · ₹940 — as listed at astrosivam.com/services. 1st report FREE (Beta), one per customer. 90% refund before approval. No hidden steps.",
+    body: "State the fee in every paid-service post: Basic/Kids/Students, Marriage Compatibility and Baby Naming US$5 · ₹470; Bhava/Varga and Subha Muhurtham US$10 · ₹940 — as listed at astrosivam.com/services. First order FREE (Beta), one per account, email address and IP address. 90% refund before approval. No hidden steps.",
   },
   {
     title: "Bilingual by default",
@@ -599,7 +600,7 @@ export const SAY_THIS = [
     not: "This date will guarantee a perfect marriage.",
   },
   {
-    say: "1st report FREE (Beta) — one per customer; then US$5 · ₹470 per report.",
+    say: "First order FREE (Beta) — one per account, email and IP; later orders use the listed US$5 or US$10 price.",
     not: "Free forever, no conditions.",
   },
   {
@@ -615,11 +616,11 @@ export const BOILERPLATES = [
   },
   {
     label: "50 words",
-    text: "Astro Sivam is an online Vedic astrology service. Every chart is calculated with the Chitra Paksha Lahiri ayanamsa and reviewed by our priest team in India, then emailed as a PDF in English, Tamil or Hindi. US$5 · ₹470 per report; Subha Muhurtham US$10 · ₹940. 1st report FREE (Beta).",
+    text: "Astro Sivam is an online Vedic astrology service. Charts use the Chitra Paksha Lahiri ayanamsa and are reviewed by our India-based priest team before PDF delivery in English, Tamil or Hindi. Read Daily Panjangam and four-period Rasi Palan online. Paid reports are US$5–10 · ₹470–940; the first order is free in Beta.",
   },
   {
     label: "100 words",
-    text: "Astro Sivam helps you understand your life through Vedic astrology. Every chart is calculated in the sidereal zodiac with the Chitra Paksha Lahiri ayanamsa and reviewed by our India-based priest team every six hours before emailing. Choose a Birth Jathagam for your chart and dasa timeline, Marriage Compatibility for the ten poruthams, Baby Naming for your child's birth-star syllables, or Subha Muhurtham for six months of auspicious dates. Reports come in English, Tamil or Hindi and include seven days of astrologer chat. Fees are US$5 · ₹470 per report — Subha Muhurtham US$10 · ₹940; your first report free (Beta).",
+    text: "Astro Sivam helps you understand your life through Vedic astrology. Charts use the Chitra Paksha Lahiri ayanamsa and are reviewed by our India-based priest team every six hours before email delivery and Customer Dashboard tracking. Choose a Birth Jathagam, Marriage Compatibility, Baby Naming or Subha Muhurtham report in English, Tamil or Hindi, with seven days of astrologer chat. Basic/Kids/Students, Marriage and Baby Naming are US$5 · ₹470; Bhava/Varga and Muhurtham are US$10 · ₹940. The first order is free in Beta, limited to one per account, email address and IP address. Daily Panjangam is free, and Rasi Palan offers Daily, Weekly, Monthly and Yearly readings for all 12 Moon signs.",
   },
 ];
 

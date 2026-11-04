@@ -118,7 +118,7 @@ export const ServiceAds: React.FC<{ service: Service }> = ({ service }) => {
 
           <p className="mt-3 text-[11.5px] leading-relaxed text-[#A2937D]">
             {role === "ad"
-              ? "One report, one action, one price read from the service record. All poster text is English only."
+              ? "One service, one action, one price or access label read from the service record. All poster text is English only."
               : "Reference plates teach one idea and sell nothing. The copy is quoted from this service's own explainer, the source is printed on the plate, and no price or action ever appears."}
           </p>
         </Panel>

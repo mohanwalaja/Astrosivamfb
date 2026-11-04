@@ -8,7 +8,7 @@ export const kidsJathagam: Service = {
   kind: "Paid report",
   badge: "Ages 0–10 · Bala Jathagam",
   price: "US$5 · ₹470",
-  priceNote: "US$5 · ₹470 · auto-selected when age 0–10 · 1st report FREE (Beta) · 7 days of astrologer chat",
+  priceNote: "US$5 · ₹470 · auto-selected when age 0–10 · First order FREE (Beta) · 7 days of astrologer chat",
   path: "/birth-jathagam",
   url: "https://astrosivam.com/birth-jathagam",
   promise:
@@ -53,7 +53,7 @@ export const kidsJathagam: Service = {
       "Learning, speech, temperament and early-education cues",
       "Dasa for this childhood chapter + Vidyarambham note + 7 days of chat",
     ],
-    cta: "Order Kids Jadagam at astrosivam.com/birth-jathagam — US$5 · ₹470, 1st report FREE (Beta).",
+    cta: "Order Kids Jadagam at astrosivam.com/birth-jathagam — US$5 · ₹470, First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#KidsJathagam", "#BalaJathagam", "#ChildHoroscope", "#VedicAstrology"],
     pinned: false,
   },
@@ -62,7 +62,7 @@ export const kidsJathagam: Service = {
     body: [
       "Kids Jadagam (0–10) — enter birth details and it auto-selects. Bala Arishta checks done gently, health & temperament, speech & early learning, and the current dasa as it touches childhood.",
       "No adult forecasts. Just what a parent actually needs now, plus a Vidyarambham note and soft pariharams.",
-      "Lahiri + priest-reviewed every 6 hrs · PDF EN/தமிழ்/हिंदी · US$5 · ₹470 · 1st FREE (Beta) · 7 days chat.",
+      "Lahiri + priest-reviewed every 6 hrs · PDF EN/தமிழ்/हिंदी · US$5 · ₹470 · First order FREE (Beta) · 7 days chat.",
     ],
     cta: "Link in bio → astrosivam.com/birth-jathagam (type DOB, the right plan appears)",
     hashtags: [
@@ -137,7 +137,7 @@ export const kidsJathagam: Service = {
       {
         kicker: "What arrives",
         headline: "One gentle PDF for parents.",
-        body: "Rasi + Navamsa charts, child-safe language, EN/தமிழ்/हिंदी. US$5 · ₹470 · 1st FREE (Beta) · astrosivam.com/birth-jathagam",
+        body: "Rasi + Navamsa charts, child-safe language, EN/தமிழ்/हिंदी. US$5 · ₹470 · First order FREE (Beta) · astrosivam.com/birth-jathagam",
       },
     ],
   },
@@ -156,7 +156,7 @@ export const kidsJathagam: Service = {
       "Bala Arishta — with care, not fear",
       "Health · sleep · buddhi",
       "Dasa for this childhood window",
-      "US$5 · ₹470 · 1st FREE (Beta)",
+      "US$5 · ₹470 · First order FREE (Beta)",
     ],
     cta: "Type the birth details — the right plan appears · astrosivam.com/birth-jathagam",
     audio: "Warm acoustic lullaby under a soft Tamil/English parent voiceover; captions burned in.",

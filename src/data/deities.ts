@@ -24,7 +24,7 @@ export const DEITIES: Deity[] = [
     epithet: "Remover of obstacles",
     mantra: "ॐ गं गणपतये नमः",
     blessing: "May every new beginning open without a single obstacle.",
-    useFor: ["Vinayaka Chaturthi", "Deepavali", "new beginnings", "first report free"],
+    useFor: ["Vinayaka Chaturthi", "Deepavali", "new beginnings", "first order free"],
     accent: "#E0A84E",
     file: "/deities/ganesha.jpg",
     thumb: "/deities/thumbs/ganesha.jpg",

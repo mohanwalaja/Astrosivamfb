@@ -77,7 +77,7 @@ const sectionCards = [
   {
     id: "services",
     title: "Service posts",
-    body: "Seven complete post systems: Facebook caption, Instagram caption, carousel script, reel, stories and hashtags.",
+    body: `${SERVICES.length} complete post systems: Facebook caption, Instagram caption, carousel script, reel, stories and hashtags.`,
     icon: Sparkles,
     meta: `${SERVICES.length} systems`,
   },
@@ -167,9 +167,9 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
         meta={
           <>
             <Chip tone="gold">Two platforms</Chip>
-            <Chip>Seven service systems</Chip>
-            <Chip>US$5 · ₹470 per report</Chip>
-            <Chip tone="jade">First report free</Chip>
+            <Chip>{SERVICES.length} service systems</Chip>
+            <Chip>Reports US$5–10 · ₹470–940</Chip>
+            <Chip tone="jade">First order free · Beta</Chip>
           </>
         }
         actions={
@@ -493,8 +493,8 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
                 Same facts everywhere
               </div>
               <p className="mt-1 text-[11px] leading-relaxed text-[#A8C6B6]">
-                US$5 · ₹470 per report · first report free · 90% refund before approval. If one platform says something
-                different, fix it the same day.
+                Paid reports US$5–10 · ₹470–940 · first order free in Beta · 90% refund before approval. If one platform
+                says something different, fix it the same day.
               </p>
             </div>
           </Panel>

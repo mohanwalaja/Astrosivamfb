@@ -80,18 +80,18 @@ export const IG_COPY_ENTRIES: IgCopyEntry[] = [
       subline: "",
       tamil: "பிறப்பு ஜாதகம்",
       chips: ["Rasi + Navamsa charts", "Vimshottari dasa timeline", "Sade Sati & pariharams"],
-      price: "US$5 · ₹470 · first report free",
+      price: "US$5 · ₹470 · Basic · first order free",
       cta: "astrosivam.com/birth-jathagam",
       footer: FOOTER,
     },
     captions: {
       instagram:
-        "The minute you were born fixes the Lagna. Everything else follows.\n\nOur Birth Jathagam is cast on the Lahiri sidereal zodiac, reviewed by Tamil Nadu temple priests, and written in plain language — English, தமிழ் or हिंदी.\n\nInside: Rasi and Navamsa charts, the Vimshottari dasa timeline, and the Sade Sati periods with the pariharams that tradition actually prescribes.\n\nUS$5 · ₹470 · first report free during the Beta.\n\nastrosivam.com/birth-jathagam",
+        "The minute you were born fixes the Lagna. Everything else follows.\n\nOur Birth Jathagam is cast on the Lahiri sidereal zodiac, reviewed by Tamil Nadu temple priests, and written in plain language — English, தமிழ் or हिंदी.\n\nInside: Rasi and Navamsa charts, the Vimshottari dasa timeline, and the Sade Sati periods with the pariharams that tradition actually prescribes.\n\nBasic US$5 · ₹470; Bhava/Varga US$10 · ₹940. First order free during the Beta.\n\nastrosivam.com/birth-jathagam",
       facebook:
-        "The minute you were born fixes the Lagna. Everything else follows.\n\nA full Birth Jathagam, cast sidereally and read by our temple-priest team: Rasi and Navamsa charts, the Vimshottari dasa timeline, Sade Sati periods and pariharams.\n\nUS$5 · ₹470 · first report free during the Beta. astrosivam.com/birth-jathagam",
+        "The minute you were born fixes the Lagna. Everything else follows.\n\nA full Birth Jathagam, cast sidereally and read by our temple-priest team: Rasi and Navamsa charts, the Vimshottari dasa timeline, Sade Sati periods and pariharams.\n\nBasic US$5 · ₹470; Bhava/Varga US$10 · ₹940. First order free during the Beta. astrosivam.com/birth-jathagam",
     },
     altText:
-      "Maroon card for the Birth Jathagam. A gilded Ganesha portrait fills the right panel; on the left, the headline 'Your life, mapped to the minute', the Tamil words பிறப்பு ஜாதகம், three deliverable lines, a price panel reading US$5 and ₹470, and the site address.",
+      "Maroon card for the Birth Jathagam. A gilded Ganesha portrait fills the right panel; on the left, the headline 'Your life, mapped to the minute', the Tamil words பிறப்பு ஜாதகம், three deliverable lines, a Basic-plan price panel reading US$5 and ₹470, and the site address.",
     hashtags: tags("#Jathagam", "#BirthChart"),
     cta: { line: "Order the jathagam", url: "astrosivam.com/birth-jathagam", dmKeyword: "JATHAGAM" },
     placement: "Top-left corner: the flagship, so the first thing the eye meets is the paid service.",
@@ -244,14 +244,14 @@ export const IG_COPY_ENTRIES: IgCopyEntry[] = [
     },
     captions: {
       instagram:
-        "Panchangam means five limbs. Each answers a different question about today.\n\nTithi — the lunar day. Nakshatra — the star the moon sits in. Yoga and Karana — the quality of the hour. Varam — the weekday itself.\n\nRead it free, every morning, with your own city and timezone: astrosivam.com/panchangam",
+        "Panchangam means five limbs. Each answers a different question about today.\n\nTithi — the lunar day. Nakshatra — the star the moon sits in. Yoga and Karana — the quality of the hour. Varam — the weekday itself.\n\nRead it free, every morning, with your own city and timezone: astrosivam.com/panjangam",
       facebook:
-        "Panchangam means five limbs: Tithi, Nakshatra, Yoga, Karana and Varam. Each answers a different question about the same day.\n\nFree every morning — astrosivam.com/panchangam",
+        "Panchangam means five limbs: Tithi, Nakshatra, Yoga, Karana and Varam. Each answers a different question about the same day.\n\nFree every morning — astrosivam.com/panjangam",
     },
     altText:
       "Ivory guide page titled 'Five limbs, every single day', listing Tithi, Nakshatra, Yoga, Karana and Varam, with the Tamil word பஞ்சாங்கம் and a link to today's panchangam.",
     hashtags: tags("#Panchangam", "#DailyPanchangam"),
-    cta: { line: "Read today's panchangam", url: "astrosivam.com/panchangam", dmKeyword: "PANCHANGAM" },
+    cta: { line: "Read today's panchangam", url: "astrosivam.com/panjangam", dmKeyword: "PANCHANGAM" },
     placement: "Sixth tile: the daily habit sits beside the carousel, where a profile visitor is still reading.",
   },
 
@@ -297,52 +297,52 @@ export const IG_COPY_ENTRIES: IgCopyEntry[] = [
       kicker: "Transits",
       headline: "Sade Sati is a season, not a sentence.",
       subline:
-        "Saturn crosses three signs around your Moon · each phase lasts about seven and a half years · pariharams are traditional remedies, not guarantees.",
+        "Saturn crosses three signs around your Moon · the three phases span about seven and a half years in total · pariharams are traditional remedies, not guarantees.",
       tamil: "சனி பெயர்ச்சி",
       chips: [],
       price: "",
-      cta: "Read the transit guide",
+      cta: "Read it with your Jathagam",
       footer: FOOTER,
       index: "08",
     },
     captions: {
       instagram:
-        "Sade Sati is a season, not a sentence.\n\nSaturn crosses three signs around your natal Moon; each phase runs about seven and a half years. What changes is the house it transits, and what that house rules in your chart.\n\nThe guide explains the phases, the pariharams tradition actually prescribes, and why the end date is calculable.\n\nastrosivam.com/transits",
+        "Sade Sati is a season, not a sentence.\n\nSaturn crosses three signs around your natal Moon; the three phases span about seven and a half years in total. What changes is the house it transits, and what that house rules in your chart.\n\nA Birth Jathagam reads the stage and its timing against your own chart, alongside traditional pariharams — not a generic forecast.\n\nastrosivam.com/birth-jathagam",
       facebook:
-        "Sade Sati is a season, not a sentence. Saturn crosses three signs around your Moon, roughly seven and a half years each. The guide explains the phases and the traditional pariharams. astrosivam.com/transits",
+        "Sade Sati is a season, not a sentence. Saturn crosses three signs around your Moon over roughly seven and a half years in total. Read the stage and its timing against your own Birth Jathagam: astrosivam.com/birth-jathagam",
     },
     altText:
       "Sand-coloured guide page titled 'Sade Sati is a season, not a sentence', explaining the three Saturn transits, their duration and the traditional pariharams.",
     hashtags: tags("#SadeSati", "#Transits"),
-    cta: { line: "Read the transit guide", url: "astrosivam.com/transits", dmKeyword: "JATHAGAM" },
+    cta: { line: "Read it with your Jathagam", url: "astrosivam.com/birth-jathagam", dmKeyword: "JATHAGAM" },
     placement: "Eighth tile: light again before the closing dark card, so the grid ends on a strong corner.",
   },
   {
     id: "ig-first-free",
     category: "service",
     layout: "ig-service",
-    label: "First report free",
+    label: "First order free",
     serviceId: "trust",
     theme: "midnight",
     art: "krishna",
     content: {
       kicker: "Beta offer",
-      headline: "The first report is free. Genuinely.",
+      headline: "The first order is free. Genuinely.",
       subline: "",
-      tamil: "முதல் அறிக்கை இலவசம்",
-      chips: ["One per customer", "No card, no subscription", "90% refund before approval"],
-      price: "US$5 · ₹470 · after your first report",
+      tamil: "முதல் ஆர்டர் இலவசம்",
+      chips: ["One per account, email & IP", "No subscription", "90% refund before approval"],
+      price: "US$5 · ₹470 · higher plans US$10 · ₹940",
       cta: "astrosivam.com/services",
       footer: FOOTER,
     },
     captions: {
       instagram:
-        "The first report is free. No card, no subscription, no trial that renews itself.\n\nOrder a Birth Jathagam, Porutham or Baby Naming report and read the whole thing before you pay anything. One free report per customer, during the Beta.\n\nAfter that: US$5 · ₹470. 90% refund before approval.\n\nastrosivam.com/services",
+        "The first order is free during Beta. No subscription, no trial that renews itself.\n\nThe offer is limited to one free order per account, email address and IP address; later orders use the standard plan price.\n\nBasic/Kids/Students, Porutham and Baby Naming: US$5 · ₹470. Bhava/Varga and Muhurtham: US$10 · ₹940. 90% refund before approval.\n\nastrosivam.com/services",
       facebook:
-        "The first report is free — no card, no subscription. One per customer during the Beta. After that US$5 · ₹470, with a 90% refund before approval.\n\nastrosivam.com/services",
+        "The first order is free during Beta — one per account, email address and IP address. Later orders use the listed price: US$5 · ₹470 for Basic/Kids/Students, Porutham and Baby Naming; US$10 · ₹940 for Bhava/Varga and Muhurtham. 90% refund before approval.\n\nastrosivam.com/services",
     },
     altText:
-      "Midnight-blue service card for the free first report, with the Tamil words முதல் அறிக்கை இலவசம், three lines about the offer and the price US$5 and ₹470 afterwards.",
+      "Midnight-blue service card for the free first Beta order, with the Tamil words முதல் ஆர்டர் இலவசம், the account, email and IP limit, and standard plan prices of US$5 or US$10 afterwards.",
     hashtags: tags("#FreeReport", "#AstrologyReport"),
     cta: { line: "Claim the free report", url: "astrosivam.com/services", dmKeyword: "PRICE" },
     placement: "Bottom-right corner: the offer closes the grid on the main diagonal with the flagship.",
@@ -402,8 +402,26 @@ export const IG_STORY_ENTRIES: IgStoryEntry[] = [
       cta: "Read it free",
       footer: FOOTER,
     },
-    sticker: "Link sticker → astrosivam.com/panchangam",
+    sticker: "Link sticker → astrosivam.com/panjangam",
     caption: "Story frame for the daily panchangam. The link sticker replaces the CTA line when posted from the app.",
+  },
+  {
+    id: "story-rasi-palan",
+    label: "Rasi Palan — four timeframes",
+    theme: "lagoon",
+    art: "krishna",
+    content: {
+      kicker: "Rasi Palan",
+      headline: "Your Moon sign. Four timeframes.",
+      subline: "Choose Daily, Weekly, Monthly or Yearly, then tap your rasi for the current summary and full palan.",
+      tamil: "ராசி பலன்",
+      chips: [],
+      price: "",
+      cta: "Read your palan",
+      footer: FOOTER,
+    },
+    sticker: "Link sticker → astrosivam.com/rasipalan",
+    caption: "Rasi Palan story. Do not reuse a rating or prediction from another date; open the live page for the selected period.",
   },
   {
     id: "story-sample",

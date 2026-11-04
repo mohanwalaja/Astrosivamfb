@@ -36,9 +36,9 @@ import { BRAND } from "../data/brand";
 
    The split is structural, not editorial:
 
-     role "ad"   — sells one report. Carries the verified price from the
-                   service record, one action, and facts traceable to that
-                   record.
+     role "ad"   — presents one service. Carries the verified price or access
+                   label from the service record, one action, and facts
+                   traceable to that record.
      role "edu"  — explains one idea. Carries no price, no action and no offer;
                    the copy is the service's own explainer, with its source
                    printed on the plate.

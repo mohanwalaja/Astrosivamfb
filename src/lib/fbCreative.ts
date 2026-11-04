@@ -473,7 +473,7 @@ function coverLockup(scene: Scene) {
   // Price chip and CTA on one baseline.
   const chipY = safe.y + safe.h - 76;
   const priceFont = scene.fonts.sans(22, 600);
-  const priceText = content.price || "First report free";
+  const priceText = content.price || "First order free";
   const chipW = measurePrice(ctx, priceText, priceFont) + 46;
   roundRect(ctx, padX, chipY, chipW, 44, 22);
   ctx.fillStyle = withAlpha(theme.gold, 0.16);
@@ -569,16 +569,16 @@ function servicePromo(scene: Scene) {
 
   /**
    * Price panel — the thing people scroll for. The price is fitted to the panel
-   * rather than trusting a fixed size: "US$5 · ₹470 · first report free" is three
+   * rather than trusting a fixed size: "US$5 · ₹470 · first order free" is three
    * times the width of "₹470", and both are legitimate input.
    */
   /**
-   * The price line is split rather than shrunk. "US$5 · ₹470 · first report free"
+   * The price line is split rather than shrunk. "US$5 · ₹470 · first order free"
    * set in one run needs ~60% of the panel width in a 24 px face; scaling it down
    * to fit would drop it below the mobile readability floor. The amount keeps
    * display size, the qualifying words become a note beneath it.
    */
-  const priceRaw = content.price || "First report free";
+  const priceRaw = content.price || "First order free";
   const priceParts = priceRaw.split(/\s*·\s*/).filter(Boolean);
   const hasAmount = priceParts.length > 1;
   const amount = hasAmount ? priceParts.slice(0, 2).join(" · ") : priceRaw;

@@ -6,8 +6,8 @@ export const FB_PAGE_FIELDS = [
   { field: "Category", value: "Astrologist", note: "Add Astrology service and Spiritual consultant as secondary categories." },
   { field: "Website", value: "https://astrosivam.com", note: "Use the clean URL, no UTM on the profile field." },
   { field: "Location", value: "Walajapet, Ranipet District, Tamil Nadu, India", note: "Registered office per astrosivam.com/contact; reports are delivered online worldwide." },
-  { field: "Hours", value: "Always open · replies within 6 hours", note: "Matches the six-hourly report review promise." },
-  { field: "Price range", value: "US$5–10 · ₹470–940", note: "Per report, as listed at astrosivam.com/services. Daily Panjangam is free." },
+  { field: "Hours", value: "Always open · replies as soon as possible", note: "The six-hour cadence is for report review; the live contact page does not promise a six-hour Messenger reply." },
+  { field: "Price range", value: "US$5–10 · ₹470–940", note: "Paid reports as listed at astrosivam.com/services. Daily Panjangam is free; Rasi Palan is available to read online." },
   { field: "Languages", value: "English · தமிழ் · हिंदी", note: "Add in About and Services copy too." },
   { field: "CTA button", value: "Book Now → https://astrosivam.com", note: "One action. Never split between DM and website." },
 ];
@@ -15,32 +15,37 @@ export const FB_PAGE_FIELDS = [
 export const FB_BIO_OPTIONS = [
   {
     label: "Primary — 200 characters",
-    text: "Authentic Vedic astrology from Tamil Nadu temple priests. Birth Jathagam, Marriage Compatibility, Baby Naming & Subha Muhurtham. First report free. PDF in English, Tamil & Hindi. Order: astrosivam.com",
+    text: "Authentic Vedic astrology from Tamil Nadu temple priests. Birth Jathagam, Marriage Compatibility, Baby Naming & Subha Muhurtham. First order free. PDF in English, Tamil & Hindi. Order: astrosivam.com",
     note: "Fits Facebook's 255-character bio with room to spare.",
   },
   {
     label: "Method-first — 208 characters",
-    text: "Lahiri sidereal charts, reviewed by an India-based priest team every 6 hours. Birth Jathagam, Marriage Compatibility, Baby Naming, Subha Muhurtham. First report free. 7 days of astrologer chat. astrosivam.com",
+    text: "Lahiri sidereal charts, reviewed by an India-based priest team every 6 hours. Birth Jathagam, Marriage Compatibility, Baby Naming, Subha Muhurtham. First order free. 7 days of astrologer chat. astrosivam.com",
     note: "Use when the audience is comparison shopping against apps.",
   },
   {
     label: "Tamil + English — 188 characters",
-    text: "துல்லிய லஹிரி ஜாதகம் 🪔 Birth Jathagam, 10-Porutham matching, Baby Naming & Subha Muhurtham by Tamil Nadu Vedic priests. Reports in தமிழ், English & हिंदी. First report FREE. astrosivam.com",
+    text: "துல்லிய லஹிரி ஜாதகம் 🪔 Birth Jathagam, 10-Porutham matching, Baby Naming & Subha Muhurtham by Tamil Nadu Vedic priests. Reports in தமிழ், English & हिंदी. First order FREE in Beta. astrosivam.com",
     note: "For campaigns targeting Tamil-speaking audiences.",
+  },
+  {
+    label: "Free reading — Panjangam + Rasi Palan",
+    text: "Daily Panjangam for any location, plus Daily, Weekly, Monthly & Yearly Rasi Palan for all 12 Moon signs. Personalised reports in English, Tamil & Hindi. First order free in Beta. astrosivam.com",
+    note: "Use when the campaign leads with the two public reading pages rather than a paid report.",
   },
 ];
 
 export const FB_ABOUT = [
   "Astro Sivam is an online Vedic astrology service built around one idea: a chart should be calculated properly and read by a person. Every report is cast in the sidereal zodiac using the Chitra Paksha Lahiri ayanamsa, then reviewed by our India-based team of Vedic scholars and South Indian temple priests in Tamil Nadu before it is emailed to you.",
-  "Choose a Birth Jathagam for your full chart, Rasi and Navamsa diagrams, Vimshottari dasa timeline, Sade Sati status and remedies. Choose Marriage Compatibility for the ten classical poruthams, Rajju and Vedha checks, Kuja dosha balancing and Dasa Sandhi. Baby Naming gives your child's birth-star syllables, a curated name shortlist and a printable naming certificate. Subha Muhurtham returns six months of auspicious windows for eighteen ceremonies, with Nalla Neram and Rahu Kalam timings.",
-  "Reports are available in English, Tamil and Hindi, and include seven days of personal astrologer chat after delivery. Our priest team checks all reports every six hours; once approved, your PDF and tax invoice are emailed to your registered address. Standard fees are US$5 · ₹470 per report (Subha Muhurtham US$10 · ₹940); your first report is free during the Beta — one per customer — and 90% is refundable before approval.",
+  "Choose a Birth Jathagam for your full chart, Rasi and Navamsa diagrams, Vimshottari dasa timeline, Sade Sati status and remedies. Choose Marriage Compatibility for the ten classical poruthams, Rajju and Vedha checks, Kuja dosha balancing and Dasa Sandhi. Baby Naming gives your child's birth-star syllables, a curated name shortlist and a printable naming certificate. Subha Muhurtham returns six months of auspicious windows for eighteen ceremonies, with Nalla Neram and Rahu Kalam timings. Daily Panjangam is available for any location, and Rasi Palan offers Daily, Weekly, Monthly and Yearly readings for all 12 Moon signs.",
+  "Reports are available in English, Tamil and Hindi, and include seven days of personal astrologer chat after delivery. Our priest team checks reports every six hours; once approved, your PDF and tax invoice are emailed to your registered address, with order history in the Customer Dashboard. Basic/Kids/Students, Marriage Compatibility and Baby Naming are US$5 · ₹470; Bhava/Varga and Subha Muhurtham are US$10 · ₹940. Your first order is free during the Beta — one per account, email address and IP address — later orders use the standard price, and 90% is refundable before approval.",
   "We do not sell fear. Difficult planetary periods are described as seasons, with the traditional pariharams that address them. Astrology is guidance, not a guarantee, and never a substitute for medical, legal or financial advice.",
 ];
 
 export const FB_TABS = [
   { tab: "Home", action: "Cover + pinned Jathagam post + featured services.", note: "Default landing." },
   { tab: "About", action: "Long about copy, website, email, hours, languages.", note: "Keep the full four paragraphs." },
-  { tab: "Services", action: "Four items with prices and links — Jathagam, Porutham, Baby Naming, Muhurtham.", note: "Add the free Daily Panjangam as a fifth. Prices: US$5 · ₹470 (Muhurtham US$10 · ₹940)." },
+  { tab: "Services", action: "Four paid items with prices and links — Jathagam, Porutham, Baby Naming, Muhurtham.", note: "Add Daily Panjangam and Rasi Palan as public reading links. Paid prices are US$5–10 · ₹470–940 by plan." },
   { tab: "Reviews", action: "On. Ask for a review after every delivered report.", note: "Invite past customers to review; publish authentic feedback only with permission." },
   { tab: "Photos", action: "Brand pack cover, profile, carousel covers.", note: "Albums: Brand, Jathagam, Porutham, Panchangam." },
   { tab: "Reels", action: "Cross-post every Instagram reel.", note: "Native upload only, no watermark." },
@@ -55,25 +60,26 @@ export const FB_PINNED_POST = {
     "10 Poruthams carousel",
     "What each report costs — sample report",
     "Daily Panchangam card",
-    "Sade Sati, explained without fear",
+    "Rasi Palan — Daily, Weekly, Monthly & Yearly",
     "Baby Naming — birth-star syllables",
     "Subha Muhurtham — six-month calendar",
     "Permissioned customer review card",
-    "Free first report — offer card",
+    "Free first order — offer card",
   ],
 };
 
 export const FB_MESSENGER = {
   greeting:
-    "Namaste 🙏 Welcome to Astro Sivam. Tell us what you need — Jathagam, Porutham, Baby Naming, Muhurtham or today's Panchangam — and we will send the right link.",
+    "Namaste 🙏 Welcome to Astro Sivam. Tell us what you need — Jathagam, Porutham, Baby Naming, Muhurtham, today's Panjangam or Rasi Palan — and we will send the right link.",
   away:
-    "Thank you for writing. Our team replies within 6 hours, every day. Meanwhile you can order directly at astrosivam.com — your first report is free.",
+    "Thank you for writing. Our team will respond as soon as possible. Meanwhile you can read Panjangam or Rasi Palan, or order a report at astrosivam.com — your first order is free during Beta.",
   instantReplies: [
-    { label: "Birth Jathagam", reply: "Order here: astrosivam.com/birth-jathagam — US$5 · ₹470, first report FREE (Beta). Keep your date, exact time and place of birth ready." },
-    { label: "Porutham matching", reply: "We need the same four details for both people: astrosivam.com/marriage-compatibility — US$5 · ₹470 for both charts, first report FREE (Beta)." },
+    { label: "Birth Jathagam", reply: "Order here: astrosivam.com/birth-jathagam — Basic US$5 · ₹470; Bhava/Varga US$10 · ₹940. First order FREE (Beta). Keep your date, exact time and place of birth ready." },
+    { label: "Porutham matching", reply: "We need the same four details for both people: astrosivam.com/marriage-compatibility — US$5 · ₹470 for both charts, first order FREE (Beta)." },
     { label: "Baby Naming", reply: "Send the birth date, exact time and place — we calculate all four pada syllables: astrosivam.com/baby-naming (US$5 · ₹470, certificate included)." },
     { label: "Muhurtham dates", reply: "Tell us the ceremony and we will send six months of windows: astrosivam.com/muhurtham (US$10 · ₹940)." },
     { label: "Sample report", reply: "Open a full sample before paying: astrosivam.com/services — every order page has one." },
+    { label: "Rasi Palan", reply: "Read Daily, Weekly, Monthly or Yearly Rasi Palan for any of the 12 Moon signs: astrosivam.com/rasipalan. Choose your sign and period for the current summary and full palan." },
   ],
 };
 
@@ -82,7 +88,7 @@ export const FB_FAQS: Faq[] = [
     question: "When and how will I receive my report?",
     quickReply: "Delivery time",
     answer:
-      "Our India-based priest team checks all reports every 6 hours. Once a report is reviewed and the administrator approves it, your official PDF report and tax invoice are emailed to your registered address.",
+      "Our India-based priest team checks reports every 6 hours. Once a report is reviewed and the administrator approves it, your official PDF report and tax invoice are emailed to your registered address. Order history and live delivery tracking are available in your Customer Dashboard.",
   },
   {
     question: "What birth details do you need?",
@@ -106,7 +112,13 @@ export const FB_FAQS: Faq[] = [
     question: "How much does a report cost?",
     quickReply: "Price",
     answer:
-      "Birth Jathagam, Marriage Compatibility and Baby Naming are US$5 · ₹470 each; Subha Muhurtham is US$10 · ₹940. Your first report is FREE during the Beta — one per customer — and additional reports are charged at these standard prices. The Daily Panjangam is always free.",
+      "Basic/Kids/Students Jathagam, Marriage Compatibility and Baby Naming are US$5 · ₹470; Bhava/Varga Jathagam and Subha Muhurtham are US$10 · ₹940. Your first order is FREE during the Beta — one per account, email address and IP address — and later orders use these standard prices. Daily Panjangam is free; Rasi Palan is available to read online.",
+  },
+  {
+    question: "Where can I read Rasi Palan?",
+    quickReply: "Rasi Palan",
+    answer:
+      "Open astrosivam.com/rasipalan and choose Daily, Weekly, Monthly or Yearly, then select any of the 12 Moon signs. Your sign card shows the current star summary, period label and focus highlight, with an option to read the full palan.",
   },
   {
     question: "Which payments do you accept?",
@@ -125,6 +137,12 @@ export const FB_FAQS: Faq[] = [
     quickReply: "Astrologer chat",
     answer:
       "Yes — every delivery includes 7 days of personal astrologer chat so you can ask follow-up questions about your report.",
+  },
+  {
+    question: "How are birth details and analytics handled?",
+    quickReply: "Privacy",
+    answer:
+      "Birth details are used to provide the requested calculation, report, support and order history; they are not included in analytics or advertising events. Optional GA4 and Meta Pixel require consent. An unfinished form may remain in this browser tab's session storage for up to 30 minutes. Read astrosivam.com/privacy-policy for the full policy.",
   },
 ];
 
@@ -153,7 +171,7 @@ export const FB_REVIEW_TEMPLATES = [
 
 export const FB_ADS = [
   {
-    name: "Free first report — flagship",
+    name: "Free first order — flagship",
     objective: "Messages or Website conversions",
     budget: "US$8–10 / day × 7 days",
     audience:
@@ -179,6 +197,15 @@ export const FB_ADS = [
       "Chennai + Tamil Nadu + Tamil diaspora, 28–60, interests: temples, bhakti, panchangam, festivals.",
     creative: "Daily panchangam card. CTA: follow for tomorrow's timings.",
     guardrail: "Keep the daily card factual — timings only, no fear framing.",
+  },
+  {
+    name: "Rasi Palan — Moon-sign readers",
+    objective: "Website traffic to Rasi Palan",
+    budget: "US$5 / day × 7 days after an organic winner",
+    audience:
+      "Tamil Nadu + Tamil diaspora, interests: Vedic astrology, Moon sign, rashifal and Tamil astrology.",
+    creative: "Four-timeframe explainer. CTA: choose a Moon sign and read the current full palan.",
+    guardrail: "Do not turn one period's rating into an evergreen promise or use fear-based prediction copy.",
   },
 ];
 
@@ -206,7 +233,12 @@ export const FB_COMPLIANCE = [
   {
     title: "Price and offer accuracy",
     body:
-      "Keep report prices identical everywhere: bio, About, posts, ads and website — US$5 · ₹470 per report, Subha Muhurtham US$10 · ₹940, exactly as listed at astrosivam.com/services.",
+      "Keep prices identical everywhere: bio, About, posts, ads and website. Basic/Kids/Students, Marriage and Baby Naming are US$5 · ₹470; Bhava/Varga and Subha Muhurtham are US$10 · ₹940. The first free Beta order is limited to one per account, email address and IP address.",
+  },
+  {
+    title: "Analytics and advertising need consent",
+    body:
+      "Optional visitor statistics, GA4 and Meta Pixel stay off until Accept all. Never send birth details or report contents in analytics or advertising events. Honour footer cookie settings and Reject all.",
   },
   {
     title: "Sample reports contain no customer data",
@@ -231,14 +263,14 @@ export const FB_CHECKLIST = [
   { id: "fb-about", label: "Publish the four-paragraph About copy", group: "Identity" },
   { id: "fb-contact", label: "Add email, website, hours, languages, price range", group: "Identity" },
   { id: "fb-cta", label: "Set the Book Now button to astrosivam.com", group: "Conversion" },
-  { id: "fb-services", label: "Add four services with prices and links", group: "Conversion" },
+  { id: "fb-services", label: "Add four paid services plus Panjangam and Rasi Palan links", group: "Conversion" },
   { id: "fb-profile", label: "Upload the 1080×1080 profile photo", group: "Creative" },
   { id: "fb-cover", label: "Upload the 1640×624 cover, check the mobile crop", group: "Creative" },
   { id: "fb-pinned", label: "Publish and pin the Birth Jathagam post", group: "Content" },
   { id: "fb-nine", label: "Queue the first nine posts from the plan", group: "Content" },
   { id: "fb-reviews", label: "Turn Reviews on and request reviews from past customers", group: "Trust" },
-  { id: "fb-messenger", label: "Load greeting, away message and five instant replies", group: "Trust" },
-  { id: "fb-faqs", label: "Add the eight Messenger FAQs", group: "Trust" },
+  { id: "fb-messenger", label: "Load the greeting, away message and every instant reply", group: "Trust" },
+  { id: "fb-faqs", label: "Add every Messenger FAQ, including Rasi Palan and privacy", group: "Trust" },
   { id: "fb-compliance", label: "Add the astrology disclaimer and privacy note", group: "Trust" },
   { id: "fb-meta", label: "Connect Instagram to Meta Business Suite", group: "Growth" },
   { id: "fb-boost", label: "Launch the free-report boost at US$8–10/day", group: "Growth" },
