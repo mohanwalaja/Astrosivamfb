@@ -542,7 +542,7 @@ function setup_page(string $error = ''): never
             <li>In <strong>App settings → Basic</strong>, set <strong>App Domains</strong> to the bare domain below (no scheme or path) and add the Privacy Policy and Data Deletion URLs if those fields are shown.</li>
             <li>For a new app that shows <strong>Unified Login</strong>, open <strong>Facebook Login for Business → Configurations</strong>, create a <strong>User access token</strong> configuration, choose the Page/Instagram assets and required permissions below, then paste its Configuration ID into this installer. Register the callback shown below in Meta's redirect settings. Older classic OAuth apps can leave the Config ID blank.</li>
             <li>Enable <strong>Instagram API with Facebook Login</strong> (or the matching Instagram use case). This site uses a Facebook user login and a Page-linked professional Instagram account; it does not use separate Instagram Login.</li>
-            <li>Include these permissions in the Unified Login configuration (classic apps request them as OAuth scopes): <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>instagram_basic</code>, and <code>instagram_content_publish</code>. In Development mode, the person connecting must have an app role; other users require Meta's review/approval as applicable.</li>
+            <li>Include these permissions in the Unified Login configuration (classic apps request them as OAuth scopes): <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>instagram_basic</code>, and <code>instagram_content_publish</code>. In Development mode, the person connecting must have an app role and API-created content is visible only to app-role users. For public Page posts, complete Meta's applicable review/Advanced Access requirements and switch the app to Live mode.</li>
           </ol>
           <div class="copy-row"><code id="val-domains">suite.astrosivam.com</code><button type="button" class="copy-btn" onclick="copyVal('val-domains')">Copy</button></div>
           <small>→ App Domains</small>
@@ -688,7 +688,7 @@ a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba
   </div>
   <h2>Permissions needed by Connect</h2>
   <div class="perms">pages_show_list · pages_read_engagement · pages_manage_posts · instagram_basic · instagram_content_publish</div>
-  <p>For apps showing <strong>Unified Login</strong>, configure <strong>Facebook Login for Business</strong> with a <strong>User access token</strong>, the Page/Instagram assets, and all five permissions above; register the exact callback in Meta's redirect settings. The site will send the Configuration ID and omit the legacy <code>scope</code> parameter. For older classic OAuth apps only, leave the Config ID blank, enable Web OAuth if shown, and the site will request the scopes directly. Use <strong>Instagram API with Facebook Login</strong> (not separate Instagram Login). In Development mode, test with an app Admin/Developer/Tester who can manage the Page. Broader use may require Meta review/Advanced Access.</p>
+  <p>For apps showing <strong>Unified Login</strong>, configure <strong>Facebook Login for Business</strong> with a <strong>User access token</strong>, the Page/Instagram assets, and all five permissions above; register the exact callback in Meta's redirect settings. The site will send the Configuration ID and omit the legacy <code>scope</code> parameter. For older classic OAuth apps only, leave the Config ID blank, enable Web OAuth if shown, and the site will request the scopes directly. Use <strong>Instagram API with Facebook Login</strong> (not separate Instagram Login). In Development mode, test with an app Admin/Developer/Tester who can manage the Page; posts and photos created in this mode are visible only to app-role users. Before public Page publishing, complete Meta's applicable review/Advanced Access requirements and switch to Live mode.</p>
   <div class="foot">The callback is always derived as <code>SITE_BASE_URL + /api/meta/callback</code>. If you change the domain, update App Domains and Valid OAuth Redirect URIs in Meta too. Never paste an access token here; use <strong>Connect Meta account</strong> after saving to authorize the Page. For app creation and troubleshooting, follow the project's Fresh Facebook + Instagram API setup guide.</div>
 </main>
 <script>
@@ -1487,8 +1487,30 @@ try {
                         'url' => $imageUrl,
                         'caption' => $captions['facebook'],
                         'published' => 'true',
+                        // A photo upload is not enough: explicitly create its Page feed story.
+                        'no_story' => 'false',
                     ], (string) $page['access_token']);
-                    $results[] = ['platform' => 'facebook', 'success' => true, 'id' => (string) ($published['post_id'] ?? $published['id'] ?? '')];
+                    $postId = (string) ($published['post_id'] ?? '');
+                    if ($postId === '') {
+                        // A bare `id` is only the photo object. Never present that as a
+                        // published Page post, and do not encourage a blind retry because
+                        // Meta has already accepted the photo upload.
+                        $results[] = [
+                            'platform' => 'facebook',
+                            'success' => false,
+                            'error' => 'Meta uploaded the photo but did not return a Facebook Page post ID.',
+                            'category' => 'api_error',
+                            'outcomeUnknown' => true,
+                            'hint' => 'Check the Page before retrying to avoid a duplicate. Confirm the Meta app is in Live mode; Development-mode content is visible only to people with a role on the app.',
+                        ];
+                    } else {
+                        $results[] = [
+                            'platform' => 'facebook',
+                            'success' => true,
+                            'id' => $postId,
+                            'permalinkUrl' => 'https://www.facebook.com/' . rawurlencode($postId),
+                        ];
+                    }
                 } else {
                     $id = instagram_publish($page, $imageUrl, $captions['instagram']);
                     $results[] = ['platform' => 'instagram', 'success' => true, 'id' => $id];

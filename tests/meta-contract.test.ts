@@ -105,6 +105,23 @@ test("publishing sends per-platform captions in one CSRF-protected multipart POS
   assert.match(PHP, /\$legacyCaption/, "older clients retain a backward-compatible caption fallback");
 });
 
+test("Facebook publishes a feed story and never mistakes a photo-only response for a Page post", () => {
+  const publishStart = PHP.indexOf("if ($uriPath === '/api/meta/publish'");
+  const facebookStart = PHP.indexOf("if ($platform === 'facebook') {", publishStart);
+  const facebookEnd = PHP.indexOf("$id = instagram_publish", facebookStart);
+  assert.ok(publishStart >= 0 && facebookStart > publishStart && facebookEnd > facebookStart, "the Facebook publish branch must exist");
+  const facebook = PHP.slice(facebookStart, facebookEnd);
+  assert.match(facebook, /'published' => 'true'/, "the photo must be published immediately");
+  assert.match(facebook, /'no_story' => 'false'/, "the photo must also create its Page feed story");
+  assert.match(facebook, /\$published\['post_id'\]/, "success requires Facebook's Page post ID");
+  assert.doesNotMatch(facebook, /\$published\['id'\]/, "a bare photo ID must never be used as the post ID");
+  assert.match(facebook, /'outcomeUnknown' => true/, "a photo-only response must block a blind retry");
+  assert.match(facebook, /'permalinkUrl'/, "the confirmed Page post should be easy to open and verify");
+  assert.match(PUBLISHER, /Page post created/);
+  assert.match(PUBLISHER, /result\.permalinkUrl/);
+  assert.match(PUBLISHER, /Development to Live mode/, "the UI must explain role-only Development-mode visibility");
+});
+
 test("single-image creative surfaces open the shared publisher with the rendered design", () => {
   for (const path of [
     "src/components/ServicePosts.tsx",

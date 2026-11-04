@@ -330,7 +330,7 @@ export function MetaStatus() {
 
       <details className="mt-3 rounded-lg border border-line-soft bg-wash px-3 py-2">
         <summary className="cursor-pointer text-[10.5px] font-semibold text-gold-soft">
-          Troubleshooting the three failures we see
+          Troubleshooting common publishing failures
         </summary>
         <dl className="mt-2 space-y-2 text-[10.5px] leading-relaxed text-[#B4A58F]">
           <div>
@@ -359,6 +359,16 @@ export function MetaStatus() {
               The app must grant <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>,
               <code>instagram_basic</code> and <code>instagram_content_publish</code>. In Development mode, test as an app role;
               other users need the applicable Meta review/Advanced Access.
+            </dd>
+          </div>
+          <div>
+            <dt className="inline-flex items-center gap-1 font-semibold text-cream">
+              <AlertTriangle className="h-3 w-3 text-[#E0B48C]" aria-hidden="true" /> “Only I can see the post” / “Others see only the photo”
+            </dt>
+            <dd className="mt-0.5">
+              API-created content in Development mode is visible only to people with an app role. Complete Meta’s applicable
+              review/Advanced Access steps, switch <strong>App mode → Live</strong>, reconnect, and publish a new test. Open its
+              permalink while logged out to verify public visibility.
             </dd>
           </div>
         </dl>
