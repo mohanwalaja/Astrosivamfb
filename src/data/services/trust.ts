@@ -31,7 +31,7 @@ export const trust: Service = {
     subline: "Full sample PDFs. Priest review. Honest customer feedback, shared with permission.",
     tamil: "மாதிரி அறிக்கையை பாருங்கள்",
     chips: ["Sample PDFs", "Priest-reviewed", "90% refund"],
-    price: "1st report FREE (Beta)",
+    price: "First order FREE (Beta)",
     cta: "astrosivam.com/services",
   },
   artDirection:
@@ -42,12 +42,12 @@ export const trust: Service = {
     hook: "You should not have to pay to find out what a report looks like.",
     body: [
       "Every Astro Sivam service page has an 'Open sample PDF' button. It opens a complete report made with fixed sample details — the same layout, the same sections, the same language you will receive.",
-      "After you order, our India-based priest team checks the chart every six hours. Once the administrator approves it, your official PDF report and tax invoice are emailed to your registered address. Seven days of personal astrologer chat come with every delivery.",
+      "After you order, our India-based priest team checks the chart every six hours. Once the administrator approves it, your official PDF report and tax invoice are emailed to your registered address, with order history in the Customer Dashboard. Seven days of personal astrologer chat come with every delivery.",
       "And if something is wrong before approval, 90% is refundable. That is the whole promise — no subscription, no auto-renewal.",
     ],
     bullets: [
       "Sample PDF for every single service",
-      "Clear fees: US$5 · ₹470 per report · Subha Muhurtham US$10 · ₹940",
+      "Clear fees by plan: US$5 · ₹470 or US$10 · ₹940",
       "Reviewed by priests, not auto-generated",
       "Customer feedback shared only with permission",
       "90% refund before report approval",
@@ -60,7 +60,7 @@ export const trust: Service = {
     body: [
       "Every service has a full sample PDF — same layout, same sections, made with fixed sample details.",
       "Charts are checked by our priest team in India, then emailed with a tax invoice. 7 days of astrologer chat included.",
-      "US$5 · ₹470 per report (Subha Muhurtham US$10 · ₹940). Read the sample before you order. 90% refund before approval. 1st report FREE (Beta).",
+      "Plans are US$5 · ₹470 or US$10 · ₹940. Read the sample before you order. 90% refund before approval. First order FREE (Beta), one per account, email address and IP address.",
     ],
     cta: "Compare & open samples → link in bio · astrosivam.com/services",
     hashtags: [
@@ -135,8 +135,8 @@ export const trust: Service = {
       },
       {
         kicker: "Start free",
-        headline: "First report is free.",
-        body: "One per customer during the Beta — then US$5 · ₹470 per report (Muhurtham US$10 · ₹940).",
+        headline: "The first order is free.",
+        body: "One per account, email address and IP address during the Beta. Later orders use the listed US$5 · ₹470 or US$10 · ₹940 plan price.",
       },
     ],
   },

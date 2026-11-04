@@ -175,7 +175,8 @@ test("stories carry their words in pixels, because the API takes no caption", ()
     assert.ok(entry.sticker.trim().length > 0, `${entry.id} must tell the editor which sticker to add`);
     assert.ok(entry.content.kicker.length <= 24, `${entry.id} kicker must fit the field note`);
   }
-  assert.equal(IG_STORY_ENTRIES.length, 3);
+  assert.equal(IG_STORY_ENTRIES.length, 4);
+  assert.ok(IG_STORY_ENTRIES.some((entry) => entry.id === "story-rasi-palan" && entry.sticker.includes("astrosivam.com/rasipalan")));
   assert.ok(
     IG_STORY_ENTRIES.some((entry) => entry.content.cta === ""),
     "one story should ask for nothing at all",

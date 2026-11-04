@@ -23,6 +23,7 @@ const BRANDED = new Set([
   "#astrosivamreports",
   "#astrosivamreviews",
   "#astrosivampanchangam",
+  "#astrosivamrasipalan",
   "#astrosivamsample",
   "#astrosivamtrust",
   "#mysisivamchart",

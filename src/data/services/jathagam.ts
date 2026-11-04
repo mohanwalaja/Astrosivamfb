@@ -7,8 +7,8 @@ export const jathagam: Service = {
   tamilName: "பிறப்பு ஜாதகம்",
   kind: "Paid report",
   badge: "Five plans · Kids 0–10 · Students 11–18 · Basic · Bhava · Varga",
-  price: "US$5 · ₹470",
-  priceNote: "US$5 · ₹470 · Bhava/Varga US$10 · ₹940 · Kids 0–10 US$5 · ₹470 · Students 11–18 US$5 · ₹470 · 1st report FREE (Beta) · 7 days astrologer chat",
+  price: "From US$5 · ₹470",
+  priceNote: "US$5 · ₹470 · Bhava/Varga US$10 · ₹940 · Kids 0–10 US$5 · ₹470 · Students 11–18 US$5 · ₹470 · First order FREE (Beta) · 7 days astrologer chat",
   path: "/birth-jathagam",
   url: "https://astrosivam.com/birth-jathagam",
   promise:
@@ -24,7 +24,7 @@ export const jathagam: Service = {
     "PDF in English, Tamil or Hindi · 7 days of astrologer chat",
   ],
   proof:
-    "Every chart is checked by our India-based priest team every six hours; after admin approval, your PDF report and tax invoice are emailed. Birth-date age is calculated live on the form to select Kids/Students automatically — no customer has to guess the right tier.",
+    "Every chart is checked by our India-based priest team every six hours; after admin approval, your PDF report and tax invoice are emailed, with order history in the Customer Dashboard. Birth-date age is calculated live on the form to select Kids/Students automatically — no customer has to guess the right tier.",
   motif: "jathagam",
   theme: "midnight",
   creative: {
@@ -33,7 +33,7 @@ export const jathagam: Service = {
     subline: "Kids 0–10 · Students 11–18 auto-selected from DOB · Basic · Bhava · Varga for adults.",
     tamil: "பிறப்பு ஜாதகம் · 5 திட்டங்கள்",
     chips: ["Kids 0–10 auto", "Students 11–18 auto", "Bhava/Varga US$10"],
-    price: "US$5 · ₹470",
+    price: "From US$5 · ₹470",
     cta: "astrosivam.com/birth-jathagam",
   },
   artDirection:
@@ -53,7 +53,7 @@ export const jathagam: Service = {
       "Students: Vidya, concentration, exam windows, 6–7 year study timeline",
       "Basic/Bhava/Varga for 19+ · Lahiri · Drik · priest-reviewed · Sade Sati & pariharams",
     ],
-    cta: "Order your Birth Jathagam at astrosivam.com/birth-jathagam — US$5 · ₹470 (Bhava/Varga US$10 · ₹940) · 1st report FREE (Beta).",
+    cta: "Order your Birth Jathagam at astrosivam.com/birth-jathagam — US$5 · ₹470 (Bhava/Varga US$10 · ₹940) · First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#VedicAstrology", "#BirthJathagam", "#Jathagam", "#KundliReading"],
     pinned: true,
   },
@@ -62,7 +62,7 @@ export const jathagam: Service = {
     body: [
       "Birth Jathagam — 5 plans, one form. Kids 0–10 & Students 11–18 auto-select from DOB/time/place. Kids: gentle Bala Arishta, health & early learning. Students: Vidya, focus, subject affinity, exam dasa windows.",
       "For 19+ → Basic (charts, dasa, 8 life areas), Bhava (all 12 bhavas in depth) & Varga (one life area via divisional charts). Lahiri sidereal, Drik, priest-reviewed, Sade Sati & dosha with pariharams.",
-      "PDF EN/தமிழ்/हिंदी · US$5 · ₹470 (Bhava/Varga US$10 · ₹940) · 1st FREE (Beta) · 7 days chat.",
+      "PDF EN/தமிழ்/हिंदी · US$5 · ₹470 (Bhava/Varga US$10 · ₹940) · First order FREE (Beta) · 7 days chat.",
     ],
     cta: "Order through link in bio → astrosivam.com/birth-jathagam (enter birth details, the right plan appears)",
     hashtags: [
@@ -138,7 +138,7 @@ export const jathagam: Service = {
       {
         kicker: "What arrives",
         headline: "A PDF you can keep.",
-        body: "Rasi + Navamsa, Vimshottari dasa, Sade Sati & doshas with pariharams. EN/தமிழ்/हिंदी. US$5 · ₹470 (Bhava/Varga US$10) · 1st FREE (Beta).",
+        body: "Rasi + Navamsa, Vimshottari dasa, Sade Sati & doshas with pariharams. EN/தமிழ்/हिंदी. US$5 · ₹470 (Bhava/Varga US$10) · First order FREE (Beta).",
       },
     ],
   },
@@ -159,7 +159,7 @@ export const jathagam: Service = {
       "Dasa = the chapter you are in",
       "Sade Sati = a season, not a curse",
     ],
-    cta: "Full report US$5 · ₹470 (Bhava/Varga US$10) · 1st FREE (Beta) — link in bio.",
+    cta: "Full report US$5 · ₹470 (Bhava/Varga US$10) · First order FREE (Beta) — link in bio.",
     audio: "Soft veena or tanpura instrumental under a calm Tamil or English voiceover. Captions burned in.",
   },
   stories: [
@@ -174,7 +174,7 @@ export const jathagam: Service = {
       sticker: "Quiz — Which one auto-selects for a 7-year-old?",
     },
     {
-      title: "1st report FREE (Beta)",
+      title: "First order FREE (Beta)",
       body: "Birth Jathagam — 5 plans · Kids 0–10 · Students 11–18 · Basic & Bhava/Varga · US$5 · ₹470",
       sticker: "Link sticker → astrosivam.com",
     },

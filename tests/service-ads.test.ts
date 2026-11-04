@@ -97,13 +97,13 @@ test("the education set and the advertising set do not overlap", () => {
 
 /* --------------------------------- coverage ------------------------------- */
 
-test("every briefed service is covered by the six-services list", () => {
-  const expected = ["jathagam", "marriage", "baby-naming", "muhurtham", "panchangam", "transits"];
+test("every briefed service is covered by the advertising list", () => {
+  const expected = ["jathagam", "marriage", "baby-naming", "muhurtham", "panchangam", "rasipalan", "transits"];
   for (const id of expected) {
     assert.ok(AD_SERVICE_IDS.includes(id), `${id} is missing from the brief list`);
     assert.ok(SERVICES.some((service) => service.id === id), `${id} is missing from SERVICES`);
   }
-  assert.deepEqual(AD_SERVICE_IDS.slice(0, 6), expected);
+  assert.deepEqual(AD_SERVICE_IDS.slice(0, 7), expected);
   assert.equal(AD_SERVICE_IDS.at(-1), "trust", "the samples plate is a trust asset, listed last");
 });
 

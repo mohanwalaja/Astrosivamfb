@@ -8,7 +8,7 @@ export const marriage: Service = {
   kind: "Paid report",
   badge: "10 Poruthams",
   price: "US$5 · ₹470",
-  priceNote: "US$5 · ₹470 for both charts · 1st report FREE (Beta)",
+  priceNote: "US$5 · ₹470 for both charts · First order FREE (Beta)",
   path: "/marriage-compatibility",
   url: "https://astrosivam.com/marriage-compatibility",
   promise:
@@ -51,7 +51,7 @@ export const marriage: Service = {
       "Kuja dosha read with its real cancellation rules",
       "Dasa Sandhi comparison for both partners",
     ],
-    cta: "Start a Marriage Compatibility report at astrosivam.com/marriage-compatibility — US$5 · ₹470 for both charts · 1st report FREE (Beta).",
+    cta: "Start a Marriage Compatibility report at astrosivam.com/marriage-compatibility — US$5 · ₹470 for both charts · First order FREE (Beta).",
     hashtags: ["#AstroSivam", "#ThirumanaPorutham", "#10Porutham", "#MarriageCompatibility", "#KundliMilan"],
   },
   ig: {
@@ -59,7 +59,7 @@ export const marriage: Service = {
     body: [
       "Porutham is not a score out of ten. Each of the ten checks protects a different part of married life.",
       "We read both charts together — Rajju, Vedha, Kuja dosha with its cancellation rules, and Dasa Sandhi — then give one clear verdict with reasons.",
-      "US$5 · ₹470 for both charts · PDF in English, Tamil or Hindi · first report FREE (Beta).",
+      "US$5 · ₹470 for both charts · PDF in English, Tamil or Hindi · first order FREE (Beta).",
     ],
     cta: "Send both birth details through the link in bio → astrosivam.com/marriage-compatibility",
     hashtags: [

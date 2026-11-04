@@ -35,7 +35,9 @@ test("service posts point at a real service in the catalogue", () => {
   for (const entry of FB_COPY_ENTRIES) {
     if (!entry.serviceId) continue;
     assert.ok(SERVICE_MAP[entry.serviceId], `${entry.id} references unknown service ${entry.serviceId}`);
-    if (entry.category === "service") assert.ok(SERVICE_MAP[entry.serviceId].kind === "Paid report");
+    if (entry.category === "service") {
+      assert.ok(["Paid report", "Free daily"].includes(SERVICE_MAP[entry.serviceId].kind));
+    }
   }
 });
 
@@ -49,12 +51,18 @@ test("no post leaves the brand line or the call to action empty", () => {
   }
 });
 
-test("the price on a service ad is a price the catalogue charges", () => {
-  // Guards against a stale price surviving a catalogue change.
+test("a service ad uses the catalogue's price or public-reading label", () => {
+  // Guards against a stale price surviving a catalogue change, while allowing
+  // a public service such as Rasi Palan to promote reading rather than checkout.
   for (const entry of FB_COPY_ENTRIES.filter((item) => item.category === "service")) {
     const price = entry.content.price;
-    assert.ok(/\d/.test(price), `${entry.id} has no number in its price`);
-    assert.ok(price.includes("₹") || price.includes("US$"), `${entry.id} price is missing a currency`);
+    const service = SERVICE_MAP[entry.serviceId!];
+    if (service.kind === "Paid report") {
+      assert.ok(/\d/.test(price), `${entry.id} has no number in its price`);
+      assert.ok(price.includes("₹") || price.includes("US$"), `${entry.id} price is missing a currency`);
+    } else {
+      assert.ok(price.includes(service.price), `${entry.id} must reuse the public-reading label`);
+    }
   }
   const priced = FB_COPY_ENTRIES.filter((entry) => entry.category === "educational" || entry.category === "festival");
   for (const entry of priced) {

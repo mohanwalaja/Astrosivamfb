@@ -3,7 +3,7 @@
 A complete, export-ready creative studio for [astrosivam.com](https://astrosivam.com).
 
 Everything lives in one React app: the brand kit and interface design system, a canvas studio that
-renders at exact platform resolutions, seven service post systems with final captions and hashtags,
+renders at exact platform resolutions, ten service post systems with final captions and hashtags,
 festival and panchangam tools, Instagram and Facebook playbooks, and a 30-day publishing calendar.
 
 ## The studio interface
@@ -143,10 +143,12 @@ one palette family and one component grammar across every screen:
 - **Deity art** — twelve painted deity portraits (Ganesha, Shiva, Murugan, Lakshmi, Saraswati, Durga,
   Krishna, Rama, Hanuman, Venkateswara, Ayyappa, Meenakshi) at 1200 px with 360 px thumbnails. Any of
   them can be turned on or off per poster; you can also upload your own image.
-- **Service posts** — Birth Jathagam, Marriage Compatibility (10 Poruthams), Baby Naming,
-  Subha Muhurtham, Daily Panchangam, Transits & Sade Sati, Samples & Trust. Each has a Facebook
-  caption, Instagram caption, first comment, alt text, carousel script, reel script, three story
-  frames and six hashtag mixes.
+- **Service posts** — Birth Jathagam, Kids Jathagam, Students Jathagam, Marriage Compatibility
+  (10 Poruthams), Baby Naming, Subha Muhurtham, Daily Panchangam, Rasi Palan, Transits & Sade Sati,
+  and Samples & Trust. Each has a Facebook caption, Instagram caption, first comment, alt text,
+  carousel script, reel script, three story frames and six hashtag mixes. Rasi Palan covers all
+  12 Moon signs and Daily, Weekly, Monthly and Yearly readings; evergreen creative explains the
+  service and deliberately does not freeze a date-specific forecast or rating.
 - **Instagram suite** — seven surfaces behind one tab bar, built on the same measurement discipline as
   the Facebook suite:
   - **Profile** — the 390 × 844 phone mockup with the real nine tiles, the seven seals and blank
@@ -183,7 +185,7 @@ one palette family and one component grammar across every screen:
   canvas sizes, safe zones and audit maths, and `npx tsx tmp/igsheet.mjs` renders all 21 assets and
   fails if any line falls below its role's floor.
 - **Facebook suite** — four sections behind one tab bar:
-  - **Post studio** — ten ready posts across four content categories (service, education, festival,
+  - **Post studio** — ready posts across four content categories (service, education, festival,
     trust), each with a distinct composition rather than one skeleton recoloured: a *service promo*
     (header band, type column, price panel, ticked deliverables, flat CTA), an *educational guide*
     (editorial light page, circular art inset, numbered points, closing link), a *festival greeting*
@@ -331,16 +333,24 @@ eight hours; a server restart signs existing sessions out.
   Yatra One) are self-hosted WOFF2 files; canvas font loading has a timeout and uses system fallbacks.
 - Tamil and Devanagari never get letter-spacing — it breaks shaping — and long greetings shrink then
   wrap instead of overflowing the safe area.
-- Prices verified 25 Oct 2026 against [astrosivam.com/services](https://astrosivam.com/services):
-  Birth Jathagam — Basic/Kids 0–10/Students 11–18 US$5 · ₹470 · Bhava/Varga US$10 · ₹940 · Marriage Compatibility US$5 · ₹470 · Baby Naming US$5 · ₹470 ·
-  Subha Muhurtham US$10 · ₹940 · Daily Panjangam free. Age-gated: /birth-jathagam auto-selects Kids 0–10 or Students 11–18 from the entered birth date; adult plans are Basic/Bhava/Varga. Everywhere: 1st report FREE (Beta, one per
-  customer) · 90% refund before approval (within 3 working days) · reports checked every 6 hours,
-  PDF + tax invoice emailed after admin approval · 7 days of astrologer chat. NOTE: the homepage
-  cards on astrosivam.com currently show different amounts (US$18/22/15/20) — this suite follows
-  /services (owner-confirmed). Keep both in sync.
-- Delivery promise, office Address (Walajapet, Ranipet District, Tamil Nadu) and the free Daily
-  Panjangam URL (astrosivam.com/panjangam) mirror the live site. Review assets are placeholders until
-  genuine customer feedback and permission are verified; do not publish placeholder copy.
+- Prices and public services rechecked 4 Nov 2026 against [astrosivam.com/services](https://astrosivam.com/services),
+  the homepage and dedicated report pages: Basic/Kids 0–10/Students 11–18, Marriage Compatibility
+  and Baby Naming are US$5 · ₹470; Bhava/Varga and Subha Muhurtham are US$10 · ₹940. Daily Panjangam
+  is free at `astrosivam.com/panjangam`. The new Rasi Palan page is `astrosivam.com/rasipalan`, with
+  Daily, Weekly, Monthly and Yearly readings for all 12 Moon signs; its public page shows no checkout,
+  so the suite uses the cautious access label **Read online** rather than inventing a price promise.
+  The owner-confirmed age-gated Kids/Students records are retained even though this static fetch
+  exposed only the three adult cards; absence from static HTML is not treated as removal.
+- The Beta offer is **first order free**, limited to one per account, email address and IP address;
+  later orders use the standard plan price. Reports are checked every six hours, then the PDF and tax
+  invoice are emailed after admin approval and tracked in the Customer Dashboard; every delivered
+  report includes seven days of astrologer chat. Refunds are 90% before approval, within three working
+  days. Google/email sign-in, optional saved profiles/family members and carts of up to six orders are
+  documented in the latest scan.
+- Delivery promise, office address (Walajapet, Ranipet District, Tamil Nadu), policies, route inventory,
+  review labels and all verification limits are recorded in [`docs/site-scan-2026-11-04.md`](docs/site-scan-2026-11-04.md).
+  The homepage currently displays six reviews, but reuse permission for social creative has not been
+  independently confirmed; the suite keeps its review-card placeholder. Do not publish placeholder copy.
 - Publishing always requires a user-initiated **Publish now** action; there are no background or scheduled
   posts. On supported single-image design surfaces, that one click renders the design, loads its separate
   platform captions/hashtags, validates it, and sends it immediately when the connected Page is verified. No

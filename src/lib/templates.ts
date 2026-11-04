@@ -405,7 +405,7 @@ function renderCover(
     ctx.fillRect(cx - 120, H * 0.7, 240, 1);
     ctx.fillStyle = withAlpha(theme.goldSoft, 0.95);
     ctx.font = SANS(19, 500);
-drawTracked(ctx, "astrosivam.com · first report free", cx, H * 0.765, 1.8, "center");
+drawTracked(ctx, "astrosivam.com · first order free", cx, H * 0.765, 1.8, "center");
     ctx.textAlign = "left";
     return;
   }
@@ -438,7 +438,7 @@ drawTracked(ctx, "astrosivam.com · first report free", cx, H * 0.765, 1.8, "cen
 
   ctx.fillStyle = withAlpha(theme.goldSoft, 0.95);
   ctx.font = SANS(19, 500);
-ctx.fillText("astrosivam.com · first report free", textX, H * 0.662);
+ctx.fillText("astrosivam.com · first order free", textX, H * 0.662);
 
   ctx.fillStyle = theme.muted;
   ctx.font = SANS(14.5, 400);
@@ -496,7 +496,7 @@ function renderLink(
   });
   ctx.fillStyle = withAlpha(theme.muted, 1);
   ctx.font = SANS(17, 500);
-  ctx.fillText("first report free", 106, H - 62);
+  ctx.fillText("first order free", 106, H - 62);
   ctx.textAlign = "right";
   ctx.fillStyle = withAlpha(theme.gold, 0.85);
   ctx.font = SANS(13, 600);
@@ -723,7 +723,7 @@ function renderCarousel(
 
   if (last) {
     const pillY = H * 0.755;
-    drawPill(ctx, "ORDER", pad, pillY, {
+    drawPill(ctx, service.kind === "Paid report" ? "ORDER" : "READ", pad, pillY, {
       theme,
       filled: true,
       size: 18,
@@ -736,13 +736,12 @@ function renderCarousel(
     ctx.fillText(service.url.replace("https://", ""), pad, pillY + 96);
     ctx.fillStyle = withAlpha(theme.muted, 1);
     ctx.font = SANS(15, 500);
-    ctx.fillText(
-      service.kind === "Paid report" && service.price
-        ? `${service.price} · First report free (Beta) · 7 days of chat`
-        : "First report free (Beta) · 7 days of astrologer chat",
-      pad,
-      pillY + 126,
-    );
+    const deliveryLine = service.kind === "Paid report"
+      ? `${service.price} · First order free (Beta) · 7 days of chat`
+      : service.kind === "Free daily"
+        ? `${service.price} · no report order required`
+        : "Free samples · no customer data";
+    ctx.fillText(deliveryLine, pad, pillY + 126);
   } else if (index !== 0) {
     const pillY = H * 0.735;
     drawPill(ctx, "SWIPE →", pad, pillY, {

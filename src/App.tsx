@@ -226,7 +226,7 @@ function SidebarFooter() {
           <span className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-[#C7E5D5]">Launch ready</span>
         </div>
         <p className="mt-2 text-[10.5px] leading-relaxed text-[#E0D4C0]">
-          {BRAND.handle} · 1st report free (beta)
+          {BRAND.handle} · First order free (Beta)
         </p>
         <a
           href={BRAND.url}

@@ -1,5 +1,7 @@
+import { SERVICES } from "./services";
+
 export const LAUNCH_STATS = [
-  { value: "7", label: "Service post systems", sub: "Captions, carousels, reels, stories" },
+  { value: String(SERVICES.length), label: "Service post systems", sub: "Captions, carousels, reels, stories" },
   { value: "90+", label: "Export-ready creatives", sub: "Exact platform resolutions" },
   { value: "30", label: "Day content calendar", sub: "Platform, pillar and time" },
   { value: "200+", label: "Curated hashtags", sub: "Tiered and rotation-ready" },
@@ -17,7 +19,7 @@ export const LAUNCH_CHECKLIST = [
   { id: "categories", label: "Set page categories and contact details", group: "Identity" },
   { id: "bio-fb", label: "Paste the Facebook bio and four-paragraph About", group: "Identity" },
   { id: "bio-ig", label: "Paste the Instagram bio and switch to a professional account", group: "Identity" },
-  { id: "link", label: "Build the link-in-bio with all six links", group: "Identity" },
+  { id: "link", label: "Build the link-in-bio with every current service and free-reading link", group: "Identity" },
   { id: "profile", label: "Upload both 1080×1080 profile photos", group: "Creative" },
   { id: "cover", label: "Upload the Facebook cover and check the mobile crop", group: "Creative" },
   { id: "highlights", label: "Publish the seven highlight covers", group: "Creative" },
@@ -25,6 +27,7 @@ export const LAUNCH_CHECKLIST = [
   { id: "pinned", label: "Pin the Birth Jathagam post on Facebook", group: "Content" },
   { id: "calendar", label: "Load the 30-day calendar into Meta Business Suite", group: "Content" },
   { id: "panchangam", label: "Set the daily 6:30 AM Panchangam slot", group: "Content" },
+  { id: "rasipalan", label: "Add the Rasi Palan link and a weekly Moon-sign post", group: "Content" },
   { id: "samples", label: "Confirm sample PDFs are linked on every service page", group: "Trust" },
   { id: "faqs", label: "Load Messenger greeting, away message and instant replies", group: "Trust" },
   { id: "reviews", label: "Turn Reviews on and invite past customers", group: "Trust" },
@@ -42,14 +45,18 @@ export const NEVER_DO = [
   "No public requests for birth details — move every order to DM or the website.",
   "No bought followers, engagement pods or follow-for-follow loops.",
   "No stock photos of Western zodiac wheels — our visual system is South Indian.",
+  "No recycled Rasi Palan ratings or predictions — verify the selected sign, period and date on the live page.",
 ];
 
 export const VERIFIED_FACTS = [
   { label: "Services", value: "Birth Jathagam · Marriage Compatibility · Baby Naming · Subha Muhurtham" },
-  { label: "Price", value: "US$5 · ₹470 per report · Subha Muhurtham US$10 · ₹940 · 1st report FREE (Beta)" },
+  { label: "Price", value: "Basic/Kids/Students, Marriage & Baby Naming US$5 · ₹470 · Bhava/Varga & Muhurtham US$10 · ₹940" },
+  { label: "Beta", value: "First order free · one per account, email address and IP address · later orders at standard price" },
   { label: "Panjangam", value: "Free daily at astrosivam.com/panjangam · any location & timezone" },
+  { label: "Rasi Palan", value: "Daily, Weekly, Monthly & Yearly · all 12 Moon signs · astrosivam.com/rasipalan" },
   { label: "Method", value: "Sidereal zodiac · Chitra Paksha Lahiri ayanamsa" },
-  { label: "Delivery", value: "Reports checked every 6 hours · PDF + tax invoice emailed after admin approval" },
+  { label: "Delivery", value: "Checked every 6 hours · PDF + invoice emailed after approval · Customer Dashboard tracking" },
+  { label: "Ordering", value: "Google or email sign-in · saved profiles/family members · up to 6 orders in cart" },
   { label: "Included", value: "7 days of personal astrologer chat after every delivery" },
   { label: "Languages", value: "English · Tamil · Hindi" },
   { label: "Review practice", value: "Publish customer feedback only with permission" },
@@ -65,6 +72,7 @@ export const QUICK_LINKS = [
   { label: "Subha Muhurtham", url: "https://astrosivam.com/muhurtham" },
   { label: "Services & prices", url: "https://astrosivam.com/services" },
   { label: "Free Daily Panjangam", url: "https://astrosivam.com/panjangam" },
+  { label: "Rasi Palan", url: "https://astrosivam.com/rasipalan" },
   { label: "How it works", url: "https://astrosivam.com/how-it-works" },
 ];
 

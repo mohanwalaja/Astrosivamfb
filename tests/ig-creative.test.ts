@@ -127,7 +127,7 @@ test("every grid, story and reel entry names a layout that exists", () => {
     ...IG_STORY_ENTRIES.map((entry) => ({ id: entry.id, layout: "ig-story" as IgLayout, headline: entry.content.headline })),
     ...IG_REEL_ENTRIES.map((entry) => ({ id: entry.id, layout: "ig-reel-cover" as IgLayout, headline: entry.content.headline })),
   ];
-  assert.equal(entries.length, 14, "nine grid posts, three stories, two covers");
+  assert.equal(entries.length, 15, "nine grid posts, four stories, two covers");
   for (const entry of entries) {
     assert.ok(IG_LAYOUT_MAP[entry.layout], `${entry.id} points at unknown layout ${entry.layout}`);
     assert.ok(entry.headline.trim().length > 0, `${entry.id} needs a headline`);

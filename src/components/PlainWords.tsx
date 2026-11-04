@@ -138,7 +138,7 @@ const Plate: React.FC<{ poster: PlainWordsPoster; onOpen: () => void }> = ({ pos
   );
 };
 
-const ONE_LINE = `${BRAND.name} prepares your jathagam online. You send your birth date, birth time and birth place. Our India-based priest team reviews the chart, and your PDF report and tax invoice arrive by email. Every report includes seven days of chat. Birth Jathagam is US$5 (₹470), and your first report is free while we are in beta.`;
+const ONE_LINE = `${BRAND.name} prepares your jathagam online. You send your birth date, birth time and birth place. Our India-based priest team reviews the chart, and your PDF report and tax invoice arrive by email. Every report includes seven days of chat. Basic Birth Jathagam is US$5 (₹470), and your first order is free while we are in beta.`;
 
 export const PlainWords: React.FC<{ onNavigate?: (id: string) => void }> = ({ onNavigate }) => {
   const open = (poster: PlainWordsPoster) => {

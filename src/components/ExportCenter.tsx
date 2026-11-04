@@ -254,7 +254,7 @@ export const ExportCenter: React.FC = () => {
               },
               {
                 label: "All captions (.txt)",
-                detail: "Facebook and Instagram captions for all seven services.",
+                detail: `Facebook and Instagram captions for all ${SERVICES.length} services.`,
                 icon: Sparkles,
                 action: () =>
                   download(

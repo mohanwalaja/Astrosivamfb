@@ -170,7 +170,7 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
       cta: "Order at astrosivam.com",
     },
     caption:
-      "There is no monthly plan and no auto-renewal. You pay once for one report.\n\nBirth Jathagam is US$5 (₹470 in India). Bhava and Varga reports are US$10. Wedding matching is US$5 for both charts. Subha Muhurtham is US$10 for a six-month calendar. Your first report is free while we are in beta, and 90% is refundable before the report is approved.",
+      "There is no monthly plan and no auto-renewal. You pay once for one report.\n\nBirth Jathagam is US$5 (₹470 in India). Bhava and Varga reports are US$10. Wedding matching is US$5 for both charts. Subha Muhurtham is US$10 for a six-month calendar. Your first order is free while we are in beta (one per account, email address and IP address), and 90% is refundable before the report is approved.",
   },
   {
     id: "read-before-pay",

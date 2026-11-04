@@ -52,6 +52,7 @@ const SERVICE_TAGS = {
   babyNaming: ["#BabyNaming", "#Namakaranam", "#TamilNames"],
   muhurtham: ["#Muhurtham", "#SubhaMuhurtham", "#WeddingDate"],
   panchangam: ["#Panchangam", "#DailyPanchangam", "#NallaNeram"],
+  rasipalan: ["#RasiPalan", "#MoonSign", "#Rashifal"],
   transits: ["#SadeSati", "#Gocharam", "#Transits"],
   trust: ["#SampleReport", "#AstrologyReport"],
 } as const;
@@ -68,6 +69,7 @@ const jathagam = getService("jathagam");
 const marriage = getService("marriage");
 const babyNaming = getService("baby-naming");
 const muhurtham = getService("muhurtham");
+const rasipalan = getService("rasipalan");
 
 export const FB_COPY_ENTRIES: FbCopyEntry[] = [
   {
@@ -83,15 +85,15 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
       subline: "Lahiri sidereal charts · reviewed by temple priests · 7 days of astrologer chat.",
       tamil: jathagam.tamilName,
       chips: ["Rasi + Navamsa charts", "Vimshottari dasa timeline", "Sade Sati & pariharams"],
-      price: "US$5 · ₹470 · first report free",
+      price: "US$5 · ₹470 · Basic · first order free",
       cta: "astrosivam.com/birth-jathagam",
       footer: BASE_FOOTER,
     },
     captions: {
       facebook:
-        "Your birth chart is more than a horoscope column.\n\nA Birth Jathagam is cast on the sidereal zodiac with the Chitra Paksha Lahiri ayanamsa, then read — Rasi and Navamsa charts, the full Vimshottari dasa timeline, Sade Sati status, and the pariharams that address a difficult season. Every chart is checked by our temple-priest team in Tamil Nadu before your PDF is emailed.\n\nBasic Jathagam US$5 · ₹470. Bhava Jathagam for all twelve bhavas, same fee. Reports in English, Tamil or Hindi, with 7 days of astrologer chat after delivery.\n\nYour first report is free during the Beta — one per customer.\n\nRead a full sample, then order: astrosivam.com/birth-jathagam",
+        "Your birth chart is more than a horoscope column.\n\nA Birth Jathagam is cast on the sidereal zodiac with the Chitra Paksha Lahiri ayanamsa, then read — Rasi and Navamsa charts, the full Vimshottari dasa timeline, Sade Sati status, and the pariharams that address a difficult season. Every chart is checked by our temple-priest team in Tamil Nadu before your PDF is emailed.\n\nBasic Jathagam US$5 · ₹470. Bhava or Varga Jathagam US$10 · ₹940. Reports in English, Tamil or Hindi, with 7 days of astrologer chat after delivery.\n\nYour first order is free during the Beta — one per account, email address and IP address; later orders use the standard price.\n\nRead a full sample, then order: astrosivam.com/birth-jathagam",
       instagram:
-        "Your birth chart, read by a person.\n\nSidereal zodiac · Lahiri ayanamsa · temple-priest review · Rasi + Navamsa · Vimshottari dasa · Sade Sati status.\n\nUS$5 · ₹470. First report free during the Beta.\n\nSample and order — astrosivam.com/birth-jathagam",
+        "Your birth chart, read by a person.\n\nSidereal zodiac · Lahiri ayanamsa · temple-priest review · Rasi + Navamsa · Vimshottari dasa · Sade Sati status.\n\nUS$5 · ₹470. First order free during the Beta.\n\nSample and order — astrosivam.com/birth-jathagam",
     },
     hashtags: tags("jathagam"),
     cta: { line: "Read the sample, then order", url: "astrosivam.com/birth-jathagam", quickReply: "Birth Jathagam" },
@@ -115,9 +117,9 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
     },
     captions: {
       facebook:
-        "Matching two charts is not a score out of 36.\n\nWe read all ten classical poruthams — Dina, Gana, Mahendra, Sthree Deergha, Yoni, Rasi, Rasiyathipathi, Vasya, Rajju and Vedha — then the checks most matching apps skip: Kuja dosha balancing, Dasa Sandhi and the running dasha of both people.\n\nBoth charts, one fee: US$5 · ₹470. First report free during the Beta.\n\nSend four details for each person — date, exact time, place, and we take it from there: astrosivam.com/marriage-compatibility",
+        "Matching two charts is not a score out of 36.\n\nWe read all ten classical poruthams — Dina, Gana, Mahendra, Sthree Deergha, Yoni, Rasi, Rasiyathipathi, Vasya, Rajju and Vedha — then the checks most matching apps skip: Kuja dosha balancing, Dasa Sandhi and the running dasha of both people.\n\nBoth charts, one fee: US$5 · ₹470. First order free during the Beta.\n\nSend four details for each person — date, exact time, place, and we take it from there: astrosivam.com/marriage-compatibility",
       instagram:
-        "Ten poruthams. Both charts. One fee.\n\nRajju · Vedha · Kuja dosha balancing · Dasa Sandhi.\n\nUS$5 · ₹470. First report free during the Beta.\n\nastrosivam.com/marriage-compatibility",
+        "Ten poruthams. Both charts. One fee.\n\nRajju · Vedha · Kuja dosha balancing · Dasa Sandhi.\n\nUS$5 · ₹470. First order free during the Beta.\n\nastrosivam.com/marriage-compatibility",
     },
     hashtags: tags("marriage"),
     cta: { line: "Send both birth details", url: "astrosivam.com/marriage-compatibility", quickReply: "Porutham matching" },
@@ -141,9 +143,9 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
     },
     captions: {
       facebook:
-        "In the Tamil tradition, a name begins with the syllable of the birth star's pada — not the star alone.\n\nWe calculate all four padas for the exact minute of birth, then send a shortlist of names that fit the syllable and the family's tradition, with a printable naming certificate for the naming ceremony.\n\nUS$5 · ₹470, certificate included. First report free during the Beta.\n\nSend the birth date, exact time and place: astrosivam.com/baby-naming",
+        "In the Tamil tradition, a name begins with the syllable of the birth star's pada — not the star alone.\n\nWe calculate all four padas for the exact minute of birth, then send a shortlist of names that fit the syllable and the family's tradition, with a printable naming certificate for the naming ceremony.\n\nUS$5 · ₹470, certificate included. First order free during the Beta.\n\nSend the birth date, exact time and place: astrosivam.com/baby-naming",
       instagram:
-        "The syllable your child's name begins with — calculated from the birth star's pada.\n\nAll four padas · name shortlist · printable certificate.\n\nUS$5 · ₹470. First report free during the Beta.\n\nastrosivam.com/baby-naming",
+        "The syllable your child's name begins with — calculated from the birth star's pada.\n\nAll four padas · name shortlist · printable certificate.\n\nUS$5 · ₹470. First order free during the Beta.\n\nastrosivam.com/baby-naming",
     },
     hashtags: tags("babyNaming"),
     cta: { line: "Send the birth details", url: "astrosivam.com/baby-naming", quickReply: "Baby Naming" },
@@ -167,12 +169,39 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
     },
     captions: {
       facebook:
-        "A date is auspicious for a ceremony, not for everyone in the abstract.\n\nSubha Muhurtham returns six months of windows calculated against both charts — for eighteen ceremonies from the naming to the housewarming — with the Nalla Neram and the Rahu Kalam that must be avoided on each day.\n\nUS$10 · ₹940. First report free during the Beta.\n\nTell us the ceremony and the two birth details: astrosivam.com/muhurtham",
+        "A date is auspicious for a ceremony, not for everyone in the abstract.\n\nSubha Muhurtham returns six months of windows calculated against both charts — for eighteen ceremonies from the naming to the housewarming — with the Nalla Neram and the Rahu Kalam that must be avoided on each day.\n\nUS$10 · ₹940. First order free during the Beta.\n\nTell us the ceremony and the two birth details: astrosivam.com/muhurtham",
       instagram:
-        "Dates that suit your charts — not a generic calendar.\n\nSix months of windows · 18 ceremonies · Nalla Neram + Rahu Kalam.\n\nUS$10 · ₹940. First report free during the Beta.\n\nastrosivam.com/muhurtham",
+        "Dates that suit your charts — not a generic calendar.\n\nSix months of windows · 18 ceremonies · Nalla Neram + Rahu Kalam.\n\nUS$10 · ₹940. First order free during the Beta.\n\nastrosivam.com/muhurtham",
     },
     hashtags: tags("muhurtham"),
     cta: { line: "Tell us the ceremony", url: "astrosivam.com/muhurtham", quickReply: "Muhurtham dates" },
+  },
+
+  {
+    id: "rasipalan-moon-sign",
+    category: "service",
+    layout: "service-promo",
+    label: "Rasi Palan — four timeframes",
+    serviceId: "rasipalan",
+    theme: "lagoon",
+    content: {
+      kicker: rasipalan.name,
+      headline: "Your Moon sign. Four timeframes.",
+      subline: "Daily, Weekly, Monthly and Yearly readings for all 12 rasis, with a summary and full palan.",
+      tamil: rasipalan.tamilName,
+      chips: ["12 Moon signs", "4 timeframes", "Full palan"],
+      price: "Read online · 4 timeframes",
+      cta: "astrosivam.com/rasipalan",
+      footer: BASE_FOOTER,
+    },
+    captions: {
+      facebook:
+        "Daily, Weekly, Monthly or Yearly — which Rasi Palan do you read?\n\nAstro Sivam's new Rasi Palan page brings all 12 Moon signs into one place. Choose your rasi, then choose the timeframe.\n\nEach card shows a five-star summary, a period label and a focus highlight such as Money & Wealth, Career & Business, Love & Relations or Travel. Tap Read full palan for the current reading.\n\nRatings and highlights belong to the selected period, so open the live page for today's wording: astrosivam.com/rasipalan",
+      instagram:
+        "Your Moon sign. Four timeframes.\n\nDaily · Weekly · Monthly · Yearly Rasi Palan for all 12 rasis. Read the star summary, period label and focus highlight, then open the full palan.\n\nCheck the live page for the current reading — astrosivam.com/rasipalan",
+    },
+    hashtags: tags("rasipalan"),
+    cta: { line: "Choose your Moon sign", url: "astrosivam.com/rasipalan", quickReply: "Rasi Palan" },
   },
 
   /* ------------------------------ educational ---------------------------- */
@@ -187,21 +216,21 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
     content: {
       kicker: "Transits",
       headline: "Sade Sati is a season, not a sentence.",
-      subline: "Saturn crosses three signs around your Moon · each phase lasts about seven and a half years · pariharams are traditional remedies, not guarantees.",
+      subline: "Saturn crosses three signs around your Moon · the three phases span about seven and a half years in total · pariharams are traditional remedies, not guarantees.",
       tamil: "சனி பெயர்ச்சி",
       chips: [],
       price: "",
-      cta: "Read the full guide",
+      cta: "Read it with your Jathagam",
       footer: BASE_FOOTER,
     },
     captions: {
       facebook:
-        "Sade Sati frightens people more than it should.\n\nIt begins when Saturn enters the sign before your natal Moon, continues across the Moon sign itself, and ends in the sign after — roughly seven and a half years in each phase. Whether it is felt as difficulty or as discipline depends on Saturn's strength in your own chart, which is why we read it before we name it.\n\nThe traditional pariharams — the lamp, the sesame, the Tuesday observance — are practices of attention, not a promise that nothing will go wrong.\n\nRead the full guide, with a worked example: astrosivam.com/transits",
+        "Sade Sati frightens people more than it should.\n\nIt begins when Saturn enters the sign before your natal Moon, continues across the Moon sign itself, and ends in the sign after — about seven and a half years across the three phases in total. Whether it is felt as difficulty or as discipline depends on Saturn's strength in your own chart, which is why we read it before we name it.\n\nThe traditional pariharams — the lamp, the sesame, the Tuesday observance — are practices of attention, not a promise that nothing will go wrong.\n\nRead the stage and timing against your own Birth Jathagam: astrosivam.com/birth-jathagam",
       instagram:
-        "Sade Sati: a season, not a sentence.\n\nThree phases · ~7.5 years each · read against your own Saturn first.\n\nFull guide with a worked example — astrosivam.com/transits",
+        "Sade Sati: a season, not a sentence.\n\nThree phases · ~7.5 years in total · read against your own Saturn first.\n\nRead it with your Birth Jathagam — astrosivam.com/birth-jathagam",
     },
     hashtags: tags("transits"),
-    cta: { line: "Read the full guide", url: "astrosivam.com/transits", quickReply: "Sample report" },
+    cta: { line: "Read it with your Jathagam", url: "astrosivam.com/birth-jathagam", quickReply: "Birth Jathagam" },
   },
   {
     id: "edu-panchangam",
@@ -222,12 +251,12 @@ export const FB_COPY_ENTRIES: FbCopyEntry[] = [
     },
     captions: {
       facebook:
-        "Panchangam means five limbs — and each one answers a different question.\n\nTithi, the lunar day, tells you what the day is for. Nakshatra, the star the Moon occupies, tells you what it favours. Yoga and Karana refine the hour. Varam sets the tone of the weekday itself.\n\nRead together, they explain why a Tuesday morning can be right for one errand and wrong for another. Our daily panchangam is free, always.\n\nToday's panchangam, in Tamil and English: astrosivam.com/panchangam",
+        "Panchangam means five limbs — and each one answers a different question.\n\nTithi, the lunar day, tells you what the day is for. Nakshatra, the star the Moon occupies, tells you what it favours. Yoga and Karana refine the hour. Varam sets the tone of the weekday itself.\n\nRead together, they explain why a Tuesday morning can be right for one errand and wrong for another. Our daily panchangam is free, always.\n\nToday's panchangam, in Tamil and English: astrosivam.com/panjangam",
       instagram:
-        "Panchangam = five limbs.\n\nTithi · Nakshatra · Yoga · Karana · Varam.\n\nEach answers a different question about the same day. Our daily panchangam is free — astrosivam.com/panchangam",
+        "Panchangam = five limbs.\n\nTithi · Nakshatra · Yoga · Karana · Varam.\n\nEach answers a different question about the same day. Our daily panchangam is free — astrosivam.com/panjangam",
     },
     hashtags: tags("panchangam"),
-    cta: { line: "Read today's panchangam", url: "astrosivam.com/panchangam", quickReply: "Sample report" },
+    cta: { line: "Read today's panchangam", url: "astrosivam.com/panjangam", quickReply: "Sample report" },
   },
   {
     id: "edu-method",

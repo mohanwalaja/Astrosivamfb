@@ -6,6 +6,7 @@ import { marriage } from "./marriage";
 import { babyNaming } from "./babyNaming";
 import { muhurtham } from "./muhurtham";
 import { panchangam } from "./panchangam";
+import { rasipalan } from "./rasipalan";
 import { transits } from "./transits";
 import { trust } from "./trust";
 
@@ -17,6 +18,7 @@ export const SERVICES: Service[] = [
   babyNaming,
   muhurtham,
   panchangam,
+  rasipalan,
   transits,
   trust,
 ];

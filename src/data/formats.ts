@@ -193,7 +193,7 @@ export const FORMATS: CreativeFormat[] = [
     height: 1350,
     template: "offer",
     ratio: "4:5",
-    usage: "Launch and boost creative for 'first report free'.",
+    usage: "Launch and boost creative for 'first order free'.",
   },
   {
     id: "style-sheet",
