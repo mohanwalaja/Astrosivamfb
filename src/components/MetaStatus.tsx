@@ -40,6 +40,10 @@ interface MetaPage {
   tokenStatus?: "valid" | "expired" | "invalid_token" | "permission_error" | "connection_error" | "api_error" | "rate_limited" | "missing_token" | "not_checked";
   probeError?: string | null;
   probeGraph?: { type?: string | null; code?: number | null; subcode?: number | null; traceId?: string | null; httpStatus?: number | null } | null;
+  /** Page-level visibility, read live from the Graph API. */
+  pageIsPublished?: boolean | null;
+  pageVerificationStatus?: string | null;
+  pageExperience?: string | null;
 }
 
 interface MetaStatusPayload {
@@ -258,6 +262,16 @@ export function MetaStatus() {
                   Follower count not returned — the API omitted <code>fan_count</code>.
                 </div>
               )}
+              {selected?.pageIsPublished === false ? (
+                <div className="mt-1 text-[10px] font-semibold text-[#E0B48C]">
+                  Page is unpublished — only people with a Page role can see its posts.
+                </div>
+              ) : null}
+              {selected?.pageVerificationStatus ? (
+                <div className="mt-1 text-[10px] text-[#B4A58F]">
+                  Verification: {selected.pageVerificationStatus.replaceAll("_", " ")}
+                </div>
+              ) : null}
             </div>
             <div className="rounded-lg border border-line-soft bg-wash p-3">
               <div className="flex items-center gap-1.5 text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">

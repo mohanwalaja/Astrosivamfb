@@ -32,6 +32,9 @@ type MetaPage = {
   tokenStatus?: "valid" | "expired" | "invalid_token" | "permission_error" | "connection_error" | "api_error" | "missing_token" | "not_checked";
   probeError?: string | null;
   instagramStatus?: "linked" | "not_linked" | "unknown" | "not_checked";
+  pageIsPublished?: boolean | null;
+  pageVerificationStatus?: string | null;
+  pageExperience?: string | null;
 };
 
 type MetaStatus = {
@@ -60,6 +63,16 @@ type PostResult = {
   hint?: string;
   category?: "expired" | "invalid_token" | "permission_error" | "rate_limited" | "api_error" | "connection_error" | "account_link_error";
   outcomeUnknown?: boolean;
+  visibility?: {
+    isPublished?: boolean | null;
+    isHidden?: boolean | null;
+    timelineVisibility?: string | null;
+    statusType?: string | null;
+    permalinkUrl?: string | null;
+    repaired?: boolean;
+    repairError?: string;
+    readError?: string;
+  };
 };
 
 type ImageCheck = {
@@ -87,6 +100,53 @@ async function readJson(response: Response, allowErrorResponse = false) {
 
 const formatBytes = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+/**
+ * Shows what Meta actually reports about the new Page post. The old publisher
+ * stopped at a photo upload, so a photo could appear in the Page's Photos tab
+ * while no feed post existed. This block makes that distinction visible.
+ */
+function FacebookVisibilityNote({ result }: { result: PostResult }) {
+  const visibility = result.visibility;
+  if (!visibility) {
+    return (
+      <p className="mt-1.5 pl-6 text-[10px] text-[#B4D5C4]">
+        Meta returned a Page feed post ID, not just a photo ID. The update is on the Page timeline and can appear in followers’ feeds.
+      </p>
+    );
+  }
+  const hidden =
+    visibility.isPublished === false ||
+    visibility.isHidden === true ||
+    (visibility.timelineVisibility != null && visibility.timelineVisibility !== "normal");
+  return (
+    <div className="mt-1.5 pl-6 text-[10px] text-[#B4D5C4]">
+      <p>
+        Meta reports:{" "}
+        {visibility.isPublished === null ? "published state unknown" : visibility.isPublished ? "published" : "not published"}
+        {visibility.isHidden === true ? " · hidden" : ""}
+        {visibility.timelineVisibility ? ` · timeline ${visibility.timelineVisibility}` : ""}
+        {visibility.statusType ? ` · ${visibility.statusType}` : ""}
+      </p>
+      {visibility.repaired ? (
+        <p className="mt-1 font-semibold text-[#C7E5D5]">
+          Meta had created the post unpublished or hidden; the publisher restored it to the Page timeline.
+        </p>
+      ) : null}
+      {hidden ? (
+        <p className="mt-1 font-semibold text-[#F0C3A2]">
+          This post is not visible on the Page timeline. The usual cause is Meta app Development mode (only app-role users can see it) or an unpublished Page. Switch the app to Live mode, publish the Page, then publish a new post. Check the Page while logged out.
+        </p>
+      ) : (
+        <p className="mt-1">
+          The update is on the Page timeline and can appear in followers’ feeds. Check the post while logged out; if others cannot see it, complete Meta’s required review/access steps and switch the app from Development to Live mode.
+        </p>
+      )}
+      {visibility.repairError ? <p className="mt-1 text-[#F0C3A2]">Visibility repair failed: {visibility.repairError}</p> : null}
+      {visibility.readError ? <p className="mt-1 text-[#F0C3A2]">Could not read the post back from Meta: {visibility.readError}</p> : null}
+    </div>
+  );
+}
 
 export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: PublisherDraft | null }> = ({ open, onClose, draft = null }) => {
   const [status, setStatus] = useState<MetaStatus>(emptyStatus);
@@ -560,6 +620,11 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
                 <p className="mt-1">Reconnect or resolve the Meta permission/API issue, then refresh the connection status. No post has been sent.</p>
               </Callout>
             ) : null}
+            {selectedPage?.pageIsPublished === false ? (
+              <Callout tone="danger" title="This Facebook Page is unpublished">
+                <p>Meta reports the Page is not published. Posts and photos are visible only to people with a role on the Page. Publish the Page from Meta Business Suite or Page settings, then refresh the connection.</p>
+              </Callout>
+            ) : null}
             <form id="publisher-form" onSubmit={requestPublish} className="space-y-5">
               <fieldset>
                 <legend className="label">Post to</legend>
@@ -825,11 +890,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
                           Open Facebook post <ExternalLink className="h-3 w-3" aria-hidden="true" />
                         </a>
                       ) : null}
-                      {result.success && result.platform === "facebook" ? (
-                        <p className="mt-1.5 pl-6 text-[10px] text-[#B4D5C4]">
-                          Meta returned a Page feed post ID, not just a photo ID. The update is on the Page timeline and can appear in followers’ feeds. Check the post while logged out; if others cannot see it, complete Meta’s required review/access steps and switch the app from Development to Live mode.
-                        </p>
-                      ) : null}
+                      {result.success && result.platform === "facebook" ? <FacebookVisibilityNote result={result} /> : null}
                       {!result.success && result.category ? <p className="mt-1.5 pl-6 text-[9.5px] uppercase tracking-wide">{result.category.replaceAll("_", " ")}</p> : null}
                       {!result.success && result.outcomeUnknown ? <p className="mt-1.5 pl-6 font-semibold text-[#F0C3A2]">Meta may have accepted content even though the result is not confirmed. Check the Page/Instagram account before retrying to avoid a duplicate.</p> : null}
                       {!result.success && result.graph ? (
