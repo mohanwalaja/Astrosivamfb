@@ -301,6 +301,9 @@ function meta_pages_for_status(?array $connection): array
             'name' => (string) ($page['name'] ?? 'Facebook Page'),
             'instagramId' => isset($page['instagram_id']) ? (string) $page['instagram_id'] : null,
             'instagramUsername' => isset($page['instagram_username']) ? (string) $page['instagram_username'] : null,
+            'pageIsPublished' => $page['pageIsPublished'] ?? null,
+            'pageVerificationStatus' => $page['pageVerificationStatus'] ?? null,
+            'pageExperience' => $page['pageExperience'] ?? null,
         ];
     }, array_values(array_filter($connection['pages'], static fn($page) => is_array($page) && !empty($page['id']))));
 }
@@ -325,11 +328,12 @@ function meta_probe_page(string $pageId, string $token, ?int $authorizationExpir
     if ($token === '') {
         return ['tokenValid' => false, 'tokenStatus' => 'missing_token', 'tokenExpiresAt' => null,
             'authorizationExpiresAt' => $authorizationExpiresAt, 'fanCount' => null, 'link' => null,
-            'category' => null, 'instagramId' => null, 'instagramUsername' => null, 'instagramStatus' => 'unknown', 'probeError' => 'No stored Page token.'];
+            'category' => null, 'pageIsPublished' => null, 'pageVerificationStatus' => null, 'pageExperience' => null,
+            'instagramId' => null, 'instagramUsername' => null, 'instagramStatus' => 'unknown', 'probeError' => 'No stored Page token.'];
     }
     try {
         $data = graph_request('GET', rawurlencode($pageId), [
-            'fields' => 'id,name,category,fan_count,link,instagram_business_account{id,username}',
+            'fields' => 'id,name,category,fan_count,link,is_published,verification_status,has_transitioned_to_new_page_experience,instagram_business_account{id,username}',
         ], $token);
         $instagram = is_array($data['instagram_business_account'] ?? null) ? $data['instagram_business_account'] : null;
         return [
@@ -341,6 +345,9 @@ function meta_probe_page(string $pageId, string $token, ?int $authorizationExpir
             'category' => isset($data['category']) ? (string) $data['category'] : null,
             'fanCount' => isset($data['fan_count']) ? (int) $data['fan_count'] : null,
             'link' => isset($data['link']) ? (string) $data['link'] : null,
+            'pageIsPublished' => isset($data['is_published']) ? (bool) $data['is_published'] : null,
+            'pageVerificationStatus' => isset($data['verification_status']) ? (string) $data['verification_status'] : null,
+            'pageExperience' => isset($data['has_transitioned_to_new_page_experience']) ? (string) $data['has_transitioned_to_new_page_experience'] : null,
             'instagramId' => $instagram && isset($instagram['id']) ? (string) $instagram['id'] : null,
             'instagramUsername' => $instagram && isset($instagram['username']) ? (string) $instagram['username'] : null,
             'instagramStatus' => $instagram ? 'linked' : 'not_linked',
@@ -362,6 +369,9 @@ function meta_probe_page(string $pageId, string $token, ?int $authorizationExpir
             'fanCount' => null,
             'link' => null,
             'category' => null,
+            'pageIsPublished' => null,
+            'pageVerificationStatus' => null,
+            'pageExperience' => null,
             'instagramId' => null,
             'instagramUsername' => null,
             'instagramStatus' => 'unknown',
@@ -421,7 +431,7 @@ function meta_error_hint(?array $graph, string $platform): string
  *
  * Step 2 is what puts the update on the Page timeline and in followers' feeds.
  */
-function facebook_publish(array $page, string $imageUrl, string $caption): string
+function facebook_publish(array $page, string $imageUrl, string $caption): array
 {
     $pageId = (string) ($page['id'] ?? '');
     $token = (string) ($page['access_token'] ?? '');
@@ -462,7 +472,62 @@ function facebook_publish(array $page, string $imageUrl, string $caption): strin
     if ($postId === '') {
         throw new RuntimeException('Meta accepted the feed post request but did not return a Page post ID.');
     }
-    return $postId;
+
+    // Read the post back. A photo can sit in the Page's photo library while
+    // the feed post is unpublished or hidden; that is the "only in Photos"
+    // symptom. Repair the visibility when Meta allows it, then report the
+    // actual state so the UI can explain anything that still needs attention.
+    $readFields = 'id,is_published,is_hidden,timeline_visibility,status_type,permalink_url,created_time';
+    $visibility = facebook_post_visibility($postId, $token, $readFields);
+    $needsRepair = $visibility['isPublished'] === false
+        || $visibility['isHidden'] === true
+        || ($visibility['timelineVisibility'] !== null && $visibility['timelineVisibility'] !== 'normal');
+    if ($needsRepair) {
+        try {
+            graph_request('POST', rawurlencode($postId), [
+                'is_published' => 'true',
+                'is_hidden' => 'false',
+                'timeline_visibility' => 'normal',
+            ], $token);
+            $visibility = facebook_post_visibility($postId, $token, $readFields);
+            $visibility['repaired'] = $visibility['isPublished'] !== false
+                && $visibility['isHidden'] !== true
+                && ($visibility['timelineVisibility'] === null || $visibility['timelineVisibility'] === 'normal');
+        } catch (Throwable $error) {
+            $visibility['repairError'] = $error->getMessage();
+        }
+    }
+
+    return ['postId' => $postId, 'visibility' => $visibility];
+}
+
+/**
+ * Read a Page post's timeline visibility. Never throws: a failed read-back
+ * must not turn an accepted post into a reported failure.
+ */
+function facebook_post_visibility(string $postId, string $token, string $fields): array
+{
+    try {
+        $read = graph_request('GET', rawurlencode($postId), ['fields' => $fields], $token);
+        return [
+            'isPublished' => isset($read['is_published']) ? (bool) $read['is_published'] : null,
+            'isHidden' => isset($read['is_hidden']) ? (bool) $read['is_hidden'] : null,
+            'timelineVisibility' => isset($read['timeline_visibility']) ? (string) $read['timeline_visibility'] : null,
+            'statusType' => isset($read['status_type']) ? (string) $read['status_type'] : null,
+            'permalinkUrl' => isset($read['permalink_url']) ? (string) $read['permalink_url'] : null,
+            'createdTime' => isset($read['created_time']) ? (string) $read['created_time'] : null,
+        ];
+    } catch (Throwable $error) {
+        return [
+            'isPublished' => null,
+            'isHidden' => null,
+            'timelineVisibility' => null,
+            'statusType' => null,
+            'permalinkUrl' => null,
+            'createdTime' => null,
+            'readError' => $error->getMessage(),
+        ];
+    }
 }
 
 function instagram_publish(array $page, string $imageUrl, string $caption): string
@@ -1203,7 +1268,16 @@ if ($authenticated) {
 }
 
 if ($uriPath === '/api/health' && $method === 'GET') {
-    json_response(['status' => 'ok', 'app' => 'astrosivam-social-suite', 'version' => '2.0.0', 'runtime' => 'php']);
+    json_response([
+        'status' => 'ok',
+        'app' => 'astrosivam-social-suite',
+        'version' => '2.0.0',
+        'runtime' => 'php',
+        // Deployment marker: lets the operator confirm the PHP host is
+        // running the two-step Facebook feed publisher, not the old
+        // photo-only upload.
+        'publisher' => 'facebook-feed-v2',
+    ]);
 }
 
 if ($uriPath === '/api/auth/login' && $method === 'POST') {
@@ -1397,6 +1471,7 @@ try {
             } else {
                 $probe = ['tokenValid' => null, 'tokenStatus' => 'not_checked', 'tokenExpiresAt' => null,
                     'instagramId' => null, 'instagramUsername' => null, 'instagramStatus' => 'not_checked',
+                    'pageIsPublished' => null, 'pageVerificationStatus' => null, 'pageExperience' => null,
                     'authorizationExpiresAt' => isset($connection['authorization_expires_at']) ? (int) $connection['authorization_expires_at'] : null,
                     'probeError' => null, 'probeGraph' => null];
             }
@@ -1543,12 +1618,15 @@ try {
                     // Two-step Page flow: upload the photo unpublished, then
                     // create the feed post that attaches it. The /feed post is
                     // what appears on the Page timeline and reaches followers.
-                    $postId = facebook_publish($page, $imageUrl, $captions['facebook']);
+                    $published = facebook_publish($page, $imageUrl, $captions['facebook']);
+                    $postId = (string) ($published['postId'] ?? '');
+                    $visibility = is_array($published['visibility'] ?? null) ? $published['visibility'] : [];
                     $results[] = [
                         'platform' => 'facebook',
                         'success' => true,
                         'id' => $postId,
-                        'permalinkUrl' => 'https://www.facebook.com/' . rawurlencode($postId),
+                        'permalinkUrl' => (string) ($visibility['permalinkUrl'] ?? ('https://www.facebook.com/' . rawurlencode($postId))),
+                        'visibility' => $visibility,
                     ];
                 } else {
                     $id = instagram_publish($page, $imageUrl, $captions['instagram']);

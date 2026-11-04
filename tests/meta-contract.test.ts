@@ -28,7 +28,7 @@ test("the status payload is read back from the Graph API, not stored assumptions
   assert.match(PHP, /Page’s linked Instagram account changed or is no longer available/);
   assert.match(PHP, /!hash_equals\(\$instagramId, \$liveInstagram\)/, "Instagram target is revalidated against the live Page relation immediately before publishing");
   assert.match(PHP, /'instagramStatus' => 'unknown'/, "failed probes must not present cached Instagram links as verified");
-  assert.match(PHP, /'fields' => 'id,name,category,fan_count,link,instagram_business_account/, "the probe asks Meta for live fields");
+  assert.match(PHP, /'fields' => 'id,name,category,fan_count,link,is_published,verification_status,has_transitioned_to_new_page_experience,instagram_business_account/, "the probe asks Meta for live fields and Page visibility");
   assert.match(PHP, /'checkedAt' => gmdate\('c'\)/, "status reports when it was checked");
   assert.match(PHP, /'graphVersion' => meta_graph_version\(\)/, "status reports the pinned Graph version");
   assert.match(PHP, /'tokenValid' => false/, "a dead token is reported, never assumed valid");
@@ -126,10 +126,16 @@ test("Facebook publishes a real Page feed post, not just a photo-library upload"
   assert.match(helper, /'attached_media\[0\]' => json_encode\(\['media_fbid' => \$photoId\]/, "the feed post attaches the uploaded photo by media_fbid");
   assert.match(helper, /'published' => 'true'/, "the feed post itself is published immediately");
   assert.match(helper, /\$post\['id'\]/, "success requires the Page feed post ID");
-  assert.match(helper, /return \$postId;/, "the function returns the feed post ID, never the photo ID");
+  assert.match(helper, /return \['postId' => \$postId, 'visibility' => \$visibility\]/, "the function returns the feed post ID plus its visibility state");
+  assert.match(helper, /facebook_post_visibility\(\$postId, \$token, \$readFields\)/, "the publisher reads the post back from Meta");
+  assert.match(helper, /'is_published' => 'true'[\s\S]*'is_hidden' => 'false'[\s\S]*'timeline_visibility' => 'normal'/, "an unpublished or hidden post is repaired to the timeline");
+  assert.match(helper, /\$visibility\['repaired'\] =/, "a repaired post is reported as repaired");
   assert.doesNotMatch(helper, /no_story|post_id/, "the old photo-only parameters must be gone");
   assert.match(helper, /The photo uploaded, but Meta rejected the Page feed post/, "a rejected feed post must not be reported as a published Page post");
   assert.match(PHP, /str_ends_with\(\$endpoint, '\/feed'\)/, "a lost response on /feed must be treated as an uncertain commit");
+  assert.match(PHP, /'publisher' => 'facebook-feed-v2'/, "the health endpoint exposes a deployment marker so the operator can confirm the new publisher is live");
+  assert.match(PHP, /'pageIsPublished' =>/, "the status payload exposes whether the Page itself is published");
+  assert.match(PHP, /'pageVerificationStatus' =>/, "the status payload exposes the Page verification state");
   assert.match(PUBLISHER, /Page feed post created/);
   assert.match(PUBLISHER, /result\.permalinkUrl/);
   assert.match(PUBLISHER, /Development to Live mode/, "the UI must explain role-only Development-mode visibility");
