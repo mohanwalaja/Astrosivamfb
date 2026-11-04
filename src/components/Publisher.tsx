@@ -811,7 +811,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
                         <span>
                           <strong className="capitalize">{result.platform}</strong>
                           {result.success
-                            ? ` · ${result.platform === "facebook" ? "Page post created" : "published"} (id ${result.id || "not returned"})`
+                            ? ` · ${result.platform === "facebook" ? "Page feed post created" : "published"} (id ${result.id || "not returned"})`
                             : ` · ${result.error || "failed"}`}
                         </span>
                       </div>
@@ -827,7 +827,7 @@ export const Publisher: React.FC<{ open: boolean; onClose: () => void; draft?: P
                       ) : null}
                       {result.success && result.platform === "facebook" ? (
                         <p className="mt-1.5 pl-6 text-[10px] text-[#B4D5C4]">
-                          Meta returned a Page post ID, not just a photo ID. Check the post while logged out; if others cannot see it, complete Meta’s required review/access steps and switch the app from Development to Live mode.
+                          Meta returned a Page feed post ID, not just a photo ID. The update is on the Page timeline and can appear in followers’ feeds. Check the post while logged out; if others cannot see it, complete Meta’s required review/access steps and switch the app from Development to Live mode.
                         </p>
                       ) : null}
                       {!result.success && result.category ? <p className="mt-1.5 pl-6 text-[9.5px] uppercase tracking-wide">{result.category.replaceAll("_", " ")}</p> : null}
