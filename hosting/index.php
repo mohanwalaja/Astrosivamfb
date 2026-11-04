@@ -217,7 +217,7 @@ function graph_request(string $method, string $endpoint, array $params, ?string 
     $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
     curl_close($curl);
     if ($body === false) {
-        $mayHaveCommitted = $method === 'POST' && (str_ends_with($endpoint, '/photos') || str_ends_with($endpoint, '/media_publish'));
+        $mayHaveCommitted = $method === 'POST' && (str_ends_with($endpoint, '/photos') || str_ends_with($endpoint, '/feed') || str_ends_with($endpoint, '/media_publish'));
         throw new MetaTransportException('Could not reach Meta. Check the hosting server outbound HTTPS and cURL settings.', $mayHaveCommitted);
     }
     $data = json_decode((string) $body, true);
@@ -406,6 +406,63 @@ function meta_error_hint(?array $graph, string $platform): string
         default:
             return 'Meta rejected the post. The code, subcode and trace id above are what Meta support will ask for.';
     }
+}
+
+/**
+ * Publish a Page photo as a real feed post.
+ *
+ * Uploading to /photos on its own only files the image in the Page's photo
+ * library. Even with published=true the response is a photo object, and the
+ * image does not become a distributed Page feed story, so followers never see
+ * it in their feed. The supported Page flow is two steps:
+ *
+ *   1. POST /{page-id}/photos with published=false  -> unpublished photo id
+ *   2. POST /{page-id}/feed with attached_media[0]   -> the Page post id
+ *
+ * Step 2 is what puts the update on the Page timeline and in followers' feeds.
+ */
+function facebook_publish(array $page, string $imageUrl, string $caption): string
+{
+    $pageId = (string) ($page['id'] ?? '');
+    $token = (string) ($page['access_token'] ?? '');
+    if ($pageId === '' || $token === '') {
+        throw new MetaLinkException('No connected Facebook Page token is available.');
+    }
+
+    $photo = graph_request('POST', rawurlencode($pageId) . '/photos', [
+        'url' => $imageUrl,
+        // Unpublished: the photo is only an attachment for the feed post below.
+        'published' => 'false',
+    ], $token);
+    $photoId = (string) ($photo['id'] ?? '');
+    if ($photoId === '') {
+        throw new RuntimeException('Meta did not return a photo ID for the unpublished upload.');
+    }
+
+    try {
+        $post = graph_request('POST', rawurlencode($pageId) . '/feed', [
+            'message' => $caption,
+            // attached_media is the documented way to turn an uploaded photo
+            // into a Page feed post. The JSON value is form-encoded by
+            // http_build_query as attached_media[0]={...}.
+            'attached_media[0]' => json_encode(['media_fbid' => $photoId], JSON_UNESCAPED_SLASHES),
+            'published' => 'true',
+        ], $token);
+    } catch (MetaApiException $error) {
+        // The photo is uploaded but unpublished, so nothing was shown to
+        // followers. Pass Meta's own error through without implying a post
+        // exists, and without telling the operator to retry blindly.
+        throw new MetaApiException(
+            'The photo uploaded, but Meta rejected the Page feed post: ' . $error->getMessage(),
+            $error->graph
+        );
+    }
+
+    $postId = (string) ($post['id'] ?? '');
+    if ($postId === '') {
+        throw new RuntimeException('Meta accepted the feed post request but did not return a Page post ID.');
+    }
+    return $postId;
 }
 
 function instagram_publish(array $page, string $imageUrl, string $caption): string
@@ -1483,34 +1540,16 @@ try {
         foreach ($platforms as $platform) {
             try {
                 if ($platform === 'facebook') {
-                    $published = graph_request('POST', rawurlencode((string) $page['id']) . '/photos', [
-                        'url' => $imageUrl,
-                        'caption' => $captions['facebook'],
-                        'published' => 'true',
-                        // A photo upload is not enough: explicitly create its Page feed story.
-                        'no_story' => 'false',
-                    ], (string) $page['access_token']);
-                    $postId = (string) ($published['post_id'] ?? '');
-                    if ($postId === '') {
-                        // A bare `id` is only the photo object. Never present that as a
-                        // published Page post, and do not encourage a blind retry because
-                        // Meta has already accepted the photo upload.
-                        $results[] = [
-                            'platform' => 'facebook',
-                            'success' => false,
-                            'error' => 'Meta uploaded the photo but did not return a Facebook Page post ID.',
-                            'category' => 'api_error',
-                            'outcomeUnknown' => true,
-                            'hint' => 'Check the Page before retrying to avoid a duplicate. Confirm the Meta app is in Live mode; Development-mode content is visible only to people with a role on the app.',
-                        ];
-                    } else {
-                        $results[] = [
-                            'platform' => 'facebook',
-                            'success' => true,
-                            'id' => $postId,
-                            'permalinkUrl' => 'https://www.facebook.com/' . rawurlencode($postId),
-                        ];
-                    }
+                    // Two-step Page flow: upload the photo unpublished, then
+                    // create the feed post that attaches it. The /feed post is
+                    // what appears on the Page timeline and reaches followers.
+                    $postId = facebook_publish($page, $imageUrl, $captions['facebook']);
+                    $results[] = [
+                        'platform' => 'facebook',
+                        'success' => true,
+                        'id' => $postId,
+                        'permalinkUrl' => 'https://www.facebook.com/' . rawurlencode($postId),
+                    ];
                 } else {
                     $id = instagram_publish($page, $imageUrl, $captions['instagram']);
                     $results[] = ['platform' => 'instagram', 'success' => true, 'id' => $id];

@@ -98,26 +98,39 @@ test("publishing sends per-platform captions in one CSRF-protected multipart POS
   assert.match(PUBLISHER, /"X-CSRF-Token": csrf/, "the request must carry the CSRF token");
   assert.match(PHP, /if \(\$uriPath === '\/api\/meta\/publish' && \$method === 'POST'\)/, "the PHP route is unchanged");
   assert.match(PHP, /require_csrf\(\);/, "the PHP route still enforces CSRF");
-  assert.match(PHP, /'caption' => \$captions\['facebook'\]/, "Facebook receives its own caption");
+  assert.match(PHP, /facebook_publish\(\$page, \$imageUrl, \$captions\['facebook'\]\)/, "Facebook receives its own caption");
   assert.match(PHP, /instagram_publish\(\$page, \$imageUrl, \$captions\['instagram'\]\)/, "Instagram receives its own caption");
   assert.match(PHP, /foreach \(\$platforms as \$platform\) \{\s*\$caption = \$captions\[\$platform\]/, "the server validates each requested platform's caption");
   assert.match(PHP, /\$captionLimit = \$platform === 'instagram' \? 2200 : 5000/, "each selected caption uses its platform's limit");
   assert.match(PHP, /\$legacyCaption/, "older clients retain a backward-compatible caption fallback");
 });
 
-test("Facebook publishes a feed story and never mistakes a photo-only response for a Page post", () => {
+test("Facebook publishes a real Page feed post, not just a photo-library upload", () => {
   const publishStart = PHP.indexOf("if ($uriPath === '/api/meta/publish'");
   const facebookStart = PHP.indexOf("if ($platform === 'facebook') {", publishStart);
   const facebookEnd = PHP.indexOf("$id = instagram_publish", facebookStart);
   assert.ok(publishStart >= 0 && facebookStart > publishStart && facebookEnd > facebookStart, "the Facebook publish branch must exist");
   const facebook = PHP.slice(facebookStart, facebookEnd);
-  assert.match(facebook, /'published' => 'true'/, "the photo must be published immediately");
-  assert.match(facebook, /'no_story' => 'false'/, "the photo must also create its Page feed story");
-  assert.match(facebook, /\$published\['post_id'\]/, "success requires Facebook's Page post ID");
-  assert.doesNotMatch(facebook, /\$published\['id'\]/, "a bare photo ID must never be used as the post ID");
-  assert.match(facebook, /'outcomeUnknown' => true/, "a photo-only response must block a blind retry");
-  assert.match(facebook, /'permalinkUrl'/, "the confirmed Page post should be easy to open and verify");
-  assert.match(PUBLISHER, /Page post created/);
+  assert.match(facebook, /facebook_publish\(\$page, \$imageUrl, \$captions\['facebook'\]\)/, "Facebook publishing goes through the two-step Page flow");
+  assert.match(facebook, /'permalinkUrl'/);
+
+  // The two-step flow lives in its own function so the contract is explicit.
+  const helperStart = PHP.indexOf("function facebook_publish(");
+  const helperEnd = PHP.indexOf("function instagram_publish(", helperStart);
+  assert.ok(helperStart >= 0 && helperEnd > helperStart, "facebook_publish must exist");
+  const helper = PHP.slice(helperStart, helperEnd);
+  assert.match(helper, /rawurlencode\(\$pageId\) \. '\/photos'/, "step 1 uploads to the Page photos edge");
+  assert.match(helper, /'published' => 'false'/, "step 1 must upload the photo unpublished");
+  assert.match(helper, /rawurlencode\(\$pageId\) \. '\/feed'/, "step 2 creates the Page feed post");
+  assert.match(helper, /'message' => \$caption/, "the feed post carries the Facebook caption");
+  assert.match(helper, /'attached_media\[0\]' => json_encode\(\['media_fbid' => \$photoId\]/, "the feed post attaches the uploaded photo by media_fbid");
+  assert.match(helper, /'published' => 'true'/, "the feed post itself is published immediately");
+  assert.match(helper, /\$post\['id'\]/, "success requires the Page feed post ID");
+  assert.match(helper, /return \$postId;/, "the function returns the feed post ID, never the photo ID");
+  assert.doesNotMatch(helper, /no_story|post_id/, "the old photo-only parameters must be gone");
+  assert.match(helper, /The photo uploaded, but Meta rejected the Page feed post/, "a rejected feed post must not be reported as a published Page post");
+  assert.match(PHP, /str_ends_with\(\$endpoint, '\/feed'\)/, "a lost response on /feed must be treated as an uncertain commit");
+  assert.match(PUBLISHER, /Page feed post created/);
   assert.match(PUBLISHER, /result\.permalinkUrl/);
   assert.match(PUBLISHER, /Development to Live mode/, "the UI must explain role-only Development-mode visibility");
 });
