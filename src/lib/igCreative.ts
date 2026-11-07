@@ -11,12 +11,10 @@ import {
   drawIndex,
   drawMedallionRing,
   drawPageDots,
-  drawPrice,
   drawSwipe,
   fontsFor,
   frameFor,
   hairline,
-  measurePrice,
   mutedOn,
   paintGrain,
   paintStyledGround,
@@ -378,47 +376,6 @@ function igService(scene: Scene) {
     y += H * 0.012;
   }
 
-  // Price, split into amount and qualifier — the same rule the FB cards follow.
-  const raw = content.price || "First order free";
-  const parts = raw.split(/\s*·\s*/).filter(Boolean);
-  const amount = parts.length > 1 ? parts.slice(0, 2).join(" · ") : raw;
-  const note = parts.length > 1 ? parts.slice(2).join(" · ") : "";
-  const priceY = Math.max(y + H * 0.018, H * 0.52);
-  // The panel stops short of the art seam; the price shrinks to 0.045W
-  // (16 CSS px at feed width) and never below, because a price you cannot read
-  // is worse than a price that wraps. The wider text column gives the label a
-  // little more breathing room without letting the panel touch the art.
-  const priceWidth = W * 0.5;
-  const panelH = H * (note ? 0.1 : 0.082);
-  ctx.save();
-  roundRect(ctx, pad - W * 0.018, priceY, priceWidth, panelH, W * 0.02);
-  ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.16 : 0.1);
-  ctx.fill();
-  ctx.strokeStyle = withAlpha(theme.gold, 0.5);
-  ctx.lineWidth = Math.max(1, W * 0.0016);
-  ctx.stroke();
-  ctx.restore();
-  const priceFloor = W * 0.045;
-  const priceTracking = W * 0.0003;
-  let priceSize = W * 0.058;
-  while (priceSize > priceFloor && measurePrice(ctx, amount, fonts.display(priceSize, 600), priceTracking) > priceWidth - W * 0.055) {
-    priceSize = Math.max(priceFloor, priceSize - W * 0.002);
-  }
-  // drawPrice paints with the current fillStyle: set it, or the price inherits
-  // the 10 %-alpha panel fill and turns to smoke.
-  ctx.save();
-  ctx.fillStyle = withAlpha(theme.ink, 0.97);
-  // Baseline is derived from the glyph size, not a fixed offset: a fixed one
-  // pushed the numerals' caps above the panel's rounded top edge.
-  drawPrice(ctx, amount, { x: pad, y: priceY + priceSize * 0.86, font: fonts.display(priceSize, 600), tracking: priceTracking });
-  ctx.restore();
-  scene.log.add("headline", priceSize, amount);
-  if (note) {
-    // The qualifier shrinks to the panel, never past it and never below 11 CSS px.
-    const noteSize = fitSize(ctx, note, priceWidth - W * 0.03, W * 0.034, W * 0.0306, (size) => fonts.sans(size, 500));
-    drawText(scene, "body", note, pad, priceY + panelH * 0.58, fonts.sans(noteSize, 500), withAlpha(theme.ink, 0.84));
-  }
-
   // Footer first, because it decides how much room the CTA has. The colophon
   // wraps to at most two lines at a fixed, legible size — 8 CSS px on a phone.
   const footerSize = W * 0.0225;
@@ -440,10 +397,10 @@ function igService(scene: Scene) {
   // Deliverables: as many as fit above the CTA at a size a phone can read.
   // The list is ordered by importance, so the card keeps the first two and the
   // caption carries the rest — no chip is ever set below 11 CSS px to squeeze
-  // a third one in.
+  // a third one in. Price cards are intentionally removed from every poster.
   const chipSize = W * 0.0306;
   const chipTextW = textW - W * 0.036;
-  const chipTop = priceY + panelH + H * 0.028;
+  const chipTop = y + H * 0.028;
   ctx.save();
   ctx.font = fonts.sans(chipSize, 400);
   let laid = content.chips.slice(0, 3).map((chip) => wrapAll(ctx, chip, chipTextW));

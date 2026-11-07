@@ -11,11 +11,9 @@ import {
   drawDoubleFrame,
   drawImageIn,
   drawIndex,
-  drawPrice,
   fontsFor,
   frameFor,
   hairline,
-  measurePrice,
   mutedOn,
   paintGrain,
   paintStyledGround,
@@ -350,30 +348,16 @@ function bodyBlock(
   return options.y + fitted.lines.length * fitted.size * 1.44;
 }
 
-const priceLabel = (scene: Scene) => (/^free/i.test(scene.price.trim()) ? "" : "FROM");
-
+/**
+ * Price cards are intentionally removed from every poster. The ad layouts
+ * still call this hook, so it stays as a no-op to keep the composition code
+ * untouched.
+ */
 function priceBlock(
-  scene: Scene,
-  options: { x: number; y: number; size: number; maxWidth: number; align?: CanvasTextAlign; labelY?: number; color?: string },
+  _scene: Scene,
+  _options: { x: number; y: number; size: number; maxWidth: number; align?: CanvasTextAlign; labelY?: number; color?: string },
 ) {
-  if (!scene.isAd || !scene.price.trim()) return;
-  const { ctx } = scene;
-  const align = options.align ?? "left";
-  const label = priceLabel(scene);
-  if (label && options.labelY !== undefined) {
-    drawText(scene, "kicker", label, options.x, options.labelY, scene.fonts.sans(scene.W * S.label, 700), withAlpha(scene.theme.ink, 0.55), {
-      align,
-      tracking: scene.W * 0.004,
-    });
-  }
-  let size = options.size;
-  const tracking = size * 0.01;
-  while (size > options.size * 0.72 && measurePrice(ctx, scene.price, scene.fonts.display(size, 600), tracking) > options.maxWidth) size -= 1;
-  ctx.save();
-  ctx.fillStyle = options.color ?? withAlpha(scene.theme.ink, 0.97);
-  drawPrice(ctx, scene.price, { x: options.x, y: options.y, font: scene.fonts.display(size, 600), tracking, align });
-  ctx.restore();
-  scene.log.add("headline", size, scene.price);
+  // Intentionally empty: no price is drawn on any poster.
 }
 
 const ctaBlock = (

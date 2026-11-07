@@ -10,8 +10,6 @@ import {
   drawCta,
   drawDiya,
   drawDoubleFrame,
-  drawPrice,
-  measurePrice,
   drawImageIn,
   drawLogoMark,
   drawMedallionRing,
@@ -470,28 +468,14 @@ function coverLockup(scene: Scene) {
     cursor += lineHop(promise.size, 1.24, line);
   });
 
-  // Price chip and CTA on one baseline.
+  // CTA on the lower baseline. Price cards are intentionally removed from
+  // every poster; the space is left for the action alone.
   const chipY = safe.y + safe.h - 76;
-  const priceFont = scene.fonts.sans(22, 600);
-  const priceText = content.price || "First order free";
-  const chipW = measurePrice(ctx, priceText, priceFont) + 46;
-  roundRect(ctx, padX, chipY, chipW, 44, 22);
-  ctx.fillStyle = withAlpha(theme.gold, 0.16);
-  ctx.fill();
-  ctx.strokeStyle = withAlpha(theme.gold, 0.6);
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  ctx.restore();
-  ctx.save();
-  ctx.fillStyle = accent(theme);
-  drawPrice(ctx, priceText, { x: padX + 23, y: chipY + 22, font: priceFont, baseline: "middle" });
-  ctx.restore();
-  scene.log.add("body", 22, priceText);
 
   if (content.cta.trim()) {
     const size = 22;
     drawCta(ctx, {
-      x: padX + chipW + 22,
+      x: padX,
       y: chipY,
       align: "left",
       theme,
@@ -567,64 +551,10 @@ function servicePromo(scene: Scene) {
     y += lineHop(head.size, 1.09, line);
   });
 
-  /**
-   * Price panel — the thing people scroll for. The price is fitted to the panel
-   * rather than trusting a fixed size: "US$5 · ₹470 · first order free" is three
-   * times the width of "₹470", and both are legitimate input.
-   */
-  /**
-   * The price line is split rather than shrunk. "US$5 · ₹470 · first order free"
-   * set in one run needs ~60% of the panel width in a 24 px face; scaling it down
-   * to fit would drop it below the mobile readability floor. The amount keeps
-   * display size, the qualifying words become a note beneath it.
-   */
-  const priceRaw = content.price || "First order free";
-  const priceParts = priceRaw.split(/\s*·\s*/).filter(Boolean);
-  const hasAmount = priceParts.length > 1;
-  const amount = hasAmount ? priceParts.slice(0, 2).join(" · ") : priceRaw;
-  const priceNote = hasAmount ? priceParts.slice(2).join(" · ") : "";
-  const priceY = Math.max(y + H * 0.02, card.y + card.h - H * 0.135);
-  const panelX = W * 0.055;
-  const panelPad = W * 0.03;
-  const priceMax = headWidth - panelPad * 2;
-  let priceSize = W * 0.05;
-  while (priceSize > W * 0.03 && measurePrice(ctx, amount, scene.fonts.display(priceSize, 600)) > priceMax) {
-    priceSize -= W * 0.002;
-  }
-  const panelH = H * (priceNote ? 0.125 : 0.1);
-  ctx.save();
-  roundRect(ctx, panelX, priceY, headWidth, panelH, W * 0.018);
-  ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.18 : 0.12);
-  ctx.fill();
-  ctx.strokeStyle = withAlpha(theme.gold, 0.55);
-  ctx.lineWidth = Math.max(1, W * 0.0016);
-  ctx.stroke();
-  ctx.restore();
-  ctx.save();
-  ctx.fillStyle = accent(theme);
-  drawPrice(ctx, amount, {
-    x: panelX + panelPad,
-    y: priceNote ? priceY + panelH * 0.38 : priceY + panelH * 0.5,
-    font: scene.fonts.display(priceSize, 600),
-    baseline: "middle",
-  });
-  ctx.restore();
-  scene.log.add("headline", priceSize, amount);
-  if (priceNote) {
-    drawText(
-      scene,
-      "body",
-      priceNote,
-      panelX + panelPad,
-      priceY + panelH * 0.62,
-      scene.fonts.sans(W * 0.0325, 500),
-      withAlpha(theme.ink, 0.85),
-    );
-  }
-
-  // Deliverables — ticked list, then the CTA
+  // Deliverables — ticked list, then the CTA. Price cards are intentionally
+  // removed from every poster, so the list starts directly under the headline.
   const chips = content.chips.length ? content.chips : toBullets(content.subline, 3);
-  const listTop = priceY + panelH + H * 0.035;
+  const listTop = y + H * 0.035;
   chips.slice(0, 3).forEach((chip, index) => {
     const rowY = listTop + index * H * 0.052;
     ctx.save();
