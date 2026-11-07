@@ -414,6 +414,11 @@ function greetingItems(scene: Scene): Array<{ text: string; size: number; role: 
   const lead = W * (scene.format.key === "ig-story" ? TYPE.displayStory : TYPE.display);
   const other = W * TYPE.script;
   const { greeting } = scene.copy;
+  // English mode is English-only. Tamil and Hindi have their own modes, and
+  // trilingual deliberately shows all three.
+  if (scene.language === "en") {
+    return [{ text: greeting.en, size: lead, role: "headline" }];
+  }
   if (scene.language === "trilingual") {
     return [
       { text: greeting.en, size: lead * 0.92, role: "headline" },

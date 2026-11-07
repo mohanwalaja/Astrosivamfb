@@ -200,16 +200,19 @@ export function festivalCaptions(
   const { date, language = "en", dateLine } = options;
   const when = date.label ? `${date.label}${date.confidence === "provisional" ? " (provisional — confirm on the panchang)" : ""}` : `${festival.when} — the civil date awaits this year's panchang`;
   const lead = language === "ta" ? festival.greetingTa : language === "hi" ? festival.greetingHi : englishGreeting(festival);
+  const wish = language === "ta" ? festival.wish.ta : language === "hi" ? festival.wish.hi : festival.wish.en;
+  // English captions stay English-only. Tamil and Hindi captions keep their own
+  // greeting so the language view is not a translation of the English one.
+  const extraGreetings = language === "ta" ? [`தமிழ் · ${festival.greetingTa}`] : language === "hi" ? [`हिंदी · ${festival.greetingHi}`] : [];
 
   const facebook = [
     `${lead} — ${festival.name}.`,
     "",
-    sentences(festival.wish.en, 520),
+    sentences(wish, 520),
     "",
     `📅 ${when}`,
     "",
-    festival.greetingTa,
-    festival.greetingHi,
+    ...extraGreetings,
     "",
     `${BRAND.tagline} Every report is prepared by a practising priest and reviewed before it reaches you.`,
     `${BRAND.website} · ${BRAND.languages}`,
@@ -223,10 +226,9 @@ export function festivalCaptions(
   const instagram = [
     `${lead} ✨`,
     "",
-    sentences(festival.wish.en, 300),
+    sentences(wish, 300),
     "",
-    `தமிழ் · ${festival.greetingTa}`,
-    `हिंदी · ${festival.greetingHi}`,
+    ...extraGreetings,
     "",
     `📅 ${when}`,
     "",

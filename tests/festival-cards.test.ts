@@ -163,8 +163,8 @@ test("Facebook and Instagram are written, not cloned", () => {
   assert.ok(captions.instagram.length <= CAPTION_LIMITS.instagram);
   assert.ok(captions.facebook.length <= CAPTION_LIMITS.facebook);
   assert.ok(captions.facebook.length > captions.instagram.length * 0.8, "Facebook should carry the full wish");
-  assert.match(captions.instagram, /தமிழ் · /);
-  assert.match(captions.instagram, /हिंदी · /);
+  assert.doesNotMatch(captions.instagram, /தமிழ் · /, "the English caption stays English-only");
+  assert.doesNotMatch(captions.instagram, /हिंदी · /, "the English caption stays English-only");
   assert.match(captions.instagram, /Save this/);
   assert.doesNotMatch(captions.facebook, /✨/, "the Instagram hook is not a Facebook line");
 
@@ -174,6 +174,15 @@ test("Facebook and Instagram are written, not cloned", () => {
 
   assert.deepEqual(captionWarnings(captions), []);
   assert.ok(captions.instagram.includes("Sunday, 8 November 2026"), "the verified date must reach the caption");
+});
+
+test("Tamil and Hindi captions keep their own greeting", () => {
+  const festival = getFestival("deepavali");
+  const date = festivalDateView(festival.id, 2026);
+  const tamil = festivalCaptions(festival, { date, language: "ta", dateLine: date.label ?? festival.when });
+  const hindi = festivalCaptions(festival, { date, language: "hi", dateLine: date.label ?? festival.when });
+  assert.match(tamil.instagram, /தமிழ் · /);
+  assert.match(hindi.instagram, /हिंदी · /);
 });
 
 test("a provisional date is labelled provisional in the caption", () => {
