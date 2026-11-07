@@ -56,7 +56,6 @@ const dateLabel = () =>
     day: "numeric",
     month: "long",
     year: "numeric",
-    timeZone: "Asia/Kolkata",
   }).format(new Date());
 
 /* ------------------------------- primitives ------------------------------- */
@@ -787,86 +786,102 @@ function renderPanchangam(
   logo: HTMLImageElement,
   content: CreativeContent,
 ) {
-  paintBackdrop(ctx, W, H, theme, { glowX: 0.7, glowY: 0.18, frameInset: W * 0.024, seed: 41 });
-  const pad = W * 0.078;
-  brandRow(ctx, W, H, pad, H * 0.062, theme, logo, "FREE · DAILY", 34);
+  paintBackdrop(ctx, W, H, theme, { glowX: 0.5, glowY: 0.12, frameInset: W * 0.022, seed: 41 });
+  const pad = W * 0.072;
 
-  drawMotif(ctx, "panchangam", W * 0.89, H * 0.205, W * 0.36, theme, 0.1);
+  brandRow(ctx, W, H, pad, H * 0.058, theme, logo, "FREE · DAILY", 34);
+
+  // A faint panchangam chart anchors the top-right corner without competing
+  // with the date.
+  drawMotif(ctx, "panchangam", W * 0.86, H * 0.19, W * 0.34, theme, 0.08);
 
   ctx.fillStyle = withAlpha(theme.gold, 0.92);
   ctx.font = SANS(15, 600);
-  drawTracked(ctx, "DAILY PANCHANGAM", pad, H * 0.125, 4, "left");
+  drawTracked(ctx, "DAILY PANCHANGAM", pad, H * 0.118, 4, "left");
 
-  const dateHead = fitHeadline(ctx, content.headline, W - pad * 2, 2, W * 0.055, W * 0.038);
+  const dateHead = fitHeadline(ctx, content.headline, W - pad * 2, 2, W * 0.062, W * 0.04);
   ctx.font = DISPLAY(dateHead.size, 700);
   ctx.fillStyle = theme.ink;
   ctx.textBaseline = "top";
-  dateHead.lines.forEach((line, i) => foilText(ctx, line, pad, H * 0.152 + i * dateHead.size * 1.1, theme));
-  const dateBottom = H * 0.152 + dateHead.lines.length * dateHead.size * 1.1;
+  dateHead.lines.forEach((line, i) => foilText(ctx, line, pad, H * 0.145 + i * dateHead.size * 1.08, theme));
+  const dateBottom = H * 0.145 + dateHead.lines.length * dateHead.size * 1.08;
 
   ctx.fillStyle = withAlpha(theme.muted, 1);
   ctx.font = SANS(19, 500);
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(content.subline || "Chennai · timings in IST", pad, dateBottom + 26);
+  ctx.fillText(content.subline || "Chennai · timings in IST", pad, dateBottom + 24);
 
-  // Ten limbs down the card. The four-value version this replaced showed a
-  // tithi, a nakshatra and two timings — the five classical limbs minus three,
-  // plus one — which is not a panchangam.
+  // Ten limbs in a two-column grid of plates. The old single-column list read
+  // like a table; the grid gives each limb its own plate and a clear value.
   const labels = PANCHANGAM_ROWS;
   const rows = Math.min(labels.length, Math.max(4, content.chips.length));
-  const startY = Math.max(dateBottom + 54, H * (rows > 6 ? 0.3 : 0.335));
-  const bottomY = H * 0.855;
-  const available = bottomY - startY;
-  const rowH = available / rows;
+  const gridTop = Math.max(dateBottom + 54, H * 0.315);
+  const gridBottom = H * 0.855;
+  const gap = W * 0.035;
+  const colW = (W - pad * 2 - gap) / 2;
+  const rowH = (gridBottom - gridTop) / Math.ceil(rows / 2);
   const dense = rows > 6;
-  const labelSize = dense ? 11 : 15;
-  const valueSize = dense ? W * 0.0255 : W * 0.034;
+  const labelSize = dense ? 10.5 : 14;
+  const valueSize = dense ? W * 0.024 : W * 0.032;
 
   labels.slice(0, rows).forEach((label, i) => {
-    const y = startY + i * rowH;
-    ctx.fillStyle = withAlpha(theme.gold, 0.3);
-    ctx.fillRect(pad, y, W - pad * 2, 1);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = pad + col * (colW + gap);
+    const y = gridTop + row * rowH;
+
+    ctx.save();
+    roundRect(ctx, x, y, colW, rowH - W * 0.012, W * 0.012);
+    ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.08 : 0.05);
+    ctx.fill();
+    ctx.strokeStyle = withAlpha(theme.gold, 0.18);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = withAlpha(theme.gold, 0.7);
+    ctx.font = SANS(10, 600);
+    drawTracked(ctx, String(i + 1).padStart(2, "0"), x + W * 0.018, y + rowH * 0.22, 1.8, "left");
 
     ctx.fillStyle = withAlpha(theme.gold, 0.95);
     ctx.font = SANS(labelSize, 600);
-    drawTracked(ctx, label.en.toUpperCase(), pad, y + rowH * 0.3, dense ? 2.6 : 3.4, "left");
+    drawTracked(ctx, label.en.toUpperCase(), x + W * 0.018, y + rowH * 0.44, dense ? 2.2 : 3, "left");
 
-    // the value, with the "till 1:38 PM" end time set back on the right
     const raw = content.chips[i] || "—";
     const [value, ...rest] = raw.split("|");
     ctx.fillStyle = theme.ink;
     ctx.font = SANS(valueSize, 500);
     let text = value.trim();
-    while (ctx.measureText(text).width > W - pad * 2 && text.length > 6) {
+    while (ctx.measureText(text).width > colW - W * 0.036 && text.length > 6) {
       text = `${text.slice(0, -2)}…`;
     }
-    ctx.fillText(text, pad, y + rowH * (dense ? 0.74 : 0.72));
+    ctx.fillText(text, x + W * 0.018, y + rowH * 0.76);
 
     const tail = rest.join("|").trim();
     if (tail) {
       ctx.fillStyle = withAlpha(theme.muted, 0.95);
-      ctx.font = SANS(dense ? 15 : 18, 500);
+      ctx.font = SANS(dense ? 12 : 15, 500);
       ctx.textAlign = "right";
-      ctx.fillText(tail, W - pad, y + rowH * (dense ? 0.74 : 0.72));
+      ctx.fillText(tail, x + colW - W * 0.018, y + rowH * 0.76);
       ctx.textAlign = "left";
     }
   });
 
   ctx.fillStyle = withAlpha(theme.gold, 0.3);
-  ctx.fillRect(pad, startY + rows * rowH, W - pad * 2, 1);
+  ctx.fillRect(pad, H * 0.875, W - pad * 2, 1);
 
   ctx.fillStyle = withAlpha(theme.gold, 0.95);
   ctx.font = SANS(19, 500);
-  ctx.fillText("Free every morning", pad, H * 0.895);
+  ctx.fillText("Free every morning", pad, H * 0.905);
   ctx.fillStyle = withAlpha(theme.muted, 0.95);
   ctx.font = SANS(13, 500);
-  ctx.fillText("Lahiri ayanamsa · timings in IST", pad, H * 0.925);
+  ctx.fillText("Lahiri ayanamsa · timings in IST", pad, H * 0.932);
   ctx.textAlign = "right";
   ctx.fillStyle = withAlpha(theme.gold, 0.85);
   ctx.font = SANS(13, 600);
-  drawTracked(ctx, "CHENNAI · IST", W - pad, H * 0.925, 2.6, "right");
+  drawTracked(ctx, "CHENNAI · IST", W - pad, H * 0.932, 2.6, "right");
   ctx.textAlign = "left";
-  drawContactLine(ctx, W, H, theme, { y: H * 0.965, size: 13 });
+  drawContactLine(ctx, W, H, theme, { y: H * 0.968, size: 13 });
 }
 
 /* ---------------------------------- quote --------------------------------- */
@@ -1453,7 +1468,6 @@ export function defaultContent(
         kicker: "Daily Panchangam",
         headline: dateLabel(),
         subline: "Chennai · timings in IST",
-        tamil: "தினசரி பஞ்சாங்கம்",
         chips: PANCHANGAM_ROWS.map((row) => row.en),
         price: "Free",
         cta: "astrosivam.com",

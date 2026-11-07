@@ -45,13 +45,18 @@ export function cardChips(panchangam: Panchangam): string[] {
 
 /** The headline line for the card: "Saturday, 24 October 2026". */
 export function cardDateLine(panchangam: Panchangam): string {
+  // The panchangam date is a civil date, not an instant. Format it at UTC
+  // noon so a Fiji or US browser cannot shift it onto the previous day.
+  const calendarDay = new Date(
+    Date.UTC(panchangam.date.getFullYear(), panchangam.date.getMonth(), panchangam.date.getDate(), 12),
+  );
   return new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
-    timeZone: "Asia/Kolkata",
-  }).format(panchangam.date);
+    timeZone: "UTC",
+  }).format(calendarDay);
 }
 
 /** The sub-line: "Aippasi 7 · Chennai · Saturday". */

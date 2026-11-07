@@ -38,8 +38,9 @@ const ISO = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
 const today = () => {
+  // Use the browser's own civil date. Pinning this to Asia/Kolkata made the
+  // card show yesterday for anyone east of India (e.g. Fiji, UTC+12).
   const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
     year: "numeric",
     month: "numeric",
     day: "numeric",
@@ -75,8 +76,7 @@ const LimbRow: React.FC<{ day: Day; limbKey: LimbKey }> = ({ day, limbKey }) => 
         {meta.english}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="font-tamil text-[13.5px] text-cream">{limb.primary.ta}</span>
-        <span className="ml-2 text-[12.5px] text-[#DCCFBA]">{limb.primary.en}</span>
+        <span className="text-[13.5px] text-cream">{limb.primary.en}</span>
         {limb.counter ? <span className="ml-2 text-[10px] text-[#A2937D]">{limb.counter}</span> : null}
       </span>
       <span className="flex shrink-0 items-baseline gap-2 text-right">
@@ -107,10 +107,6 @@ export const Panchangam: React.FC = () => {
   }, [iso, observer]);
 
   const chips = useMemo(() => cardChips(day), [day]);
-  const tamilRows = useMemo(
-    () => PANCHANGAM_ROWS.map((row) => `${row.ta}: ${day.limbs[row.key].primary.ta}`).join("\n"),
-    [day],
-  );
 
   const renderPanchangamCard = () => renderCreative({
     format: FORMAT_MAP["panchangam-card"],
@@ -120,7 +116,6 @@ export const Panchangam: React.FC = () => {
       kicker: "Daily Panchangam",
       headline: cardDateLine(day),
       subline: cardSubline(day),
-      tamil: "தினசரி பஞ்சாங்கம்",
       chips,
       price: "Free",
       cta: "astrosivam.com",
@@ -129,7 +124,7 @@ export const Panchangam: React.FC = () => {
   });
 
   const panchangamCaptions = brandPostCaptions(
-    `Daily Panchangam · ${longDate(day.date)} · ${place}\n\n${cardSubline(day)}\n\n${tamilRows}`,
+    `Daily Panchangam · ${longDate(day.date)} · ${place}\n\n${cardSubline(day)}`,
   );
 
   const downloadCard = async () => {
@@ -160,7 +155,7 @@ export const Panchangam: React.FC = () => {
         title={
           <>
             The whole day, not just five limbs.{" "}
-            <span className="gold-text">Calculated, in English and Tamil.</span>
+            <span className="gold-text">Calculated for your city.</span>
           </>
         }
         description="A panchangam is five limbs in name and ten in practice: a printed Tamil almanac opens with the year, half-year, season and solar month before it ever reaches the tithi. These values are computed from the Sun and Moon for the chosen city, on the Lahiri ayanamsa — the same seven limbs your panchangam.rf.gd site prints, now in English and ready to post."
@@ -235,12 +230,12 @@ export const Panchangam: React.FC = () => {
             </select>
           </div>
           <div className="ml-auto text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#B4A58F]">Tamil date</div>
-            <div className="font-tamil text-[15px] text-gold-soft">
-              {day.tamilDate.month.ta} {day.tamilDate.day}
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#B4A58F]">Solar month</div>
+            <div className="font-display text-[15px] text-gold-soft">
+              {day.tamilDate.month.en} {day.tamilDate.day}
             </div>
             <div className="text-[10.5px] text-[#A2937D]">
-              {day.tamilDate.month.en} {day.tamilDate.day} · {day.sunSign.en}
+              {day.sunSign.en}
             </div>
           </div>
         </div>
@@ -302,10 +297,7 @@ export const Panchangam: React.FC = () => {
             <ul className="space-y-2">
               {day.auspicious.map((w) => (
                 <li key={w.label} className="flex items-baseline justify-between gap-3 text-[11.5px]">
-                  <span className="text-[#DCCFBA]">
-                    {w.label}
-                    <span className="ml-1.5 font-tamil text-[10.5px] text-[#A2937D]">{w.tamil}</span>
-                  </span>
+                  <span className="text-[#DCCFBA]">{w.label}</span>
                   <span className="shrink-0 font-display text-[12px] text-jade">
                     {timeText(w.start)} – {timeText(w.end)}
                   </span>
@@ -317,13 +309,10 @@ export const Panchangam: React.FC = () => {
               <ul className="space-y-2">
                 {day.inauspicious.map((w) => (
                   <li key={w.label} className="flex items-baseline justify-between gap-3 text-[11.5px]">
-                    <span className="text-[#DCCFBA]">
-                      {w.label}
-                      <span className="ml-1.5 font-tamil text-[10.5px] text-[#A2937D]">{w.tamil}</span>
-                    </span>
-                    <span className="shrink-0 font-display text-[12px] text-saffron">
-                      {timeText(w.start)} – {timeText(w.end)}
-                    </span>
+                  <span className="text-[#DCCFBA]">{w.label}</span>
+                  <span className="shrink-0 font-display text-[12px] text-saffron">
+                    {timeText(w.start)} – {timeText(w.end)}
+                  </span>
                   </li>
                 ))}
               </ul>
@@ -352,8 +341,7 @@ export const Panchangam: React.FC = () => {
             })}
           </ol>
           <div className="mt-3 flex gap-2">
-            <CopyButton text={tamilRows} label="Tamil only" />
-            <CopyButton text={chips.join("\n")} label="English only" />
+            <CopyButton text={chips.join("\n")} label="Copy all ten limbs" />
           </div>
         </Panel>
 
