@@ -3,7 +3,6 @@ import { useBrandPlacementVersion } from "../lib/brandPlacement";
 import {
   CalendarHeart,
   Check,
-  Copy,
   Download,
   Facebook,
   Hash,
@@ -320,7 +319,7 @@ export const FestivalWishes: React.FC = () => {
           <>
             Every festival, ready to post —{" "}
             <span className="gold-text">
-              <ScriptText text="English, தமிழ் and हिंदी." />
+              <ScriptText text="English." />
             </span>
           </>
         }
@@ -795,23 +794,6 @@ export const FestivalWishes: React.FC = () => {
                 />
               </label>
               <label className="block">
-                <span lang="ta" className="mb-1 block font-tamil text-[10.5px] text-[#A2937D]">தமிழ்</span>
-                <input
-                  value={greetings.ta ?? copy.greeting.ta}
-                  onChange={(event) => setGreetings((value) => ({ ...value, ta: event.target.value }))}
-                  className="w-full rounded-lg border border-line bg-[#191314] px-2 py-1.5 font-tamil text-[12px] text-cream"
-                />
-              </label>
-              <label className="block">
-                <span lang="hi" className="mb-1 block font-hindi text-[10.5px] text-[#A2937D]">हिंदी</span>
-                <input
-                  value={greetings.hi ?? copy.greeting.hi}
-                  onChange={(event) => setGreetings((value) => ({ ...value, hi: event.target.value }))}
-                  lang="hi"
-                  className="w-full rounded-lg border border-line bg-[#191314] px-2 py-1.5 font-hindi text-[12px] text-cream"
-                />
-              </label>
-              <label className="block">
                 <span className="mb-1 block text-[9.5px] uppercase tracking-[0.14em] text-[#A2937D]">Supporting line</span>
                 <input
                   value={subline || copy.subline}
@@ -930,27 +912,6 @@ export const FestivalWishes: React.FC = () => {
                 <span className="text-[9.5px] text-[#A2937D]">{captions.instagram.length} / 2200</span>
                 <CopyButton text={captions.instagram} label="Copy IG" compact />
               </div>
-            </Panel>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Panel>
-              <SectionLabel right={<Copy className="h-3.5 w-3.5 text-gold" />}>
-                Wishes · <span lang="ta" className="font-tamil">தமிழ்</span>
-              </SectionLabel>
-              <p lang="ta" className="font-tamil text-[12.5px] leading-relaxed text-[#D9CDBA]">{festival.greetingTa}</p>
-              <p lang="ta" className="mt-2 font-tamil text-[11px] leading-relaxed text-[#B4A58F]">{festival.wish.ta}</p>
-              <CopyButton text={festival.greetingTa} label="Copy Tamil" className="mt-3 w-full" />
-            </Panel>
-            <Panel>
-              <SectionLabel right={<Copy className="h-3.5 w-3.5 text-gold" />}>
-                Wishes · <span lang="hi" className="font-hindi">हिंदी</span>
-              </SectionLabel>
-              <p lang="hi" className="font-hindi text-[12.5px] leading-relaxed text-[#D9CDBA]">
-                {festival.greetingHi}
-              </p>
-              <p lang="hi" className="mt-2 font-hindi text-[11px] leading-relaxed text-[#B4A58F]">{festival.wish.hi}</p>
-              <CopyButton text={festival.greetingHi} label="Copy Hindi" className="mt-3 w-full" />
             </Panel>
           </div>
 

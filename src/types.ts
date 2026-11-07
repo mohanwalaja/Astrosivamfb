@@ -290,7 +290,8 @@ export interface CreativeContent {
   kicker: string;
   headline: string;
   subline: string;
-  tamil: string;
+  /** Optional Tamil line. English-only layouts omit it. */
+  tamil?: string;
   chips: string[];
   price: string;
   cta: string;

@@ -161,7 +161,7 @@ export async function festivalYearFiles(
       const when = date.label
         ? `${date.label}${date.confidence === "provisional" ? " (provisional — confirm on the panchang)" : ""}`
         : `No civil date on file — ${festival.when}`;
-      return `## ${festival.name}\n\n${when}\n\n${festival.wish.en}\n\nTamil: ${festival.greetingTa}\n\nHindi: ${festival.greetingHi}\n\nTags: ${festival.hashtags.join(" ")}\n`;
+      return `## ${festival.name}\n\n${when}\n\n${festival.wish.en}\n\nTags: ${festival.hashtags.join(" ")}\n`;
     }),
   ].join("\n");
   files.push({ name: "FESTIVAL-CALENDAR.md", data: new TextEncoder().encode(calendar) });
