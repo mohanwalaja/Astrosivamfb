@@ -117,7 +117,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "மகா சிவராத்திரி வாழ்த்துக்கள்",
     greetingHi: "महा शिवरात्रि की शुभकामनाएँ",
     wish: {
-      en: "Om Namah Shivaya. Maha Shivaratri is the night we stay awake on purpose — not because sleep is a sin, but because attention is the offering. May the still centre of your mind hold through the year.",
+      en: "Maha Shivaratri greetings. The night we stay awake on purpose — not because sleep is a sin, but because attention is the offering. May the still centre of your mind hold through the year.",
       ta: "ஓம் நமசிவாய. மகா சிவராத்திரியில் நாம் விழித்திருப்பது தூக்கம் பாவம் என்பதற்காக அல்ல, கவனமே காணிக்கை என்பதற்காக. உங்கள் மனம் அமைதியாக இருக்கட்டும்.",
       hi: "ॐ नमः शिवाय। महाशिवरात्रि की रात हम जागते हैं — क्योंकि ध्यान ही सच्ची भेंट है। शिव आपके मन को स्थिरता दें।",
     },
@@ -140,7 +140,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "பங்குனி உத்திரம் வாழ்த்துக்கள்",
     greetingHi: "पंगुनी उत्तीरम की शुभकामनाएँ",
     wish: {
-      en: "Happy Panguni Uthiram. This is the month Tamil families read charts before they read invitations. If a marriage, a housewarming or a naming is on the table this year, book the muhurtham window now — the good nalla nerams fill first.",
+      en: "Happy Panguni Uthiram. This is the month Tamil families read charts before they read invitations. If a marriage, a housewarming or a naming is on the table this year, book the muhurtham window now — the good auspicious windows fill first.",
       ta: "பங்குனி உத்திரம் வாழ்த்துக்கள். திருமணம், கிரகப்பிரவேசம், பெயர் சூட்டுதல் — இந்த ஆண்டு திட்டமிருந்தால் இப்போதே முகூர்த்த நாட்களைப் பாருங்கள். நல்ல நேரம் முதலில் நிரம்பிவிடும்.",
       hi: "पंगुनी उत्तीरम की शुभकामनाएँ। विवाह, गृह प्रवेश या नामकरण इस वर्ष है तो मुहूर्त अभी तय करें — शुभ नेरम पहले भर जाते हैं।",
     },
@@ -163,7 +163,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "இனிய தமிழ்ப் புத்தாண்டு வாழ்த்துக்கள்",
     greetingHi: "तमिल नववर्ष की हार्दिक शुभकामनाएँ",
     wish: {
-      en: "Iniya Tamil Puthandu. A year is not a guarantee — it is a ledger of days you get to write into. May this one open with a clear chart, an honest plan, and work that pays for itself.",
+      en: "Happy Tamil New Year. A year is not a guarantee — it is a ledger of days you get to write into. May this one open with a clear chart, an honest plan, and work that pays for itself.",
       ta: "இனிய தமிழ்ப் புத்தாண்டு வாழ்த்துக்கள். இந்த ஆண்டு தெளிவான திட்டத்துடனும், நேர்மையான உழைப்புடனும் தொடங்கட்டும். அனைவருக்கும் நல்வாழ்த்துக்கள்.",
       hi: "तमिल नववर्ष की हार्दिक शुभकामनाएँ। यह वर्ष स्पष्ट योजना और ईमानदार मेहनत के साथ शुरू हो। सबको शुभकामनाएँ।",
     },
@@ -186,7 +186,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "சித்திரை திருவிழா வாழ்த்துக்கள்",
     greetingHi: "चितिरै महोत्सव की शुभकामनाएँ",
     wish: {
-      en: "Chithirai Thiruvizha vazhthukkal. The Madurai festival is the oldest reminder that a wedding is a public promise, not a private party. May your own commitments be witnessed, kept and honoured.",
+      en: "Greetings for Chithirai Thiruvizha. The Madurai festival is the oldest reminder that a wedding is a public promise, not a private party. May your own commitments be witnessed, kept and honoured.",
       ta: "சித்திரை திருவிழா வாழ்த்துக்கள். மதுரை மீனாக்ஷி அம்மன் திருக்கல்யாணம் நமக்குச் சொல்லும் பாடம் — வாக்கு கொடுப்பது மட்டும் போதாது, காத்துக்கொள்ள வேண்டும்.",
       hi: "चितिरै महोत्सव की शुभकामनाएँ। मदुरै का यह उत्सव सिखाता है कि वचन निभाना ही असली परंपरा है।",
     },
@@ -209,7 +209,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "வைகாசி விசாகம் வாழ்த்துக்கள்",
     greetingHi: "वैकासी विशाकम की शुभकामनाएँ",
     wish: {
-      en: "Vaikasi Visakam vazhthukkal. Kanda Sashti and Visakam both mark the moment a promise becomes an army. Whatever you have been circling for months — give it form this week, not another plan.",
+      en: "Greetings for Vaikasi Visakam. Kanda Sashti and Visakam both mark the moment a promise becomes an army. Whatever you have been circling for months — give it form this week, not another plan.",
       ta: "வைகாசி விசாகம் வாழ்த்துக்கள். முருகனின் அருளால் உங்கள் முயற்சிகள் வெற்றி பெறட்டும். தயங்கிய வேலையை இந்த வாரம் தொடங்குங்கள்.",
       hi: "वैकासी विशाकम की शुभकामनाएँ। मुरुगन का आशीर्वाद आपके प्रयासों को सफल करे।",
     },
@@ -232,7 +232,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ஆடிப் பூரம் வாழ்த்துக்கள்",
     greetingHi: "आदि पूरम की शुभकामनाएँ",
     wish: {
-      en: "Aadi Pooram vazhthukkal. Aadi is the month Tamil families quietly do the important things — new ventures, bangles, prayers for the household. May the Goddess keep the home you are building.",
+      en: "Greetings for Aadi Pooram. Aadi is the month Tamil families quietly do the important things — new ventures, bangles, prayers for the household. May the Goddess keep the home you are building.",
       ta: "ஆடிப் பூரம் வாழ்த்துக்கள். ஆடி மாதம் வீட்டு நலனுக்காக பிரார்த்தனை செய்யும் மாதம். அம்மன் உங்கள் குடும்பத்தைக் காப்பாற்றட்டும்.",
       hi: "आदि पूरम की शुभकामनाएँ। आदि का महीना घर और परिवार के लिए है। देवी आपके घर की रक्षा करें।",
     },
@@ -255,7 +255,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ஆடிப் பெருக்கு வாழ்த்துக்கள்",
     greetingHi: "आदि पेरुक्कु की शुभकामनाएँ",
     wish: {
-      en: "Aadi Perukku vazhthukkal. The Kaveri rises and the delta says thank you to the one thing nobody made: water. A good reminder that half of what feeds you is not your own doing.",
+      en: "Greetings for Aadi Perukku. The Kaveri rises and the delta says thank you to the one thing nobody made: water. A good reminder that half of what feeds you is not your own doing.",
       ta: "ஆடிப் பெருக்கு வாழ்த்துக்கள். காவிரி பெருக்கெடுத்து ஓடும் இந்த நாளில் நீரையும் விவசாயிகளையும் நினைவு கூர்வோம்.",
       hi: "आदि पेरुक्कु की शुभकामनाएँ। कावेरी का बढ़ता जल हमें प्रकृति और किसानों का आभार सिखाता है।",
     },
@@ -278,7 +278,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "வரலக்ஷ்மி விரதம் வாழ்த்துக்கள்",
     greetingHi: "वरलक्ष्मी व्रत की शुभकामनाएँ",
     wish: {
-      en: "Varalakshmi Vratham vazhthukkal. The vratham is unusual — the boon is yours to name. Sit down before the pooja and write what you are actually asking for. Wealth is easier to receive when you have decided what it is for.",
+      en: "Greetings for Varalakshmi Vratham. The vratham is unusual — the boon is yours to name. Sit down before the pooja and write what you are actually asking for. Wealth is easier to receive when you have decided what it is for.",
       ta: "வரலக்ஷ்மி விரதம் வாழ்த்துக்கள். இந்த விரதத்தில் வரம் கேட்பது நீங்களே. பூஜைக்கு முன் உங்கள் வேண்டுதலை எழுதி வையுங்கள்.",
       hi: "वरलक्ष्मी व्रत की शुभकामनाएँ। इस व्रत में वरदान आप स्वयं चुनते हैं — पूजा से पहले लिख लें कि आप क्या माँग रहे हैं।",
     },
@@ -301,7 +301,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "கோகுலாஷ்டமி வாழ்த்துக்கள்",
     greetingHi: "कृष्ण जन्माष्टमी की शुभकामनाएँ",
     wish: {
-      en: "Gokulashtami vazhthukkal. Krishna is the god who gives advice for a living — and the advice is always the same: do your work, drop the result, keep your word. May this year's counsel be easy to hear.",
+      en: "Greetings for Gokulashtami. Krishna is the god who gives advice for a living — and the advice is always the same: do your work, drop the result, keep your word. May this year's counsel be easy to hear.",
       ta: "கோகுலாஷ்டமி வாழ்த்துக்கள். கண்ணன் சொல்லும் உபதேசம் எப்போதும் ஒன்றே — கடமையைச் செய், பலனை எதிர்பார்க்காதே. இந்த ஆண்டு உங்கள் மனம் அமைதியாக இருக்கட்டும்.",
       hi: "कृष्ण जन्माष्टमी की शुभकामनाएँ। कन्हैया का उपदेश सदा एक ही है — कर्म करो, फल की चिंता छोड़ो।",
     },
@@ -324,7 +324,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "விநாயகர் சதுர்த்தி வாழ்த்துக்கள்",
     greetingHi: "विनायक चतुर्थी की शुभकामनाएँ",
     wish: {
-      en: "Vinayaka Chaturthi vazhthukkal. Ganesha is not asked for success — he is asked for a clear path. Before the launch, the loan, the wedding or the new shop, sit with the one obstacle you have been avoiding and name it out loud.",
+      en: "Greetings for Vinayaka Chaturthi. Ganesha is not asked for success — he is asked for a clear path. Before the launch, the loan, the wedding or the new shop, sit with the one obstacle you have been avoiding and name it out loud.",
       ta: "விநாயகர் சதுர்த்தி வாழ்த்துக்கள். விநாயகரை வெற்றிக்காக அல்ல, தடையற்ற வழிக்காக வேண்டுவோம். தவிர்த்துக்கொண்டிருக்கும் ஒரு தடையை இன்று பெயர் சொல்லி அழையுங்கள்.",
       hi: "विनायक चतुर्थी की शुभकामनाएँ। गणेश जी से सफलता नहीं, निर्विघ्न मार्ग माँगा जाता है। जिस बाधा से बच रहे हैं, उसे आज नाम दें।",
     },
@@ -347,7 +347,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ஓணம் வாழ்த்துக்கள்",
     greetingHi: "ओणम की शुभकामनाएँ",
     wish: {
-      en: "Onam aashamsakal. The festival is about a king who asked to come back to his people once a year — and kept the appointment. May your own promises be that reliable.",
+      en: "Onam greetings. The festival is about a king who asked to come back to his people once a year — and kept the appointment. May your own promises be that reliable.",
       ta: "ஓணம் ஆசம்சகள். மகாபலி சக்கரவர்த்தி ஆண்டுதோறும் தன் மக்களைக் காண வரும் வாக்கை நிறைவேற்றுகிறார். நமது வாக்குகளும் அப்படியே இருக்கட்டும்.",
       hi: "ओणम की शुभकामनाएँ। राजा महाबली हर साल अपने वादे पर लौटते हैं — हमारे वादे भी ऐसे ही पक्के हों।",
     },
@@ -370,7 +370,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "நவராத்திரி வாழ்த்துக்கள்",
     greetingHi: "नवरात्रि की शुभकामनाएँ",
     wish: {
-      en: "Navaratri vazhthukkal. The nine nights are ordered on purpose: first courage, then means, then knowledge. Most people try to skip to the third. May this year give you the patience to climb in order.",
+      en: "Greetings for Navaratri. The nine nights are ordered on purpose: first courage, then means, then knowledge. Most people try to skip to the third. May this year give you the patience to climb in order.",
       ta: "நவராத்திரி வாழ்த்துக்கள். ஒன்பது இரவுகளும் ஒரு வரிசையில் — முதலில் தைரியம், பிறகு செல்வம், கடைசியில் ஞானம். வரிசையை மாற்றாமல் ஏறுங்கள்.",
       hi: "नवरात्रि की शुभकामनाएँ। नौ रातें क्रम में हैं — पहले साहस, फिर साधन, फिर ज्ञान। क्रम न तोड़ें।",
     },
@@ -393,7 +393,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "சரஸ்வதி பூஜை வாழ்த்துக்கள்",
     greetingHi: "सरस्वती पूजा की शुभकामनाएँ",
     wish: {
-      en: "Saraswati Puja vazhthukkal. Today the tools are put down and the books are opened. Whatever you are studying — a language, a chart, a trade — may it settle in your mind and come out as your own voice.",
+      en: "Greetings for Saraswati Puja. Today the tools are put down and the books are opened. Whatever you are studying — a language, a chart, a trade — may it settle in your mind and come out as your own voice.",
       ta: "சரஸ்வதி பூஜை வாழ்த்துக்கள். இன்று கருவிகளை வைத்துவிட்டு புத்தகங்களைத் திறக்கும் நாள். நீங்கள் கற்கும் அனைத்தும் உங்கள் சொந்தக் குரலாக மாறட்டும்.",
       hi: "सरस्वती पूजा की शुभकामनाएँ। आज औज़ार रखकर किताबें खोलने का दिन है। जो सीखा है वह अपनी आवाज़ बने।",
     },
@@ -416,7 +416,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "விஜயதசமி வாழ்த்துக்கள்",
     greetingHi: "विजयादशमी की शुभकामनाएँ",
     wish: {
-      en: "Vijayadashami vazhthukkal. This is the day Tamil Nadu starts things — a new account book, a first lesson, a signature on a lease. If you have been waiting for a date, this is the date.",
+      en: "Greetings for Vijayadashami. This is the day Tamil Nadu starts things — a new account book, a first lesson, a signature on a lease. If you have been waiting for a date, this is the date.",
       ta: "விஜயதசமி வாழ்த்துக்கள். புது கணக்கு புத்தகம், முதல் பாடம், புதிய ஒப்பந்தம் — இன்று தொடங்கும் எதுவும் நல்ல பலன் தரும். காத்திருந்தால் இதுவே சரியான நாள்.",
       hi: "विजयादशमी की शुभकामनाएँ। आज शुरू किया गया हर काम शुभ फल देता है — नया बहीखाता, पहला पाठ, नया अनुबंध।",
     },
@@ -439,7 +439,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "இனிய தீபாவளி நல்வாழ்த்துக்கள்",
     greetingHi: "दीपावली की हार्दिक शुभकामनाएँ",
     wish: {
-      en: "Iniya Deepavali nalvazhthukkal. Deepavali is not about the noise — it is about the row of lamps, and the fact that somebody has to light each one. May your year have one more lamp than last year, and someone to light it with.",
+      en: "Warm Deepavali greetings. Deepavali is not about the noise — it is about the row of lamps, and the fact that somebody has to light each one. May your year have one more lamp than last year, and someone to light it with.",
       ta: "இனிய தீபாவளி நல்வாழ்த்துக்கள். தீபாவளி சத்தத்தைப் பற்றியது அல்ல, வரிசையாக ஏற்றப்படும் விளக்குகளைப் பற்றியது. கடந்த ஆண்டை விட ஒரு விளக்கு அதிகம் ஏற்றுங்கள்.",
       hi: "दीपावली की हार्दिक शुभकामनाएँ। दीपावली शोर की नहीं, दीयों की कतार की बात है। पिछले साल से एक दीया ज़्यादा जलाएँ।",
     },
@@ -462,7 +462,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "கந்த சஷ்டி வாழ்த்துக்கள்",
     greetingHi: "स्कंद षष्ठी की शुभकामनाएँ",
     wish: {
-      en: "Skanda Sashti vazhthukkal. Six days of fast, one clear ask at the end. If you are keeping the vratham, decide now what you are asking for — and be specific enough that you will know if it arrives.",
+      en: "Greetings for Skanda Sashti. Six days of fast, one clear ask at the end. If you are keeping the vratham, decide now what you are asking for — and be specific enough that you will know if it arrives.",
       ta: "கந்த சஷ்டி வாழ்த்துக்கள். ஆறு நாட்கள் விரதம், இறுதியில் ஒரு தெளிவான வேண்டுதல். எதைக் கேட்கிறீர்கள் என்று இப்போதே முடிவு செய்யுங்கள்.",
       hi: "स्कंद षष्ठी की शुभकामनाएँ। छह दिन व्रत, अंत में एक स्पष्ट मन्नत। अभी तय करें कि क्या माँगना है।",
     },
@@ -485,7 +485,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "கார்த்திகை தீபம் வாழ்த்துக்கள்",
     greetingHi: "कार्तिक दीपम की शुभकामनाएँ",
     wish: {
-      en: "Karthigai Deepam vazhthukkal. It starts with agal vilakku at the door and ends with a flame you can see from ten kilometres away. Small faithful acts, repeated, is the whole teaching.",
+      en: "Greetings for Karthigai Deepam. It starts with a clay lamp at the door and ends with a flame you can see from ten kilometres away. Small faithful acts, repeated, is the whole teaching.",
       ta: "கார்த்திகை தீபம் வாழ்த்துக்கள். வாசலில் அகல் விளக்கு ஏற்றுவதில் தொடங்கி, மலை உச்சியில் பெரும் தீபமாக முடிகிறது. சிறுசிறு செயல்களே பெரிய பலன் தரும்.",
       hi: "कार्तिक दीपम की शुभकामनाएँ। दरवाज़े के दीये से शुरू होकर पहाड़ की महादीप तक — छोटे-छोटे कर्म ही बड़ा फल देते हैं।",
     },
@@ -508,7 +508,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "மண்டல பூஜை வாழ்த்துக்கள்",
     greetingHi: "मंडल पूजा की शुभकामनाएँ",
     wish: {
-      en: "Swamiye Saranam Ayyappa. Forty-one days of restraint, then the walk up. The vratham is not a warm-up for the pilgrimage — the vratham is the point. May your discipline outlast your enthusiasm.",
+      en: "Greetings for the Ayyappa Mandala. Forty-one days of restraint, then the walk up. The vratham is not a warm-up for the pilgrimage — the vratham is the point. May your discipline outlast your enthusiasm.",
       ta: "சுவாமியே சரணம் ஐயப்பா. நாற்பத்தொரு நாட்கள் விரதம் — அந்த விரதமே பயணம். உங்கள் ஒழுக்கம் உங்கள் ஆர்வத்தை விட நீண்டது ஆகட்டும்.",
       hi: "स्वामिये शरणम् अय्यप्पा। इकतालीस दिन का व्रत ही यात्रा है। आपका अनुशासन उत्साह से आगे टिके।",
     },
@@ -531,7 +531,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "வைகுண்ட ஏகாதசி வாழ்த்துக்கள்",
     greetingHi: "वैकुंठ एकादशी की शुभकामनाएँ",
     wish: {
-      en: "Vaikunta Ekadasi vazhthukkal. One day a year the north gate opens and the whole temple queues before sunrise. Whatever you have been putting off, go early — the gate does not wait for the crowd behind you.",
+      en: "Greetings for Vaikunta Ekadasi. One day a year the north gate opens and the whole temple queues before sunrise. Whatever you have been putting off, go early — the gate does not wait for the crowd behind you.",
       ta: "வைகுண்ட ஏகாதசி வாழ்த்துக்கள். ஆண்டுக்கு ஒருமுறை சொர்க்க வாசல் திறக்கிறது. தள்ளிப் போட்ட வேலைகளை விடியும் முன் தொடங்குங்கள்.",
       hi: "वैकुंठ एकादशी की शुभकामनाएँ। साल में एक दिन स्वर्ग द्वार खुलता है। जो टाल रहे हैं, उसे भोर से पहले शुरू करें।",
     },
@@ -554,7 +554,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ஆருத்ரா தரிசனம் வாழ்த்துக்கள்",
     greetingHi: "आर्द्रा दर्शन की शुभकामनाएँ",
     wish: {
-      en: "Arudra Darshan vazhthukkal. Nataraja dances inside a ring of fire — creation and destruction in the same gesture. Margazhi is the month to notice which of your habits deserve to end.",
+      en: "Greetings for Arudra Darshan. Nataraja dances inside a ring of fire — creation and destruction in the same gesture. Margazhi is the month to notice which of your habits deserve to end.",
       ta: "ஆருத்ரா தரிசனம் வாழ்த்துக்கள். நடராஜர் ஆனந்த தாண்டவம் — ஆக்கமும் அழிவும் ஒரே அசைவில். உங்கள் பழக்கங்களில் எது முடிய வேண்டும் என்பதை மார்கழியில் பாருங்கள்.",
       hi: "आर्द्रा दर्शन की शुभकामनाएँ। नटराज का नृत्य सृजन और संहार एक साथ है। मार्गशीर्ष में तय करें कौन सी आदत खत्म होनी चाहिए।",
     },
@@ -577,7 +577,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "அனுமன் ஜெயந்தி வாழ்த்துக்கள்",
     greetingHi: "हनुमान जयंती की शुभकामनाएँ",
     wish: {
-      en: "Hanuman Jayanti vazhthukkal. The most powerful figure in the Ramayana spends the whole epic serving somebody else — and never once asks for the credit. May your strength find a worthy direction this year.",
+      en: "Greetings for Hanuman Jayanti. The most powerful figure in the Ramayana spends the whole epic serving somebody else — and never once asks for the credit. May your strength find a worthy direction this year.",
       ta: "அனுமன் ஜெயந்தி வாழ்த்துக்கள். ராமாயணத்தில் மிக வலிமையானவர் அனுமன், ஆனால் அவர் எப்போதும் பிறருக்காகவே உழைத்தார். உங்கள் வலிமைக்கு ஒரு நல்ல திசை அமையட்டும்.",
       hi: "हनुमान जयंती की शुभकामनाएँ। सबसे शक्तिशाली होकर भी हनुमान जी दूसरों के लिए जिए। आपकी शक्ति को सही दिशा मिले।",
     },
@@ -600,7 +600,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ராம நவமி வாழ்த்துக்கள்",
     greetingHi: "राम नवमी की शुभकामनाएँ",
     wish: {
-      en: "Rama Navami vazhthukkal. Rama's story is not about being perfect — it is about choosing the harder right when the easier wrong was available. May your next decision be that simple.",
+      en: "Greetings for Rama Navami. Rama's story is not about being perfect — it is about choosing the harder right when the easier wrong was available. May your next decision be that simple.",
       ta: "ராம நவமி வாழ்த்துக்கள். ராமரின் கதை சரியானவர் என்பதல்ல, கடினமான நேர்மையைத் தேர்ந்தெடுப்பது. அடுத்த முடிவு அப்படியே இருக்கட்டும்.",
       hi: "राम नवमी की शुभकामनाएँ। राम की कथा सही होने की नहीं, कठिन सही चुनने की है। आपका अगला निर्णय ऐसा ही हो।",
     },
@@ -623,7 +623,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "குரு பூர்ணிமா வாழ்த்துக்கள்",
     greetingHi: "गुरु पूर्णिमा की शुभकामनाएँ",
     wish: {
-      en: "Guru Purnima vazhthukkal. A guru is not the one who flatters your chart — it is the one who tells you the part you skipped. If someone corrects you this year, keep them close.",
+      en: "Greetings for Guru Purnima. A guru is not the one who flatters your chart — it is the one who tells you the part you skipped. If someone corrects you this year, keep them close.",
       ta: "குரு பூர்ணிமா வாழ்த்துக்கள். உண்மையான குரு புகழ்பவர் அல்ல, தவறைச் சுட்டிக்காட்டுபவர். உங்களைத் திருத்துபவர்களை நெருக்கமாக வைத்திருங்கள்.",
       hi: "गुरु पूर्णिमा की शुभकामनाएँ। असली गुरु वह नहीं जो तारीफ करे, वह जो गलती बताए। आपको सुधारने वाले लोगों को पास रखें।",
     },
@@ -646,7 +646,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "நாக பஞ்சமி வாழ்த்துக்கள்",
     greetingHi: "नाग पंचमी की शुभकामनाएँ",
     wish: {
-      en: "Nag Panchami vazhthukkal. Nag Panchami honours the same two nodes that astrology calls Rahu and Ketu — the axis of every transit you worry about. Respect the axis; you do not have to fear it.",
+      en: "Greetings for Nag Panchami. Nag Panchami honours the same two nodes that astrology calls Rahu and Ketu — the axis of every transit you worry about. Respect the axis; you do not have to fear it.",
       ta: "நாக பஞ்சமி வாழ்த்துக்கள். ராகு கேது பெயரில் நாம் பயப்படும் அதே இரண்டு புள்ளிகளுக்கு இந்த நாள் மரியாதை செலுத்துகிறது. பயப்படாமல் பாருங்கள்.",
       hi: "नाग पंचमी की शुभकामनाएँ। यही दो बिंदु ज्योतिष में राहु-केतु हैं। इनका सम्मान करें, डरें नहीं।",
     },
@@ -761,7 +761,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "ஆனி திருமஞ்சனம் வாழ்த்துக்கள்",
     greetingHi: "आनि तिरुमंजनम की शुभकामनाएँ",
     wish: {
-      en: "Aani Thirumanjanam wishes. Today the Nataraja at Chidambaram is bathed, and the year turns with him. May what needs to end in your life end gracefully, and what follows arrive on time.",
+      en: "Greetings for Aani Thirumanjanam. Today the Nataraja at Chidambaram is bathed, and the year turns with him. May what needs to end in your life end gracefully, and what follows arrive on time.",
       ta: "ஆனி திருமஞ்சனம் வாழ்த்துக்கள். சிதம்பரத்தில் நடராஜர் அபிஷேகம் காணும் இந்நாளில், முடிய வேண்டியவை அமைதியாக முடிந்து, வர வேண்டியவை சரியான நேரத்தில் வரட்டும்.",
       hi: "आनि तिरुमंजनम की शुभकामनाएँ। चिदंबरम में नटराज आज स्नान करते हैं और वर्ष अपनी दिशा पाता है। जो समाप्त होना चाहिए वह शांति से समाप्त हो।",
     },
@@ -784,7 +784,7 @@ export const FESTIVALS: Festival[] = [
     greetingTa: "மகாளய அமாவாசை — முன்னோரை நினைவு கூர்வோம்",
     greetingHi: "महालय अमावस्या — पूर्वजों को श्रद्धांजलि",
     wish: {
-      en: "Mahalaya Amavasya. Before the festival season opens, one dark night is set aside to say the names of the people who made us. Light a lamp, feed someone, and let the season begin clean.",
+      en: "Mahalaya Amavasya greetings. Before the festival season opens, one dark night is set aside to say the names of the people who made us. Light a lamp, feed someone, and let the season begin clean.",
       ta: "மகாளய அமாவாசை. நம்மை உருவாக்கியவர்களின் பெயரைச் சொல்ல ஒரு இருண்ட இரவு ஒதுக்கப்பட்டிருக்கிறது. ஒரு விளக்கேற்றுங்கள், ஒருவருக்கு உணவளியுங்கள்.",
       hi: "महालय अमावस्या। त्योहारों से पहले एक अंधेरी रात उनके नाम लेने के लिए है जिन्होंने हमें बनाया। एक दीया जलाएँ, किसी को भोजन कराएँ।",
     },
@@ -1267,7 +1267,7 @@ export const festivalCaption = (festival: Festival, platform: "facebook" | "inst
   const lines =
     platform === "facebook"
       ? [festival.wish.en, "", "Understand your life through Vedic astrology — astrosivam.com", "", tags]
-      : [festival.wish.en, "", `✨ ${festival.greetingTa}`, `✨ ${festival.greetingHi}`, "", "Book a report → astrosivam.com", "", tags];
+      : [festival.wish.en, "", "Book a report → astrosivam.com", "", tags];
   return lines.join("\n");
 };
 
