@@ -32,7 +32,7 @@ export const jathagam: Service = {
     headline: "Your life, mapped to the minute.",
     subline: "Kids 0–10 · Students 11–18 auto-selected from DOB · Basic · Bhava · Varga for adults.",
     tamil: "பிறப்பு ஜாதகம் · 5 திட்டங்கள்",
-    chips: ["Kids 0–10 auto", "Students 11–18 auto", "Bhava/Varga US$10"],
+    chips: ["Kids 0–10 auto", "Students 11–18 auto", "Bhava & Varga plans"],
     price: "From US$5 · ₹470",
     cta: "astrosivam.com/birth-jathagam",
   },
@@ -138,7 +138,7 @@ export const jathagam: Service = {
       {
         kicker: "What arrives",
         headline: "A PDF you can keep.",
-        body: "Rasi + Navamsa, Vimshottari dasa, Sade Sati & doshas with pariharams. EN/தமிழ்/हिंदी. US$5 · ₹470 (Bhava/Varga US$10) · First order FREE (Beta).",
+        body: "Rasi + Navamsa, Vimshottari dasa, Sade Sati & doshas with pariharams. EN/தமிழ்/हिंदी. First order FREE (Beta).",
       },
     ],
   },
@@ -175,7 +175,7 @@ export const jathagam: Service = {
     },
     {
       title: "First order FREE (Beta)",
-      body: "Birth Jathagam — 5 plans · Kids 0–10 · Students 11–18 · Basic & Bhava/Varga · US$5 · ₹470",
+      body: "Birth Jathagam — 5 plans · Kids 0–10 · Students 11–18 · Basic & Bhava/Varga · First order FREE (Beta)",
       sticker: "Link sticker → astrosivam.com",
     },
   ],

@@ -34,16 +34,15 @@ import { BRAND } from "../data/brand";
 
    The split is structural, not editorial:
 
-     role "ad"   — presents one service. Carries the verified price or access
-                   label from the service record, one action, and facts
-                   traceable to that record.
-     role "edu"  — explains one idea. Carries no price, no action and no offer;
-                   the copy is the service's own explainer, with its source
-                   printed on the plate.
+     role "ad"   — presents one service. Carries one action and facts traceable
+                   to that record. It never prints a fee.
+     role "edu"  — explains one idea. Carries no action and no offer; the copy
+                   is the service's own explainer, with its source printed on
+                   the plate.
 
-   Nothing here invents a price, a testimonial, a guarantee or an outcome.
-   Prices arrive from `Service.price`; the rest is either authored positioning
-   or quoted from the service data, and `tests/service-ads.test.ts` checks that.
+   Nothing here invents a fee, a testimonial, a guarantee or an outcome. Every
+   fact is either authored positioning or quoted from the service data, and
+   `tests/service-ads.test.ts` checks exactly that.
 
    Layout rules that matter:
    — One secondary script at a time. Tamil and Hindi never stack; the reader
@@ -51,7 +50,7 @@ import { BRAND } from "../data/brand";
    — Every block is measured before the next one is placed, and every block is
      given a hard floor. Nothing is placed at a fixed height that a long line
      could collide with.
-   — The price shrinks to fit its column rather than bleeding into artwork.
+   — The deliverable list shrinks to fit its column rather than bleeding into artwork.
    ========================================================================== */
 
 export type AdLayout =
@@ -89,7 +88,7 @@ export const AD_LAYOUTS: AdLayoutMeta[] = [
     key: "ad-plate",
     name: "Gallery plate",
     role: "ad",
-    purpose: "A full-height portrait beside a measured type column, price on a plate.",
+    purpose: "A full-height portrait beside a measured type column, deliverables on a plate.",
     bestFor: "The flagship report; paid boosts; the pinned post.",
     ...FEED,
   },
@@ -184,7 +183,10 @@ export interface ServiceAdInput {
   style: StyleKey;
   copy: AdCopy;
   lang?: AdLang;
-  /** Verified price string from the service record. Ignored by reference plates. */
+  /**
+   * Kept for call sites that still pass the catalogue figure. No painter reads
+   * it: a fee never reaches the artwork.
+   */
   price?: string;
   /** Landing URL from the service record, printed under the action. */
   url?: string;
@@ -215,7 +217,6 @@ interface Scene {
   theme: Theme;
   fonts: FontSet;
   copy: AdCopy;
-  price: string;
   url: string;
   art: HTMLImageElement | null;
   logo: HTMLImageElement | null;
@@ -228,7 +229,7 @@ interface Scene {
 
 /* One type scale for the whole system, as fractions of the plate width. Chosen
    so nothing falls under the legibility floor at a 360 px phone width:
-   0.0315 ≈ 11 px body · 0.0345 ≈ 12.4 px action · 0.046 ≈ 16.6 px price. */
+   0.0315 ≈ 11 px body · 0.0345 ≈ 12.4 px action. */
 const S = {
   kicker: 0.0265,
   label: 0.026,
@@ -236,8 +237,6 @@ const S = {
   url: 0.0245,
   body: 0.034,
   bodyMin: 0.0315,
-  price: 0.05,
-  priceMin: 0.046,
   cta: 0.0345,
   script: 0.036,
 } as const;
@@ -348,18 +347,6 @@ function bodyBlock(
   return options.y + fitted.lines.length * fitted.size * 1.44;
 }
 
-/**
- * Price cards are intentionally removed from every poster. The ad layouts
- * still call this hook, so it stays as a no-op to keep the composition code
- * untouched.
- */
-function priceBlock(
-  _scene: Scene,
-  _options: { x: number; y: number; size: number; maxWidth: number; align?: CanvasTextAlign; labelY?: number; color?: string },
-) {
-  // Intentionally empty: no price is drawn on any poster.
-}
-
 const ctaBlock = (
   scene: Scene,
   options: Omit<CtaOptions, "theme" | "label"> & { label?: string; maxWidth?: number },
@@ -446,21 +433,28 @@ function adPlate(scene: Scene) {
   if (scene.script) y = scriptBlock(scene, pad, y + H * GAP.script, colW) + H * GAP.body;
   y = bodyBlock(scene, { x: pad, y, width: colW, limit: H * 0.625, maxLines: 3 });
 
-  // Price plate: a hairline box, pinned to a fixed height so it can never be
-  // overrun by a long line above it.
-  const plateTop = H * 0.66;
-  const plateH = H * 0.205;
-  ctx.save();
-  ctx.strokeStyle = withAlpha(theme.gold, 0.45);
-  ctx.lineWidth = Math.max(1.5, W * 0.0018);
-  roundRect(ctx, pad - W * 0.018, plateTop, colW + W * 0.036, plateH, W * 0.018);
-  ctx.stroke();
-  ctx.restore();
-  drawText(scene, "kicker", "THE REPORT", pad, plateTop + H * 0.022, fonts.sans(W * S.label, 700), withAlpha(theme.ink, 0.58), {
-    tracking: W * 0.004,
+  // This column used to end in a hairline fee plate. Fees are retired from the
+  // artwork, so the deliverables now fill that space and the action sits on a
+  // rule at the foot of the column.
+  let factY = Math.max(y + H * 0.05, H * 0.62);
+  copy.facts.slice(0, 3).forEach((fact) => {
+    const size = Math.max(W * S.bodyMin, Math.min(W * S.body, H * 0.021));
+    const fitted = fitLines(ctx, fact, colW + W * 0.01, 2, (face) => fonts.sans(face, 500), size, W * S.bodyMin, true);
+    ctx.save();
+    ctx.fillStyle = withAlpha(theme.gold, 0.85);
+    ctx.beginPath();
+    ctx.arc(pad + W * 0.006, factY + size * 0.34, W * 0.0048, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    fitted.lines.forEach((line, index) => {
+      drawText(scene, "body", line, pad + W * 0.022, factY + index * fitted.size * 1.3, fonts.sans(fitted.size, 500), withAlpha(theme.ink, 0.84));
+    });
+    factY += fitted.lines.length * fitted.size * 1.3 + H * 0.018;
   });
-  priceBlock(scene, { x: pad, y: plateTop + H * 0.098, size: W * S.price, maxWidth: colW + W * 0.02 });
-  ctaBlock(scene, { x: pad, y: plateTop + plateH - H * 0.078, align: "left", variant: "pill", size: W * S.cta });
+
+  const actionY = H * 0.845;
+  hairline(ctx, pad - W * 0.018, actionY - H * 0.05, pad + colW + W * 0.018, withAlpha(theme.gold, 0.32), Math.max(1.5, W * 0.0014));
+  ctaBlock(scene, { x: pad, y: actionY, align: "left", variant: "pill", size: W * S.cta });
   urlLine(scene, pad, H * 0.932);
   footerLine(scene, pad, H * 0.972);
 }
@@ -507,16 +501,8 @@ function adSplit(scene: Scene) {
   if (scene.script) y = scriptBlock(scene, pad, y + H * GAP.script, W * 0.8) + H * GAP.body;
   y = bodyBlock(scene, { x: pad, y, width: W * 0.74, limit: H * 0.572, maxLines: 2 });
 
-  // The action sits on the photograph; the price sits opposite it.
+  // The action sits on the photograph; nothing sits opposite it any more.
   ctaBlock(scene, { x: pad, y: H - H * 0.185, align: "left", variant: "pill", size: W * S.cta });
-  priceBlock(scene, {
-    x: W - pad,
-    y: H * 0.868,
-    labelY: H * 0.803,
-    size: W * S.priceMin,
-    maxWidth: W * 0.42,
-    align: "right",
-  });
   drawText(scene, "footer", scene.url, W - pad, H * 0.925, fonts.sans(W * S.url, 600), withAlpha(theme.goldSoft, 0.95), {
     align: "right",
     tracking: W * 0.0022,
@@ -563,11 +549,7 @@ function adChecklist(scene: Scene) {
   });
 
   hairline(ctx, pad, H * 0.72, W - pad, withAlpha(theme.gold, 0.4), Math.max(1.5, W * 0.0018));
-  drawText(scene, "kicker", "THE REPORT", pad, H * 0.742, fonts.sans(W * S.label, 700), withAlpha(theme.ink, 0.58), {
-    tracking: W * 0.004,
-  });
-  priceBlock(scene, { x: pad, y: H * 0.808, size: W * S.price, maxWidth: W - pad * 2 });
-  ctaBlock(scene, { x: pad, y: H * 0.828, align: "left", variant: "pill", size: W * S.cta });
+  ctaBlock(scene, { x: pad, y: H * 0.79, align: "left", variant: "pill", size: W * S.cta });
   urlLine(scene, W - pad, H * 0.93, "right");
   footerLine(scene, pad, H - H * 0.035);
 }
@@ -636,7 +618,6 @@ function adDuo(scene: Scene) {
     factY += size * 1.75;
   });
 
-  priceBlock(scene, { x: right, y: H * 0.795, labelY: H * 0.742, size: W * S.price, maxWidth: colW, align: "right" });
   ctaBlock(scene, { x: right, y: H * 0.822, align: "right", variant: "text", size: W * S.cta });
   urlLine(scene, right, H * 0.932, "right");
 }
@@ -708,7 +689,6 @@ function adBand(scene: Scene) {
   });
 
   ctaBlock(scene, { x: W / 2, y: H * 0.762, align: "center", variant: "ribbon", size: W * S.cta });
-  priceBlock(scene, { x: W / 2, y: H * 0.892, labelY: H * 0.838, size: W * S.priceMin, maxWidth: W * 0.7, align: "center" });
   drawText(scene, "footer", scene.url, W / 2, H * 0.945, fonts.sans(W * S.url, 600), withAlpha(theme.gold, 0.95), {
     align: "center",
     tracking: W * 0.0022,
@@ -753,7 +733,6 @@ function adStatement(scene: Scene) {
     });
   });
 
-  priceBlock(scene, { x: W / 2, y: H * 0.822, labelY: H * 0.772, size: W * S.price, maxWidth: W * 0.72, align: "center" });
   ctaBlock(scene, { x: W / 2, y: H * 0.85, align: "center", variant: "outline", size: W * S.cta });
   drawText(scene, "footer", scene.url, W / 2, H * 0.938, fonts.sans(W * S.url, 600), withAlpha(theme.gold, 0.95), {
     align: "center",
@@ -768,7 +747,7 @@ function eduGuide(scene: Scene) {
   ground(scene, { angle: "vertical", glowX: 0.2, glowY: 0.12, glow: 0.1 });
 
   // A reference plate wears a different frame from an ad, on purpose: a rule
-  // and a label instead of a price plate and a button.
+  // and a label instead of a sales plate and a button.
   const pad = W * 0.075;
   drawText(scene, "kicker", "REFERENCE · NOT AN OFFER", pad, H * 0.062, fonts.sans(W * S.kicker, 700), withAlpha(theme.ink, 0.62), {
     tracking: W * 0.0045,
@@ -948,7 +927,6 @@ export async function renderServiceAd(input: ServiceAdInput): Promise<ServiceAdR
     theme,
     fonts,
     copy: input.copy,
-    price: input.price ?? "",
     url: input.url ?? "",
     art,
     logo,

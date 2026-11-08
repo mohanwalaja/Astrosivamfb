@@ -135,7 +135,7 @@ export const muhurtham: Service = {
       {
         kicker: "What arrives",
         headline: "Six months of dates.",
-        body: "One calendar, PDF in English, Tamil or Hindi · US$10 · ₹940.",
+        body: "One calendar, PDF in English, Tamil or Hindi.",
       },
     ],
   },
@@ -167,7 +167,7 @@ export const muhurtham: Service = {
     },
     {
       title: "Six months at once",
-      body: "Eighteen ceremonies, one calendar · US$10 · ₹940.",
+      body: "Eighteen ceremonies, one calendar · First order FREE (Beta).",
       sticker: "Link sticker → muhurtham",
     },
   ],

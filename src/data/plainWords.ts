@@ -150,8 +150,8 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
   },
   {
     id: "one-price",
-    label: "One price",
-    message: "US$5 once. No subscription, no renewal — the objection a new customer always raises.",
+    label: "One payment",
+    message: "One payment, never a subscription or a renewal — the objection a new customer always raises.",
     category: "birth",
     occasion: "discover",
     composition: "infographic",
@@ -162,11 +162,11 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
     height: 1350,
     copy: {
       kicker: "Plain pricing",
-      serviceTitle: "One report, one price",
-      headline: "US$5 for one report. No subscription.",
+      serviceTitle: "One report, one payment",
+      headline: "One report. One payment. No subscription.",
       subline:
-        "Birth Jathagam US$5, Bhava or Varga US$10, Wedding matching US$5, Muhurtham US$10. You pay once.",
-      facts: ["Basic US$5", "Bhava and Varga US$10", "Muhurtham US$10"],
+        "Birth Jathagam, Bhava or Varga, wedding matching and Subha Muhurtham are priced per report. You pay once, and there is no renewal.",
+      facts: ["Pay once", "No auto-renewal", "No subscription"],
       cta: "Order at astrosivam.com",
     },
     caption:

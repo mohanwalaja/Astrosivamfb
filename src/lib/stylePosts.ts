@@ -14,7 +14,7 @@ import { drawStyleFrame, paintStyledBackdrop } from "./styles";
 import { glassCard } from "./styleArt";
 import { drawContactLine } from "./posterKit";
 import { drawGlobalLockup } from "./brandPlacement";
-import { foilGradient, foilText } from "./premium";
+import { foilText } from "./premium";
 import { blockHeight, leadOffsets, wrapClip } from "./typeset";
 import { BRAND } from "../data/brand";
 
@@ -1730,40 +1730,23 @@ function listChips(c: Ctx, x: number, y: number, size: number, color: string, in
   return parts.length * gap;
 }
 
-/** Solid price pill. Returns its width. */
-function pricePill(c: Ctx, x: number, y: number, align: Align, options: { fill?: string; color?: string; size?: number; height?: number; outline?: boolean } = {}) {
-  if (!c.content.price) return 0;
-  const { ctx, theme } = c;
-  const size = options.size ?? c.W * 0.0155;
-  const height = options.height ?? c.H * 0.038;
-  const tracking = size * 0.12;
-  ctx.save();
-  ctx.font = SANS(size, 700);
-  const text = c.content.price.toUpperCase();
-  const width = trackedWidth(ctx, text, tracking) + size * 2.6;
-  const left = align === "center" ? x - width / 2 : x;
-  roundRect(ctx, left, y, width, height, height / 2);
-  if (options.outline) {
-    ctx.strokeStyle = options.fill ?? theme.gold;
-    ctx.lineWidth = Math.max(1, c.W * 0.0015);
-    ctx.stroke();
-    ctx.fillStyle = options.color ?? theme.gold;
-  } else {
-    ctx.fillStyle = options.fill ?? theme.gold;
-    ctx.fill();
-    ctx.fillStyle = options.color ?? "#140F04";
-  }
-  ctx.textBaseline = "middle";
-  drawTracked(ctx, text, left + width / 2, y + height / 2 + 1, tracking, "center");
-  ctx.restore();
-  return width;
+/**
+ * Price pill — intentionally retired.
+ *
+ * No poster in the studio carries a price any more, so this stays as a no-op
+ * with its old signature: the layouts still call it in their bottom row, and
+ * the CTA keeps its own coordinates because the pill paints nothing.
+ */
+function pricePill(
+  _c: Ctx,
+  _x: number,
+  _y: number,
+  _align: Align,
+  _options: { fill?: string; color?: string; size?: number; height?: number; outline?: boolean } = {},
+) {
+  return 0;
 }
 
-/**
- * CTA as a tracked line with an arrow. The arrow is drawn, not typed: U+2192 is
- * outside the Latin subsets the suite ships, so as a glyph it would fall to
- * whatever the visitor's system has.
- */
 function ctaLine(c: Ctx, x: number, y: number, align: "left" | "right" | "center", color: string, size = c.W * 0.0142, maxWidth = c.W * 0.5) {
   if (!c.content.cta) return;
   const { ctx } = c;
@@ -1842,9 +1825,7 @@ function renderSignature(c: Ctx) {
   const chipsH = capsuleChips(c, W / 2, chipsY, W - pad * 2, "center");
   const ruleY = Math.max(c.tall ? H * 0.845 : H * 0.835, chipsY + chipsH + H * 0.03);
   rule(ctx, pad, ruleY, W - pad * 2, withAlpha(theme.gold, 0.5), "both");
-  const priceY = ruleY + H * 0.018;
-  pricePill(c, pad, priceY, "left");
-  ctaLine(c, W - pad, priceY + H * 0.019, "right", withAlpha(theme.gold, 0.95), W * 0.0148, W * 0.5);
+  ctaLine(c, W / 2, ruleY + H * 0.036, "center", withAlpha(theme.gold, 0.95), W * 0.0148, W * 0.6);
   footer(c, H - H * 0.038);
 }
 
@@ -1872,32 +1853,10 @@ function renderThanjavur(c: Ctx) {
   y += subline(c, W / 2, y, W * 0.021, W - pad * 2.6, "center", "rgba(255,230,200,0.78)");
   const chipsY = Math.max(c.tall ? H * 0.8 : H * 0.785, y + H * 0.02);
   const chipsH = textChips(c, W / 2, chipsY, W - pad * 2, "center", { color: "rgba(255,236,210,0.82)", mark: "#FFD98A" });
-  // brass price plate
-  if (c.content.price) {
-    const plateH = H * 0.046;
-    const plateY = Math.max(c.tall ? H * 0.83 : H * 0.815, chipsY + chipsH + H * 0.012);
-    ctx.save();
-    ctx.font = SANS(W * 0.0155, 700);
-    const text = c.content.price.toUpperCase();
-    const plateW = trackedWidth(ctx, text, 2.6) + W * 0.12;
-    const plateX = W / 2 - plateW / 2;
-    ctx.shadowColor = "rgba(0,0,0,.5)";
-    ctx.shadowBlur = W * 0.012;
-    ctx.shadowOffsetY = W * 0.004;
-    ctx.fillStyle = foilGradient(ctx, theme, plateX, plateY, plateH);
-    roundRect(ctx, plateX, plateY, plateW, plateH, 4);
-    ctx.fill();
-    ctx.shadowColor = "transparent";
-    ctx.strokeStyle = withAlpha("#5A2A08", 0.7);
-    ctx.lineWidth = 1;
-    roundRect(ctx, plateX + 4, plateY + 4, plateW - 8, plateH - 8, 2);
-    ctx.stroke();
-    ctx.fillStyle = "#3A1606";
-    ctx.textBaseline = "middle";
-    drawTracked(ctx, text, W / 2, plateY + plateH / 2 + 1, 2.6, "center");
-    ctx.restore();
-    ctaLine(c, W / 2, plateY + plateH + H * 0.03, "center", "#FFD98A", W * 0.0138, W * 0.7);
-  }
+  // The brass plate that used to hold the fee is retired, so the action takes
+  // that seat under the chip row and the layout keeps its centred axis.
+  const ctaY = Math.max(c.tall ? H * 0.852 : H * 0.84, chipsY + chipsH + H * 0.026);
+  ctaLine(c, W / 2, ctaY, "center", "#FFD98A", W * 0.0138, W * 0.7);
   footer(c, H - H * 0.04, "rgba(255,230,200,0.6)");
 }
 
@@ -1939,8 +1898,7 @@ function renderKolam(c: Ctx) {
   capsuleChips(c, pad, chipsY, W - pad * 2, "left", { fill: withAlpha("#9A4A22", 0.06), stroke: withAlpha("#9A4A22", 0.45), color: "#5A2E16" });
   const baseY = c.tall ? H * 0.865 : H * 0.855;
   rule(ctx, pad, baseY - H * 0.02, W - pad * 2, withAlpha("#9A4A22", 0.35), "none");
-  pricePill(c, pad, baseY, "left", { fill: "#9A4A22", color: "#FFF3E2" });
-  ctaLine(c, W - pad, baseY + H * 0.019, "right", "#9A4A22", W * 0.0145, W * 0.5);
+  ctaLine(c, W / 2, baseY + H * 0.008, "center", "#9A4A22", W * 0.0145, W * 0.7);
   footer(c, H - H * 0.04, withAlpha("#2C1A10", 0.6));
 }
 
@@ -1967,11 +1925,9 @@ function renderSilk(c: Ctx) {
   y += subline(c, W / 2, y, W * 0.021, W - pad * 2.2, "center", theme.muted);
   const chipsY = Math.max(c.tall ? H * 0.745 : H * 0.735, y + H * 0.02);
   const chipsH = textChips(c, W / 2, chipsY, W - pad * 2, "center", { color: withAlpha(theme.ink, 0.8) });
-  // price + CTA sit together above the korvai band
-  const rowY = Math.min(H * 0.84, Math.max(c.tall ? H * 0.79 : H * 0.78, chipsY + chipsH + H * 0.016));
-  const pw = pricePill(c, W / 2 - W * 0.01, rowY, "left", { fill: theme.gold });
-  void pw;
-  ctaLine(c, W / 2 - W * 0.025, rowY + H * 0.019, "right", theme.goldSoft, W * 0.0138, W * 0.34);
+  // the action sits centred above the korvai band, on the axis of the plate
+  const rowY = Math.min(H * 0.84, Math.max(c.tall ? H * 0.79 : H * 0.78, chipsY + chipsH + H * 0.022));
+  ctaLine(c, W / 2, rowY + H * 0.006, "center", theme.goldSoft, W * 0.0138, W * 0.6);
   // contact inside the band
   footer(c, H - H * 0.0375, withAlpha("#FFE7C2", 0.9), W * 0.0118);
 }
@@ -1999,8 +1955,7 @@ function renderGopuram(c: Ctx) {
   const chipsH = textChips(c, W / 2, chipsY, W - pad * 2, "center", { color: "rgba(255,236,210,0.8)", mark: "#FFC46A" });
   const rowY = Math.max(c.tall ? H * 0.848 : H * 0.84, chipsY + chipsH + H * 0.012);
   rule(ctx, pad, rowY, W - pad * 2, withAlpha("#FFC46A", 0.4), "both");
-  pricePill(c, pad, rowY + H * 0.016, "left", { fill: "#F2A23A" });
-  ctaLine(c, W - pad, rowY + H * 0.035, "right", "#FFC46A", W * 0.0142, W * 0.5);
+  ctaLine(c, W / 2, rowY + H * 0.03, "center", "#FFC46A", W * 0.0142, W * 0.6);
   footer(c, H - H * 0.038, "rgba(255,226,190,0.6)");
 }
 
@@ -2028,8 +1983,7 @@ function renderDeepam(c: Ctx) {
   y += H * 0.03;
   capsuleChips(c, W / 2, y, W - pad * 2, "center", { fill: "rgba(255,160,60,0.1)", stroke: "rgba(255,196,106,0.45)", color: "#FFE2B0" });
   y += H * 0.06;
-  pricePill(c, W / 2, y, "center", { fill: "#FFB45A", color: "#2A1204" });
-  ctaLine(c, W / 2, y + H * 0.06, "center", "#FFC46A", W * 0.0138, W * 0.7);
+  ctaLine(c, W / 2, y + H * 0.012, "center", "#FFC46A", W * 0.0138, W * 0.7);
   footer(c, H - H * 0.036, "rgba(255,226,190,0.62)");
 }
 
@@ -2064,15 +2018,8 @@ function renderMono(c: Ctx) {
   const listY = c.tall ? H * 0.765 : H * 0.75;
   rule(ctx, left, listY - H * 0.03, right - left, "rgba(255,255,255,0.2)", "none");
   listChips(c, left, listY, W * 0.0165, "rgba(255,255,255,0.86)", "#E4572E", H * 0.034);
-  // price + CTA in the right column
+  // CTA in the right column; the oversized fee type that sat above it is gone
   const priceY = listY - H * 0.012;
-  ctx.save();
-  ctx.font = DISPLAY(W * 0.03, 700);
-  ctx.fillStyle = "#F5F5F2";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "alphabetic";
-  ctx.fillText(c.content.price, right, priceY + H * 0.012);
-  ctx.restore();
   ctaLine(c, right, priceY + H * 0.045, "right", "#E4572E", W * 0.0138, W * 0.4);
   rule(ctx, left, H * 0.92, right - left, "rgba(255,255,255,0.2)", "none");
   footer(c, H - H * 0.045, "rgba(255,255,255,0.5)");
@@ -2126,17 +2073,18 @@ function renderPaper(c: Ctx) {
   label(c, "Contents", right - col, bodyY + H * 0.03, W * 0.011, "#B4531F", "left", 2.6);
   subline(c, left, bodyY + H * 0.055, W * 0.03, col, "left", withAlpha(inkColor, 0.85), 4, SERIF);
   listChips(c, right - col, bodyY + H * 0.075, W * 0.018, withAlpha(inkColor, 0.85), "#B4531F", H * 0.056);
-  // proof line low in the left column
+  // proof line low in the left column. This slot used to print the fee note
+  // from the service record; posters carry no price, so the proof is the
+  // promise instead.
   ctx.save();
   ctx.font = SANS(W * 0.0135, 400);
   ctx.fillStyle = withAlpha(inkColor, 0.6);
   ctx.textBaseline = "alphabetic";
-  const proof = wrapClip(ctx, c.service.priceNote, col, 2);
+  const proof = wrapClip(ctx, c.service.promise, col, 2);
   proof.forEach((line, i) => ctx.fillText(line, left, H * 0.83 + i * W * 0.02));
   ctx.restore();
-  // ink footer bar: price left, CTA right, contact centred
+  // ink footer bar: action right, contact centred
   const barY = H * 0.89;
-  pricePill(c, left, barY + H * 0.03, "left", { fill: "#F4EDE0", color: inkColor, height: H * 0.036 });
   ctaLine(c, right, barY + H * 0.048, "right", "#F4EDE0", W * 0.0138, W * 0.42);
   footer(c, H - H * 0.022, "rgba(244,237,224,0.55)", W * 0.011);
 }
@@ -2194,8 +2142,7 @@ function renderEphemeris(c: Ctx) {
   });
   ctx.restore();
   const rowY = cellsY + H * 0.085;
-  pricePill(c, pad, rowY, "left", { fill: theme.gold, color: "#031419" });
-  ctaLine(c, W - pad, rowY + H * 0.019, "right", theme.gold, W * 0.0138, W * 0.45);
+  ctaLine(c, W / 2, rowY + H * 0.012, "center", theme.gold, W * 0.0138, W * 0.6);
   footer(c, H - H * 0.04, withAlpha(theme.ink, 0.55));
 }
 
@@ -2217,14 +2164,12 @@ function renderAurum(c: Ctx) {
   y += subline(c, left, y, W * 0.0205, W * 0.6, "left", theme.muted);
   const rowY = c.tall ? H * 0.8 : H * 0.79;
   textChips(c, left, rowY, W * 0.8, "left", { color: withAlpha(theme.ink, 0.7) });
-  // price as large type, CTA underlined
+  // CTA underlined on the lower baseline — the large fee type that shared this
+  // line is retired, so the action keeps the row to itself.
   ctx.save();
-  ctx.font = DISPLAY(W * 0.03, 600);
-  ctx.fillStyle = theme.gold;
+  ctx.font = SANS(W * 0.0138, 600);
   ctx.textBaseline = "alphabetic";
   const priceY = rowY + H * 0.07;
-  ctx.fillText(c.content.price, left, priceY);
-  ctx.font = SANS(W * 0.0138, 600);
   ctx.fillStyle = theme.ink;
   const cta = c.content.cta.replace(/^https?:\/\//, "");
   const cw = ctx.measureText(cta).width;
@@ -2262,10 +2207,12 @@ function renderGlass(c: Ctx) {
   y += subline(c, W / 2, y, W * 0.0205, innerW * 0.86, "center", "rgba(246,249,254,0.66)");
   y += H * 0.03;
   capsuleChips(c, W / 2, y, innerW, "center", { fill: "rgba(255,255,255,0.08)", stroke: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.86)" });
-  const rowY = cardY + cardH - H * 0.09;
+  // The action follows the chips instead of sitting pinned to the card floor,
+  // so a short card never leaves a hole where the fee pill used to be.
+  const chipsBottom = y + H * 0.042;
+  const rowY = Math.min(cardY + cardH - H * 0.09, Math.max(chipsBottom + H * 0.055, cardY + cardH * 0.66));
   rule(ctx, inner, rowY - H * 0.018, innerW, "rgba(255,255,255,0.18)", "none");
-  pricePill(c, inner, rowY, "left", { fill: "#F6F9FE", color: "#161B29" });
-  ctaLine(c, cardX + cardW - W * 0.06, rowY + H * 0.019, "right", "#C7B3FF", W * 0.0138, W * 0.42);
+  ctaLine(c, cardX + cardW / 2, rowY + H * 0.008, "center", "#C7B3FF", W * 0.0138, W * 0.5);
   footer(c, H - H * 0.045, "rgba(246,249,254,0.5)");
 }
 
@@ -2302,8 +2249,7 @@ function renderOrbit(c: Ctx) {
   const chipsH = textChips(c, W / 2, chipsY, W - pad * 2, "center", { color: withAlpha(theme.ink, 0.72), mark: theme.gold });
   const rowY = Math.max(c.tall ? H * 0.838 : H * 0.83, chipsY + chipsH + H * 0.012);
   rule(ctx, pad, rowY, W - pad * 2, withAlpha(theme.gold, 0.4), "both");
-  pricePill(c, pad, rowY + H * 0.016, "left", { fill: theme.gold, color: "#140A2A" });
-  ctaLine(c, W - pad, rowY + H * 0.035, "right", theme.gold, W * 0.0138, W * 0.45);
+  ctaLine(c, W / 2, rowY + H * 0.03, "center", theme.gold, W * 0.0138, W * 0.6);
   footer(c, H - H * 0.04, withAlpha(theme.ink, 0.5));
 }
 

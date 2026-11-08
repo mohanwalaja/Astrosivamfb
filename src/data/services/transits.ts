@@ -135,7 +135,7 @@ export const transits: Service = {
       {
         kicker: "What arrives",
         headline: "Dates, stages and remedies.",
-        body: "A transit reading with your Birth Jathagam · US$5 · ₹470 at astrosivam.com.",
+        body: "A transit reading with your Birth Jathagam · astrosivam.com",
       },
     ],
   },

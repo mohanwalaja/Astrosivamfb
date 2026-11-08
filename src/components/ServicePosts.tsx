@@ -191,7 +191,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
       <PageHeader
         eyebrow="Service posts · 12 art directions"
         title={`${SERVICES.length} services. One copy contract. Twelve ways to dress it.`}
-        description="Pick a service, then dress the same kicker, headline, Tamil line, chips, price and CTA in any of the twelve art directions — six rooted in Tamil heritage, six modern. The copy is final; the artwork rotates."
+        description="Pick a service, then dress the same kicker, headline, Tamil line, chips and CTA in any of the twelve art directions — six rooted in Tamil heritage, six modern. No poster carries a price. The copy is final; the artwork rotates."
         actions={
           <>
             <CopyButton text={fullIgCaption(service)} label="Copy IG caption" />
@@ -629,7 +629,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold">Copy contract · every system</div>
                     <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-[#C7B9A3]">
                       <li>· Kicker, headline, Tamil line, one subline.</li>
-                      <li>· Three detail chips, one price, one CTA.</li>
+                      <li>· Three detail chips and one CTA. No price.</li>
                       <li>· The service plate is the only illustration.</li>
                       <li>· Lockup top-left; contact line in the footer.</li>
                     </ul>
