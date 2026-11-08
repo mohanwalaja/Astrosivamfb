@@ -137,7 +137,7 @@ export const studentsJathagam: Service = {
       {
         kicker: "What arrives",
         headline: "A student PDF, not an adult one.",
-        body: "Rasi + Navamsa + D-24 summary, study timeline, EN/தமிழ்/हिंदी. US$5 · ₹470 · First order FREE (Beta) · astrosivam.com/birth-jathagam",
+        body: "Rasi + Navamsa + D-24 summary, study timeline, EN/தமிழ்/हिंदी. First order FREE (Beta) · astrosivam.com/birth-jathagam",
       },
     ],
   },
@@ -174,7 +174,7 @@ export const studentsJathagam: Service = {
     },
     {
       title: "For students & parents",
-      body: "Students Jadagam 11–18 · US$5 · ₹470 · PDF EN/தமிழ்/हिंदी · 7 days chat",
+      body: "Students Jadagam 11–18 · PDF EN/தமிழ்/हिंदी · 7 days chat",
       sticker: "Link sticker → astrosivam.com",
     },
   ],

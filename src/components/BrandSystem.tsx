@@ -337,7 +337,8 @@ export const BrandSystem: React.FC = () => {
         </div>
         <Callout>
           One copy contract, six layouts. A post always carries a kicker, an English headline, the Tamil line, three
-          detail chips, a price pill and a CTA — so a service can move between styles without a single word changing.
+          detail chips and a CTA — so a service can move between styles without a single word changing. Prices stay in
+          the catalogue and the captions, never on the artwork.
           Keep the signature gold system on profile photos, covers and pinned offers.
         </Callout>
       </div>

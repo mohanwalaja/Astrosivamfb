@@ -387,7 +387,7 @@ export const StyleGallery: React.FC<{ onNavigate?: (id: string) => void }> = ({ 
               </li>
             </ol>
             <Callout icon={<Info className="h-3.5 w-3.5" />} tone="quiet">
-              Each style keeps the same copy contract: kicker, headline, Tamil line, three detail chips, price and CTA.
+              Each style keeps the same copy contract: kicker, headline, Tamil line, three detail chips and a CTA. No poster carries a price.
               Change the service and every style re-renders together.
             </Callout>
           </Panel>

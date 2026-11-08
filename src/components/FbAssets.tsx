@@ -240,7 +240,7 @@ export function FbAssets() {
               </li>
               <li className="flex gap-2">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gold/60" />
-                Cover: the promise, the price and the call to action are inside the mobile crop, not centred on a 1640 px
+                Cover: the promise and the call to action are inside the mobile crop, not centred on a 1640 px
                 canvas.
               </li>
               <li className="flex gap-2">

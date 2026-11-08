@@ -137,7 +137,7 @@ export const kidsJathagam: Service = {
       {
         kicker: "What arrives",
         headline: "One gentle PDF for parents.",
-        body: "Rasi + Navamsa charts, child-safe language, EN/தமிழ்/हिंदी. US$5 · ₹470 · First order FREE (Beta) · astrosivam.com/birth-jathagam",
+        body: "Rasi + Navamsa charts, child-safe language, EN/தமிழ்/हिंदी. First order FREE (Beta) · astrosivam.com/birth-jathagam",
       },
     ],
   },
@@ -174,7 +174,7 @@ export const kidsJathagam: Service = {
     },
     {
       title: "For new parents",
-      body: "Kids Jadagam 0–10 · US$5 · ₹470 · PDF EN/தமிழ்/हिंदी · 7 days chat",
+      body: "Kids Jadagam 0–10 · PDF EN/தமிழ்/हिंदी · 7 days chat",
       sticker: "Link sticker → astrosivam.com",
     },
   ],

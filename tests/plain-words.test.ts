@@ -52,6 +52,16 @@ test("every plate renders through a real composition, category, theme and artwor
   }
 });
 
+test("no plain-words plate puts a price on the artwork", () => {
+  // Captions still quote the fee; the painted plate never may.
+  for (const poster of PLAIN_WORDS) {
+    const printed = [poster.copy.kicker, poster.copy.serviceTitle, poster.copy.headline, poster.copy.subline, poster.copy.cta, ...poster.copy.facts];
+    for (const line of printed) {
+      assert.equal(/US\$|₹|€|£|\$\s?\d/.test(line), false, `${poster.id} prints money on the artwork: “${line}”`);
+    }
+  }
+});
+
 test("the renderer contract holds: facts are trimmed and nothing non-English reaches the canvas", () => {
   for (const poster of PLAIN_WORDS) {
     const copy = englishCopy(poster.copy);

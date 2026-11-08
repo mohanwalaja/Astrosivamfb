@@ -136,7 +136,7 @@ export const trust: Service = {
       {
         kicker: "Start free",
         headline: "The first order is free.",
-        body: "One per account, email address and IP address during the Beta. Later orders use the listed US$5 · ₹470 or US$10 · ₹940 plan price.",
+        body: "One per account, email address and IP address during the Beta. Later orders use the standard plan price.",
       },
     ],
   },

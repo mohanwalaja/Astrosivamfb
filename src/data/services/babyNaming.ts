@@ -130,7 +130,7 @@ export const babyNaming: Service = {
       {
         kicker: "What arrives",
         headline: "A certificate for the album.",
-        body: "Naming report, shortlist and a printable ASTRO SIVAM certificate · US$5 · ₹470.",
+        body: "Naming report, shortlist and a printable ASTRO SIVAM certificate.",
       },
     ],
   },
@@ -166,7 +166,7 @@ export const babyNaming: Service = {
     },
     {
       title: "Certificate",
-      body: "Printable naming certificate included · US$5 · ₹470 · First order FREE (Beta).",
+      body: "Printable naming certificate included · First order FREE (Beta).",
       sticker: "Link sticker → baby naming",
     },
   ],

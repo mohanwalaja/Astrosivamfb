@@ -88,7 +88,7 @@ export const FB_LAYOUTS: FbLayoutMeta[] = [
     key: "cover-lockup",
     name: "Cover lockup",
     category: "Cover",
-    purpose: "Cover where the promise and the price survive the 640 × 360 mobile crop.",
+    purpose: "Cover where the promise and the action survive the 640 × 360 mobile crop.",
     width: 1640,
     height: 624,
     mobileWidth: 360,

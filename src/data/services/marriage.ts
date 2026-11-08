@@ -135,7 +135,7 @@ export const marriage: Service = {
       {
         kicker: "What arrives",
         headline: "One verdict, with reasons.",
-        body: "Both charts, all ten poruthams and Dasa Sandhi · US$5 · ₹470 at astrosivam.com.",
+        body: "Both charts, all ten poruthams and Dasa Sandhi · astrosivam.com",
       },
     ],
   },
@@ -171,7 +171,7 @@ export const marriage: Service = {
     },
     {
       title: "Both charts",
-      body: "10 poruthams · Rajju · Vedha · Dasa Sandhi for both charts · US$5 · ₹470.",
+      body: "10 poruthams · Rajju · Vedha · Dasa Sandhi for both charts.",
       sticker: "Link sticker → marriage compatibility",
     },
   ],

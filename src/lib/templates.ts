@@ -253,18 +253,10 @@ function renderPost(
   ctx.fillStyle = grad;
   ctx.fillRect(pad, ruleY, W - pad * 2, 1);
 
-  const priceY = H * 0.864;
-  const priceHeight = H * 0.038;
-  if (content.price) {
-    drawPill(ctx, content.price.toUpperCase(), pad, priceY, {
-      theme,
-      filled: true,
-      size: W * 0.0158,
-      height: priceHeight,
-      paddingX: W * 0.022,
-      tracking: W * 0.0016,
-    });
-  }
+  // Bottom row: the action alone. Posters carry no price, so the filled pill
+  // that used to sit opposite the CTA is gone and the action keeps the row.
+  const rowY = H * 0.864;
+  const rowHeight = H * 0.038;
 
   if (content.cta) {
     ctx.font = SANS(W * 0.0155, 500);
@@ -276,7 +268,7 @@ function renderPost(
     while (ctx.measureText(label).width > maxCta && label.length > 12) {
       label = `${label.slice(0, -2)}…`;
     }
-    ctx.fillText(label, W - pad, priceY + priceHeight / 2 + 1);
+    ctx.fillText(label, W - pad, rowY + rowHeight / 2 + 1);
     ctx.textAlign = "left";
   }
 
@@ -627,14 +619,8 @@ function drawStoryCta(
   ctx.textAlign = "center";
   ctx.fillStyle = withAlpha(theme.goldSoft, 0.95);
   ctx.font = SANS(15, 600);
-  drawTracked(
-    ctx,
-    content.price && content.price !== "Free" ? `${content.price}  ·  ${hint}` : hint,
-    W / 2,
-    y + 92,
-    2.8,
-    "center",
-  );
+  // Nothing priced goes on a story: the hint alone sits under the CTA pill.
+  drawTracked(ctx, hint, W / 2, y + 92, 2.8, "center");
   ctx.fillStyle = withAlpha(theme.muted, 0.9);
   ctx.font = SANS(13, 500);
   drawContactLine(ctx, W, 1920, theme, { y: 1920 * footerAt, size: 13 });
@@ -735,10 +721,11 @@ function renderCarousel(
     ctx.fillText(service.url.replace("https://", ""), pad, pillY + 96);
     ctx.fillStyle = withAlpha(theme.muted, 1);
     ctx.font = SANS(15, 500);
+    // Delivery line only — the fee that used to lead it is retired from posters.
     const deliveryLine = service.kind === "Paid report"
-      ? `${service.price} · First order free (Beta) · 7 days of chat`
+      ? "Priest-reviewed · 7 days of chat"
       : service.kind === "Free daily"
-        ? `${service.price} · no report order required`
+        ? "Read free · no report order required"
         : "Free samples · no customer data";
     ctx.fillText(deliveryLine, pad, pillY + 126);
   } else if (index !== 0) {
@@ -1387,7 +1374,6 @@ const CONTENT_FIELDS: FieldSpec[] = [
   { key: "headline", label: "Headline", multiline: true, max: 110 },
   { key: "subline", label: "Subline", multiline: true, max: 120 },
   { key: "tamil", label: "Tamil line", max: 60 },
-  { key: "price", label: "Price pill", max: 28 },
   { key: "cta", label: "Link / CTA", max: 60 },
 ];
 
