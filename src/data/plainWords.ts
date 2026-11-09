@@ -9,16 +9,16 @@ import { BRAND } from "./brand";
    "what does my chart say" — it is "what is this, and what do I do next?".
 
    Every plate here answers that in three lines: what the service is, why it
-   helps someone who cannot reach their own priest, and the one price or action
-   that follows. Nothing is a metaphor. If a sentence could be misunderstood by
+   helps someone who cannot reach their own priest, and the one action that
+   follows. Nothing is a metaphor. If a sentence could be misunderstood by
    someone reading it for the first time, it does not belong in this file.
 
    The hooks (a busy priest, no time to visit the temple, a family abroad) are
    the real reasons people search for an online jathagam. They lead the plate;
    the service explains itself underneath.
 
-   Prices, dates and deliverables are quoted from `src/data/services` — never
-   typed here — so a price change moves the campaign with it.
+   Posters carry no prices. Dates and deliverables come from the service
+   records, while the words are written here plainly.
    ========================================================================== */
 
 export interface PlainWordsCopy {
@@ -150,8 +150,8 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
   },
   {
     id: "one-price",
-    label: "One payment",
-    message: "One payment, never a subscription or a renewal — the objection a new customer always raises.",
+    label: "One report",
+    message: "One report. Made once for your chart.",
     category: "birth",
     occasion: "discover",
     composition: "infographic",
@@ -161,16 +161,16 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
     width: 1080,
     height: 1350,
     copy: {
-      kicker: "Plain pricing",
-      serviceTitle: "One report, one payment",
-      headline: "One report. One payment. No subscription.",
+      kicker: "One report",
+      serviceTitle: "One report",
+      headline: "One report. Made once for you.",
       subline:
-        "Birth Jathagam, Bhava or Varga, wedding matching and Subha Muhurtham are priced per report. You pay once, and there is no renewal.",
-      facts: ["Pay once", "No auto-renewal", "No subscription"],
+        "Your birth chart is read by our priest team and sent to you as a PDF. One report, made once for your chart.",
+      facts: ["One report", "Priest-reviewed", "PDF by email"],
       cta: "Order at astrosivam.com",
     },
     caption:
-      "There is no monthly plan and no auto-renewal. You pay once for one report.\n\nBirth Jathagam is US$5 (₹470 in India). Bhava and Varga reports are US$10. Wedding matching is US$5 for both charts. Subha Muhurtham is US$10 for a six-month calendar. Your first order is free while we are in beta (one per account, email address and IP address), and 90% is refundable before the report is approved.",
+      "Every Astro Sivam report is prepared once, for your chart, and sent to you as a PDF. Our India-based priest team reviews the chart before the report leaves us. You order one report and it is yours. Seven days of chat come with every report, so you can ask what it means for you.",
   },
   {
     id: "read-before-pay",
@@ -266,7 +266,7 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
       cta: "Check a match",
     },
     caption:
-      "A single score does not help a family decide. A clear explanation does.\n\nWe read both charts together on all ten poruthams, check Rajju, Vedha and Kuja dosha, and write one honest verdict: what is strong, what needs care and what to ask about. US$5 for both charts, with seven days of chat after the report.",
+      "A single score does not help a family decide. A clear explanation does.\n\nWe read both charts together on all ten poruthams, check Rajju, Vedha and Kuja dosha, and write one honest verdict: what is strong, what needs care and what to ask about. Seven days of chat come with the report.",
   },
   {
     id: "muhurtham-dates",
@@ -290,7 +290,7 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
       cta: "Find your date",
     },
     caption:
-      "Finding a muhurtham should not mean calling four people and comparing three calendars.\n\nOne report covers six months and eighteen ceremonies. Every suitable window is printed with its Nalla Neram, Rahu Kalam and Tara Balam, so the whole family can plan around one page. US$10, reviewed by our priest team.",
+      "Finding a muhurtham should not mean calling four people and comparing three calendars.\n\nOne report covers six months and eighteen ceremonies. Every suitable window is printed with its Nalla Neram, Rahu Kalam and Tara Balam, so the whole family can plan around one page, reviewed by our priest team.",
   },
   {
     id: "ask-after",
@@ -338,7 +338,7 @@ export const PLAIN_WORDS: PlainWordsPoster[] = [
       cta: "Order for your family",
     },
     caption:
-      "You do not have to work out which report to buy. The form does it from the birth date.\n\nA child aged 0–10 receives the Kids Jadagam, written for parents. A teenager aged 11–18 receives the Students Jadagam, focused on study and exam years. Adults choose Basic, Bhava or Varga. All five plans start at US$5.",
+      "You do not have to work out which report to buy. The form does it from the birth date.\n\nA child aged 0–10 receives the Kids Jadagam, written for parents. A teenager aged 11–18 receives the Students Jadagam, focused on study and exam years. Adults choose Basic, Bhava or Varga.",
   },
 ];
 

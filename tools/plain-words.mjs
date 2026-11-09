@@ -110,7 +110,7 @@ const md = [
   "# Plain-words campaign — captions",
   "",
   "Every plate explains the service in one breath: what it is, what you send, what arrives.",
-  "Prices and deliverables are quoted from the service records in `src/data/services`.",
+  "Posters carry no prices. Dates and deliverables come from the service records.",
   "",
   ...PLAIN_WORDS.flatMap((poster, index) => [
     `## ${index + 1}. ${poster.copy.headline}`,
