@@ -1,7 +1,7 @@
 # Plain-words campaign — captions
 
 Every plate explains the service in one breath: what it is, what you send, what arrives.
-Prices and deliverables are quoted from the service records in `src/data/services`.
+Posters carry no prices. Dates and deliverables come from the service records.
 
 ## 1. Your priest is busy. Our priests are ready.
 
@@ -127,17 +127,15 @@ See all services — link in bio.
 
 #AstroSivam #VedicAstrology #Jathagam #TamilAstrology #BirthChart
 
-## 5. US$5 for one report. No subscription.
+## 5. One report. Made once for you.
 
-_US$5 once. No subscription, no renewal — the objection a new customer always raises._
+_One report. Made once for your chart._
 
 **Poster:** `05-one-price.png` · 1080×1350
 
 **Caption**
 
-There is no monthly plan and no auto-renewal. You pay once for one report.
-
-Birth Jathagam is US$5 (₹470 in India). Bhava and Varga reports are US$10. Wedding matching is US$5 for both charts. Subha Muhurtham is US$10 for a six-month calendar. Your first report is free while we are in beta, and 90% is refundable before the report is approved.
+Every Astro Sivam report is prepared once, for your chart, and sent to you as a PDF. Our India-based priest team reviews the chart before the report leaves us. You order one report and it is yours. Seven days of chat come with every report, so you can ask what it means for you.
 
 Order at astrosivam.com · questions: admin@astrosivam.com
 
@@ -145,13 +143,13 @@ Order at astrosivam.com · questions: admin@astrosivam.com
 
 **Instagram cut**
 
-There is no monthly plan and no auto-renewal. You pay once for one report.
+Every Astro Sivam report is prepared once, for your chart, and sent to you as a PDF. Our India-based priest team reviews the chart before the report leaves us. You order one report and it is yours. Seven days of chat come with every report, so you can ask what it means for you.
 
-Birth Jathagam US$5, Bhava or Varga US$10, Wedding matching US$5, Muhurtham US$10. You pay once.
+Your birth chart is read by our priest team and sent to you as a PDF. One report, made once for your chart.
 
-· Basic US$5
-· Bhava and Varga US$10
-· Muhurtham US$10
+· One report
+· Priest-reviewed
+· PDF by email
 
 Order at astrosivam.com — link in bio.
 
@@ -257,7 +255,7 @@ _Ten poruthams, one verdict — in words both families can follow._
 
 A single score does not help a family decide. A clear explanation does.
 
-We read both charts together on all ten poruthams, check Rajju, Vedha and Kuja dosha, and write one honest verdict: what is strong, what needs care and what to ask about. US$5 for both charts, with seven days of chat after the report.
+We read both charts together on all ten poruthams, check Rajju, Vedha and Kuja dosha, and write one honest verdict: what is strong, what needs care and what to ask about. Seven days of chat come with the report.
 
 Order at astrosivam.com · questions: admin@astrosivam.com
 
@@ -287,7 +285,7 @@ _Six months of dates, with the reasons printed._
 
 Finding a muhurtham should not mean calling four people and comparing three calendars.
 
-One report covers six months and eighteen ceremonies. Every suitable window is printed with its Nalla Neram, Rahu Kalam and Tara Balam, so the whole family can plan around one page. US$10, reviewed by our priest team.
+One report covers six months and eighteen ceremonies. Every suitable window is printed with its Nalla Neram, Rahu Kalam and Tara Balam, so the whole family can plan around one page, reviewed by our priest team.
 
 Order at astrosivam.com · questions: admin@astrosivam.com
 
@@ -347,7 +345,7 @@ _Explains the five plans without a pricing table — one form picks the right on
 
 You do not have to work out which report to buy. The form does it from the birth date.
 
-A child aged 0–10 receives the Kids Jadagam, written for parents. A teenager aged 11–18 receives the Students Jadagam, focused on study and exam years. Adults choose Basic, Bhava or Varga. All five plans start at US$5.
+A child aged 0–10 receives the Kids Jadagam, written for parents. A teenager aged 11–18 receives the Students Jadagam, focused on study and exam years. Adults choose Basic, Bhava or Varga.
 
 Order at astrosivam.com · questions: admin@astrosivam.com
 
