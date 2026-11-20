@@ -797,7 +797,7 @@ export function Skeleton({ className = "" }: { className?: string }) {
 }
 
 /**
- * Fixed progress toast used by the Asset Studio and the Export library while a
+ * Fixed progress toast used by the Creative Studio and the Export library while a
  * ZIP is being rendered. It stays out of the tab order and announces politely.
  */
 export function ExportProgress({

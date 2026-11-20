@@ -23,8 +23,7 @@ import { HERITAGE_STYLES, MODERN_STYLES, STYLE_MAP, STYLE_PALETTES } from "../da
 import type { CreativeContent, CreativeFormat, DownloadFile, StyleKey, ThemeKey } from "../types";
 import { defaultContent, editorConfig, renderCreative } from "../lib/templates";
 import { downloadCanvas, downloadZip, slugify } from "../lib/export";
-import { igCaption } from "../lib/pack";
-import { brandPackFiles, servicePackFiles } from "../lib/packBuilder";
+import { brandPackFiles, igCaption, servicePackFiles } from "../lib/packs";
 import { CreativeCanvas } from "./CreativeCanvas";
 import { Badge, Button, Callout, CopyButton, ExportProgress, Input, PageHeader, Panel, PreviewFrame, SectionLabel, Textarea, useToast } from "./ui";
 

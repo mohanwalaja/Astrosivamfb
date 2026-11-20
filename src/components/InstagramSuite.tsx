@@ -1237,7 +1237,7 @@ export const InstagramSuite: React.FC<{ initialTab?: Tab }> = ({ initialTab = "p
   return (
     <div>
       <PageHeader
-        eyebrow="Instagram suite"
+        eyebrow="Social suite · Instagram"
         title="A profile that reads like a studio, not a hobby."
         description="Nine posts composed as one grid, each judged on its own at phone width; stories and reels that keep clear of Instagram's own chrome; seven highlight seals; and an honest map of what the Graph API will and will not publish."
         actions={
@@ -1252,7 +1252,7 @@ export const InstagramSuite: React.FC<{ initialTab?: Tab }> = ({ initialTab = "p
       />
 
       <div className="mb-4">
-        <Segmented<Tab> label="Instagram suite sections" options={TABS} value={tab} onChange={setTab} />
+        <Segmented<Tab> label="Social suite · Instagram sections" options={TABS} value={tab} onChange={setTab} />
       </div>
 
       {tab === "profile" ? <ProfileTab bioIndex={bioIndex} setBioIndex={setBioIndex} /> : null}

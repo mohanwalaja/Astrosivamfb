@@ -10,15 +10,13 @@ import {
   Globe,
   Hash,
   Instagram,
+  Share2,
   Layers,
   Palette,
   PartyPopper,
-  PenLine,
-  Shapes,
-  Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { BRAND, STYLES } from "../data/brand";
+import { BRAND } from "../data/brand";
 import { FESTIVALS } from "../data/festivals";
 import { IG_BIO_OPTIONS } from "../data/instagram";
 import { FB_BIO_OPTIONS } from "../data/facebook";
@@ -27,7 +25,7 @@ import { SERVICES } from "../data/services";
 import { CALENDAR } from "../data/calendar";
 import { HASHTAG_BANK } from "../data/hashtags";
 import { FORMATS } from "../data/formats";
-import { fullPackMarkdown } from "../lib/pack";
+import { fullPackMarkdown } from "../lib/packs";
 import { downloadText } from "../lib/export";
 import { Badge, Button, Chip, CopyButton, ExternalLink, Panel, PageHeader, SectionLabel, Stat, useToast } from "./ui";
 import { UpcomingFestivals } from "./UpcomingFestivals";
@@ -40,32 +38,11 @@ const STORAGE_KEY = "astrosivam.launch.checklist.v2";
 
 const sectionCards = [
   {
-    id: "profile-cover",
-    title: "Profile & covers",
-    body: "Two profile photos, two Facebook covers, the link card and seven highlight covers — with the mobile crop drawn on.",
-    icon: BadgeCheck,
-    meta: "Identity set",
-  },
-  {
-    id: "assets",
-    title: "Asset Studio",
-    body: "Profile photos, covers, service posts, carousels, stories, reel covers and highlight sets — exported at exact platform sizes.",
+    id: "creative",
+    title: "Creative studio",
+    body: "One studio, three views: every asset at exact platform sizes, the identity set (profile, covers, highlights), and the per-service post desk with final captions.",
     icon: Layers,
-    meta: `${FORMATS.length} formats`,
-  },
-  {
-    id: "styles",
-    title: "Style gallery",
-    body: "Twelve art directions — six heritage systems (Signature Gold, Thanjavur, Kolam, Kanchipuram Silk, Gopuram, Deepam) and six modern (Mono, Paper, Ephemeris, Aurum, Glass, Orbit) — rendered side by side for every service, with per-style hashtags.",
-    icon: Shapes,
-    meta: `${STYLES.length} styles`,
-  },
-  {
-    id: "poster",
-    title: "Poster studio",
-    body: "A blank poster with the brand already applied. Pick a deity painting or upload your own photo, choose a layout and font, write in English, Tamil and Hindi, export at any size.",
-    icon: PenLine,
-    meta: "Freeform",
+    meta: `${FORMATS.length} formats · ${SERVICES.length} services`,
   },
   {
     id: "festivals",
@@ -75,25 +52,11 @@ const sectionCards = [
     meta: `${FESTIVALS.length} festivals`,
   },
   {
-    id: "services",
-    title: "Service posts",
-    body: `${SERVICES.length} complete post systems: Facebook caption, Instagram caption, carousel script, reel, stories and hashtags.`,
-    icon: Sparkles,
-    meta: `${SERVICES.length} systems`,
-  },
-  {
-    id: "instagram",
-    title: "Instagram suite",
-    body: "Bio, name field, seven highlights, grid plan, DM keywords, reels formats and a weekly cadence.",
-    icon: Instagram,
-    meta: "Profile → grid",
-  },
-  {
-    id: "facebook",
-    title: "Facebook suite",
-    body: "Page fields, About copy, Messenger FAQs, review replies, boost plan and compliance rules.",
-    icon: Facebook,
-    meta: "Page → Messenger",
+    id: "social",
+    title: "Social suite",
+    body: "Facebook and Instagram in one place: Page fields, About and Messenger copy, the Instagram profile and grid plan, publishing state and API limits.",
+    icon: Share2,
+    meta: "Page + profile",
   },
   {
     id: "calendar",
@@ -174,8 +137,8 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
         }
         actions={
           <>
-            <Button variant="gold" icon={<Layers className="h-4 w-4" />} onClick={() => onNavigate("assets")}>
-              Open Asset Studio
+            <Button variant="gold" icon={<Layers className="h-4 w-4" />} onClick={() => onNavigate("creative")}>
+              Open Creative Studio
             </Button>
             <Button
               variant="ghost"
@@ -225,7 +188,7 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
             </p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Button variant="gold" size="lg" iconRight={<ArrowRight className="h-4 w-4" />} onClick={() => onNavigate("assets")}>
+              <Button variant="gold" size="lg" iconRight={<ArrowRight className="h-4 w-4" />} onClick={() => onNavigate("creative")}>
                 Build the brand pack
               </Button>
               <Button variant="quiet" onClick={() => onNavigate("calendar")}>
@@ -285,8 +248,8 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[10.5px] uppercase tracking-[0.14em] text-[#A2937D]">255-character bio</span>
-            <button type="button" className="copy-inline" onClick={() => onNavigate("facebook")}>
-              Page setup <ArrowRight className="h-3 w-3" />
+            <button type="button" className="copy-inline" onClick={() => onNavigate("social")}>
+              Social suite <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </Panel>
@@ -327,8 +290,8 @@ export const LaunchControl: React.FC<Props> = ({ onNavigate }) => {
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[10.5px] uppercase tracking-[0.14em] text-[#A2937D]">150-character bio</span>
-            <button type="button" className="copy-inline" onClick={() => onNavigate("instagram")}>
-              Profile suite <ArrowRight className="h-3 w-3" />
+            <button type="button" className="copy-inline" onClick={() => onNavigate("social")}>
+              Social suite <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </Panel>

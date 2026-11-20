@@ -40,7 +40,7 @@ import {
   DEFAULT_BRAND_LOCKUP,
 } from "../lib/festivalCreative";
 import { festivalArt, festivalCaptions, festivalCopy, festivalDateView, festivalYears, skinFor } from "../lib/festivalKit";
-import { festivalPackFiles, festivalYearFiles } from "../lib/festivalPack";
+import { festivalPackFiles, festivalYearFiles } from "../lib/packs";
 import { Button, Callout, CopyButton, PageHeader, Panel, SectionLabel, useToast } from "./ui";
 import { PublishCanvasButton } from "./PublishCanvasButton";
 import { ScriptText } from "./ScriptText";

@@ -775,6 +775,7 @@ function renderPanchangam(
 ) {
   paintBackdrop(ctx, W, H, theme, { glowX: 0.5, glowY: 0.12, frameInset: W * 0.022, seed: 41 });
   const pad = W * 0.072;
+  const extras = content.panchangam;
 
   brandRow(ctx, W, H, pad, H * 0.058, theme, logo, "FREE · DAILY", 34);
 
@@ -784,7 +785,7 @@ function renderPanchangam(
 
   ctx.fillStyle = withAlpha(theme.gold, 0.92);
   ctx.font = SANS(15, 600);
-  drawTracked(ctx, "DAILY PANCHANGAM", pad, H * 0.118, 4, "left");
+  drawTracked(ctx, (content.kicker || "Daily Panchangam").toUpperCase(), pad, H * 0.118, 4, "left");
 
   const dateHead = fitHeadline(ctx, content.headline, W - pad * 2, 2, W * 0.062, W * 0.04);
   ctx.font = DISPLAY(dateHead.size, 700);
@@ -793,23 +794,68 @@ function renderPanchangam(
   dateHead.lines.forEach((line, i) => foilText(ctx, line, pad, H * 0.145 + i * dateHead.size * 1.08, theme));
   const dateBottom = H * 0.145 + dateHead.lines.length * dateHead.size * 1.08;
 
-  ctx.fillStyle = withAlpha(theme.muted, 1);
-  ctx.font = SANS(19, 500);
+  // The day's identity in one gold line: Tamil month and day, the year name,
+  // the weekday. This is the line a reader screenshots.
+  ctx.fillStyle = withAlpha(theme.gold, 0.95);
+  ctx.font = SANS(20, 600);
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(content.subline || "Chennai · timings in IST", pad, dateBottom + 24);
+  drawTracked(ctx, (content.subline || "Chennai · timings in IST").toUpperCase(), pad, dateBottom + 36, 2, "left");
 
+  /* ------------------------- sun and moon strip ------------------------- */
+  let cursor = dateBottom + 58;
+  if (extras?.sunMoon.length) {
+    const stripH = W * 0.07;
+    ctx.save();
+    roundRect(ctx, pad, cursor, W - pad * 2, stripH, W * 0.012);
+    ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.07 : 0.045);
+    ctx.fill();
+    ctx.strokeStyle = withAlpha(theme.gold, 0.18);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    const cellW = (W - pad * 2) / extras.sunMoon.length;
+    extras.sunMoon.forEach((cell, i) => {
+      const x = pad + i * cellW;
+      if (i > 0) {
+        ctx.fillStyle = withAlpha(theme.gold, 0.14);
+        ctx.fillRect(x, cursor + stripH * 0.18, 1, stripH * 0.64);
+      }
+      ctx.fillStyle = withAlpha(theme.muted, 1);
+      ctx.font = SANS(10, 600);
+      drawTracked(ctx, cell.label.toUpperCase(), x + W * 0.018, cursor + stripH * 0.34, 2, "left");
+      ctx.fillStyle = theme.ink;
+      ctx.font = DISPLAY(21, 600);
+      ctx.fillText(cell.value, x + W * 0.018, cursor + stripH * 0.72);
+    });
+    cursor += stripH + W * 0.024;
+  }
+
+  /* ------------------------------ ten limbs ----------------------------- */
   // Ten limbs in a two-column grid of plates. The old single-column list read
   // like a table; the grid gives each limb its own plate and a clear value.
   const labels = PANCHANGAM_ROWS;
   const rows = Math.min(labels.length, Math.max(4, content.chips.length));
-  const gridTop = Math.max(dateBottom + 54, H * 0.315);
-  const gridBottom = H * 0.855;
+  const gridTop = extras ? cursor : Math.max(dateBottom + 54, H * 0.315);
+  const gridBottom = extras ? H * 0.772 : H * 0.855;
   const gap = W * 0.035;
   const colW = (W - pad * 2 - gap) / 2;
   const rowH = (gridBottom - gridTop) / Math.ceil(rows / 2);
   const dense = rows > 6;
   const labelSize = dense ? 10.5 : 14;
-  const valueSize = dense ? W * 0.024 : W * 0.032;
+
+  /** Shrink the face until the text fits; ellipsise only as a last resort. */
+  const fitValue = (text: string, maxWidth: number, start: number, min: number, weight = 500) => {
+    let size = start;
+    ctx.font = SANS(size, weight);
+    while (size > min && ctx.measureText(text).width > maxWidth) {
+      size -= 1;
+      ctx.font = SANS(size, weight);
+    }
+    let out = text;
+    while (out.length > 6 && ctx.measureText(out).width > maxWidth) out = `${out.slice(0, -2)}…`;
+    return { size, text: out, width: ctx.measureText(out).width };
+  };
 
   labels.slice(0, rows).forEach((label, i) => {
     const col = i % 2;
@@ -828,45 +874,79 @@ function renderPanchangam(
 
     ctx.fillStyle = withAlpha(theme.gold, 0.7);
     ctx.font = SANS(10, 600);
-    drawTracked(ctx, String(i + 1).padStart(2, "0"), x + W * 0.018, y + rowH * 0.22, 1.8, "left");
+    drawTracked(ctx, String(i + 1).padStart(2, "0"), x + W * 0.018, y + rowH * 0.24, 1.8, "left");
 
     ctx.fillStyle = withAlpha(theme.gold, 0.95);
     ctx.font = SANS(labelSize, 600);
-    drawTracked(ctx, label.en.toUpperCase(), x + W * 0.018, y + rowH * 0.44, dense ? 2.2 : 3, "left");
+    drawTracked(ctx, label.en.toUpperCase(), x + W * 0.018, y + rowH * 0.46, dense ? 2.2 : 3, "left");
 
     const raw = content.chips[i] || "—";
     const [value, ...rest] = raw.split("|");
-    ctx.fillStyle = theme.ink;
-    ctx.font = SANS(valueSize, 500);
-    let text = value.trim();
-    while (ctx.measureText(text).width > colW - W * 0.036 && text.length > 6) {
-      text = `${text.slice(0, -2)}…`;
-    }
-    ctx.fillText(text, x + W * 0.018, y + rowH * 0.76);
-
     const tail = rest.join("|").trim();
+    const innerW = colW - W * 0.036;
+    const fitted = fitValue(value.trim(), innerW, W * 0.0255, W * 0.0185);
+    ctx.fillStyle = theme.ink;
+    ctx.font = SANS(fitted.size, 500);
+    ctx.fillText(fitted.text, x + W * 0.018, y + rowH * 0.74);
+
     if (tail) {
+      ctx.font = SANS(12, 500);
+      const tailWidth = ctx.measureText(tail).width;
       ctx.fillStyle = withAlpha(theme.muted, 0.95);
-      ctx.font = SANS(dense ? 12 : 15, 500);
       ctx.textAlign = "right";
-      ctx.fillText(tail, x + colW - W * 0.018, y + rowH * 0.76);
+      // Side by side when the plate has room; under the value when it does not.
+      const tailY = fitted.width + tailWidth + W * 0.016 <= innerW ? y + rowH * 0.74 : y + rowH * 0.9;
+      ctx.fillText(tail, x + colW - W * 0.018, tailY);
       ctx.textAlign = "left";
     }
   });
 
+  /* ---------------------------- timings band ---------------------------- */
+  if (extras && (extras.good.length || extras.avoid.length)) {
+    const bandTop = H * 0.786;
+    const bandH = H * 0.088;
+    const columns = [
+      { title: "GOOD TIMES", color: "#63B995", lines: extras.good },
+      { title: "TIMES TO AVOID", color: "#D97B4A", lines: extras.avoid },
+    ];
+    columns.forEach((column, ci) => {
+      const x = pad + ci * (colW + gap);
+      ctx.save();
+      roundRect(ctx, x, bandTop, colW, bandH, W * 0.012);
+      ctx.fillStyle = withAlpha(theme.gold, theme.light ? 0.06 : 0.04);
+      ctx.fill();
+      ctx.strokeStyle = withAlpha(theme.gold, 0.16);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = column.color;
+      ctx.font = SANS(11, 700);
+      drawTracked(ctx, column.title, x + W * 0.018, bandTop + W * 0.024, 2.4, "left");
+      column.lines.slice(0, 3).forEach((line, li) => {
+        const fitted = fitValue(line, colW - W * 0.036, 15.5, 12);
+        ctx.fillStyle = withAlpha(theme.ink, 0.92);
+        ctx.font = SANS(fitted.size, 500);
+        ctx.fillText(fitted.text, x + W * 0.018, bandTop + W * 0.046 + li * W * 0.0215);
+      });
+    });
+  }
+
+  /* -------------------------------- footer ------------------------------ */
+  const dividerY = extras ? H * 0.892 : H * 0.875;
   ctx.fillStyle = withAlpha(theme.gold, 0.3);
-  ctx.fillRect(pad, H * 0.875, W - pad * 2, 1);
+  ctx.fillRect(pad, dividerY, W - pad * 2, 1);
 
   ctx.fillStyle = withAlpha(theme.gold, 0.95);
   ctx.font = SANS(19, 500);
-  ctx.fillText("Free every morning", pad, H * 0.905);
+  ctx.fillText("Free every morning", pad, dividerY + W * 0.026);
   ctx.fillStyle = withAlpha(theme.muted, 0.95);
   ctx.font = SANS(13, 500);
-  ctx.fillText("Lahiri ayanamsa · timings in IST", pad, H * 0.932);
+  ctx.fillText("Lahiri ayanamsa · timings in IST", pad, dividerY + W * 0.05);
   ctx.textAlign = "right";
   ctx.fillStyle = withAlpha(theme.gold, 0.85);
   ctx.font = SANS(13, 600);
-  drawTracked(ctx, "CHENNAI · IST", W - pad, H * 0.932, 2.6, "right");
+  drawTracked(ctx, `${(extras?.place ?? "Chennai").toUpperCase()} · IST`, W - pad, dividerY + W * 0.05, 2.6, "right");
   ctx.textAlign = "left";
   drawContactLine(ctx, W, H, theme, { y: H * 0.968, size: 13 });
 }

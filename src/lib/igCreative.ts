@@ -1,18 +1,14 @@
 import type { MotifKey, StyleKey, ThemeKey } from "../types";
-import { englishCopy, englishText } from "./englishCopy";
 import {
   type ImageBox,
   accent,
   drawArtFallback,
   drawContactLine,
   drawCta,
-  drawDiya,
   drawImageIn,
   drawIndex,
-  drawMedallionRing,
   drawPageDots,
   drawSwipe,
-  fontsFor,
   frameFor,
   hairline,
   mutedOn,
@@ -20,16 +16,14 @@ import {
   paintStyledGround,
   roundRect,
   styleMotif,
-  themeFor,
-  tracked,
   withAlpha,
 } from "./posterKit";
-import { drawMotif, ensureFonts, loadImageSource, loadLogo } from "./canvas";
+import { drawSocialText, renderSocialCreative, type SocialScene } from "./socialCreative";
 import { renderHighlightSeal } from "./highlightSeal";
 import { brandSize, brandSpot, drawGlobalLockup } from "./brandPlacement";
 import { IG_HIGHLIGHTS } from "../data/instagram";
 import { fitLine, fitLines, fitSize, fontPx as px, lineHop, wrapAll } from "./typeset";
-import { TypeLog, auditLegibility, LEGIBILITY_MINIMUMS, type TypedDraw, type TypeRole } from "./legibility";
+import { auditLegibility, LEGIBILITY_MINIMUMS, type TypedDraw, type TypeRole } from "./legibility";
 
 /**
  * Instagram-specific creatives.
@@ -209,42 +203,8 @@ export interface IgRender {
   typography: TypedDraw[];
 }
 
-interface Scene {
-  ctx: CanvasRenderingContext2D;
-  W: number;
-  H: number;
-  theme: ReturnType<typeof themeFor>;
-  fonts: ReturnType<typeof fontsFor>;
-  content: IgContent;
-  art: HTMLImageElement | null;
-  logo: HTMLImageElement | null;
-  log: TypeLog;
-  style: StyleKey;
-  showSafeArea: boolean;
-}
-
-/** Paint one logged line in the current face. */
-const drawText = (
-  scene: Scene,
-  role: TypeRole,
-  text: string,
-  x: number,
-  y: number,
-  font: string,
-  color: string,
-  options: { align?: CanvasTextAlign; baseline?: CanvasTextBaseline; tracking?: number } = {},
-) => {
-  const { ctx } = scene;
-  ctx.save();
-  ctx.font = font;
-  ctx.fillStyle = color;
-  ctx.textAlign = options.align ?? "left";
-  ctx.textBaseline = options.baseline ?? "top";
-  if (options.tracking) tracked(ctx, text, x, y, options.tracking, options.align ?? "left");
-  else ctx.fillText(text, x, y);
-  ctx.restore();
-  scene.log.add(role, px(font), text);
-};
+type Scene = SocialScene<IgContent>;
+const drawText = drawSocialText;
 
 /**
  * Cover CTA. This layout wants a huge label — it has to survive a 124 px
@@ -853,75 +813,45 @@ const PAINTERS: Record<IgLayout, (scene: Scene) => void> = {
 };
 
 export async function renderIgCreative(input: IgCreativeInput): Promise<IgRender> {
-  input = { ...input, content: englishCopy(input.content) };
-  // Fonts must be resident before the first measurement: `fitLines` and
-  // `measureText` are what decide the size, and a face that arrives late makes
-  // every wrapped line the wrong length — which shows up as overflow in export.
-  await ensureFonts();
-  const meta = IG_LAYOUT_MAP[input.layout] ?? IG_LAYOUT_MAP["ig-service"];
-  const scale = input.scale ?? 1;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(meta.width * scale);
-  canvas.height = Math.round(meta.height * scale);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("This browser cannot render the creative.");
-  if (scale !== 1) ctx.scale(scale, scale);
-
-  const theme = themeFor(input.themeKey);
-  const logo = await loadLogo().catch(() => null);
-  const artSource = input.art ?? null;
-  const art = artSource ? await loadImageSource(artSource).catch(() => null) : null;
-  const log = new TypeLog();
-
-  const scene: Scene = {
-    ctx,
-    W: meta.width,
-    H: meta.height,
-    theme,
-    fonts: fontsFor("classic"),
-    content: input.content,
-    art,
-    logo,
-    log,
-    style: input.style,
-    showSafeArea: false,
-  };
-  (PAINTERS[meta.key] ?? igService)(scene);
-
-  // Editor-only guides: UI bands, the grid crop, the safe circle.
-  if (input.showSafeArea) {
-    ctx.save();
-    if (meta.uiZones) {
-      ctx.fillStyle = "rgba(8,6,7,0.55)";
-      ctx.fillRect(0, 0, meta.width, meta.uiZones.top);
-      ctx.fillRect(0, meta.height - meta.uiZones.bottom, meta.width, meta.uiZones.bottom);
-      ctx.setLineDash([meta.width * 0.014, meta.width * 0.01]);
-      ctx.strokeStyle = "rgba(120,220,190,0.7)";
-      ctx.lineWidth = Math.max(2, meta.width * 0.0022);
-      ctx.beginPath();
-      ctx.moveTo(0, meta.uiZones.top);
-      ctx.lineTo(meta.width, meta.uiZones.top);
-      ctx.moveTo(0, meta.height - meta.uiZones.bottom);
-      ctx.lineTo(meta.width, meta.height - meta.uiZones.bottom);
-      ctx.stroke();
-    }
-    if (meta.safeArea && (meta.crop === "circle" || meta.key === "ig-reel-cover")) {
-      ctx.setLineDash([meta.width * 0.014, meta.width * 0.01]);
-      ctx.strokeStyle = "rgba(120,220,190,0.7)";
-      ctx.lineWidth = Math.max(2, meta.width * 0.0022);
-      if (meta.crop === "circle") {
-        ctx.beginPath();
-        ctx.arc(meta.width / 2, meta.height / 2, meta.safeArea.w / 2, 0, Math.PI * 2);
-        ctx.stroke();
-      } else {
-        ctx.strokeRect(meta.safeArea.x, meta.safeArea.y, meta.safeArea.w, meta.safeArea.h);
-      }
-    }
-    ctx.restore();
-  }
-
-  return { canvas, layout: meta, typography: log.entries };
+  const out = await renderSocialCreative({
+    input,
+    layouts: IG_LAYOUT_MAP,
+    fallback: "ig-service",
+    painters: PAINTERS,
+    paintSafeArea: (ctx, meta) => paintIgSafeArea(ctx, IG_LAYOUT_MAP[meta.key]),
+  });
+  return { canvas: out.canvas, layout: IG_LAYOUT_MAP[out.layout.key], typography: out.typography };
 }
+
+/** Editor-only guides: UI bands, the grid crop, the safe circle. */
+const paintIgSafeArea = (ctx: CanvasRenderingContext2D, meta: IgLayoutMeta) => {
+  if (meta.uiZones) {
+    ctx.fillStyle = "rgba(8,6,7,0.55)";
+    ctx.fillRect(0, 0, meta.width, meta.uiZones.top);
+    ctx.fillRect(0, meta.height - meta.uiZones.bottom, meta.width, meta.uiZones.bottom);
+    ctx.setLineDash([meta.width * 0.014, meta.width * 0.01]);
+    ctx.strokeStyle = "rgba(120,220,190,0.7)";
+    ctx.lineWidth = Math.max(2, meta.width * 0.0022);
+    ctx.beginPath();
+    ctx.moveTo(0, meta.uiZones.top);
+    ctx.lineTo(meta.width, meta.uiZones.top);
+    ctx.moveTo(0, meta.height - meta.uiZones.bottom);
+    ctx.lineTo(meta.width, meta.height - meta.uiZones.bottom);
+    ctx.stroke();
+  }
+  if (meta.safeArea && (meta.crop === "circle" || meta.key === "ig-reel-cover")) {
+    ctx.setLineDash([meta.width * 0.014, meta.width * 0.01]);
+    ctx.strokeStyle = "rgba(120,220,190,0.7)";
+    ctx.lineWidth = Math.max(2, meta.width * 0.0022);
+    if (meta.crop === "circle") {
+      ctx.beginPath();
+      ctx.arc(meta.width / 2, meta.height / 2, meta.safeArea.w / 2, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      ctx.strokeRect(meta.safeArea.x, meta.safeArea.y, meta.safeArea.w, meta.safeArea.h);
+    }
+  }
+};
 
 /** Re-exported so the suite can audit without importing the shared module twice. */
 export { auditLegibility, LEGIBILITY_MINIMUMS };

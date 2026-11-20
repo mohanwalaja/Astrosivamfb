@@ -7,7 +7,6 @@ import {
   Facebook,
   Gauge,
   Hash,
-  ImageIcon,
   Instagram,
   Layers,
   LogOut,
@@ -16,10 +15,8 @@ import {
   MonitorSmartphone,
   Palette,
   PartyPopper,
-  PenLine,
-  ScrollText,
   Send,
-  Shapes,
+  Share2,
   Sparkles,
   Sunrise,
   X,
@@ -28,31 +25,25 @@ import { BRAND } from "./data/brand";
 import { LaunchControl } from "./components/LaunchControl";
 import { Publisher } from "./components/Publisher";
 
-// Everything below pulls the canvas engines (templates, poster, style art) — loading
+// Everything below pulls the canvas engines (templates, festival, service art) — loading
 // them lazily keeps the first paint on the landing section small.
-const AssetStudio = lazy(() => import("./components/AssetStudio").then((m) => ({ default: m.AssetStudio })));
 const BrandSystem = lazy(() => import("./components/BrandSystem").then((m) => ({ default: m.BrandSystem })));
 const ContentCalendar = lazy(() =>
   import("./components/ContentCalendar").then((m) => ({ default: m.ContentCalendar })),
 );
 const ExportCenter = lazy(() => import("./components/ExportCenter").then((m) => ({ default: m.ExportCenter })));
-const FacebookSuite = lazy(() =>
-  import("./components/FacebookSuite").then((m) => ({ default: m.FacebookSuite })),
-);
+
 const HashtagLab = lazy(() => import("./components/HashtagLab").then((m) => ({ default: m.HashtagLab })));
-const InstagramSuite = lazy(() =>
-  import("./components/InstagramSuite").then((m) => ({ default: m.InstagramSuite })),
+const SocialSuite = lazy(() =>
+  import("./components/SocialSuite").then((m) => ({ default: m.SocialSuite })),
 );
 const Mockups = lazy(() => import("./components/Mockups").then((m) => ({ default: m.Mockups })));
-const ProfileCover = lazy(() => import("./components/ProfileCover").then((m) => ({ default: m.ProfileCover })));
 const FestivalWishes = lazy(() =>
   import("./components/FestivalWishes").then((m) => ({ default: m.FestivalWishes })),
 );
-const PosterStudio = lazy(() => import("./components/PosterStudio").then((m) => ({ default: m.PosterStudio })));
 const Panchangam = lazy(() => import("./components/Panchangam").then((m) => ({ default: m.Panchangam })));
-const ServicePosts = lazy(() => import("./components/ServicePosts").then((m) => ({ default: m.ServicePosts })));
-const StyleGallery = lazy(() => import("./components/StyleGallery").then((m) => ({ default: m.StyleGallery })));
 const PlainWords = lazy(() => import("./components/PlainWords").then((m) => ({ default: m.PlainWords })));
+const CreativeStudio = lazy(() => import("./components/CreativeStudio").then((m) => ({ default: m.CreativeStudio })));
 import { ensureFonts, fontHealth } from "./lib/canvas";
 import { getCsrfToken } from "./lib/csrf";
 import { PublishContextProvider, type PublisherDraft } from "./lib/publishContext";
@@ -64,21 +55,16 @@ const NAV = [
     items: [
       { id: "launch", label: "Studio home", icon: Gauge },
       { id: "brand", label: "Brand & design", icon: Palette },
-      { id: "profile-cover", label: "Identity set", icon: ImageIcon },
     ],
   },
   {
     group: "Create",
     items: [
-      { id: "assets", label: "Asset studio", icon: Layers },
+      { id: "creative", label: "Creative studio", icon: Layers },
       { id: "plain-words", label: "Plain-words posters", icon: Megaphone },
-      { id: "styles", label: "Style gallery", icon: Shapes },
-      { id: "poster", label: "Poster studio", icon: PenLine },
       { id: "panchangam", label: "Panchangam", icon: Sunrise },
       { id: "festivals", label: "Festival wishes", icon: PartyPopper },
-      { id: "services", label: "Service posts", icon: ScrollText },
-      { id: "instagram", label: "Instagram suite", icon: Instagram },
-      { id: "facebook", label: "Facebook suite", icon: Facebook },
+      { id: "social", label: "Social suite", icon: Share2 },
     ],
   },
   {
@@ -527,16 +513,11 @@ function Shell() {
               <Suspense fallback={<SectionFallback />}>
                 {section === "launch" ? <LaunchControl onNavigate={navigate} /> : null}
                 {section === "brand" ? <BrandSystem /> : null}
-                {section === "profile-cover" ? <ProfileCover /> : null}
-                {section === "assets" ? <AssetStudio /> : null}
-                {section === "plain-words" ? <PlainWords onNavigate={navigate} /> : null}
-                {section === "styles" ? <StyleGallery onNavigate={navigate} /> : null}
-                {section === "poster" ? <PosterStudio /> : null}
+                {section === "creative" ? <CreativeStudio onNavigate={navigate} /> : null}
+                {section === "plain-words" ? <PlainWords /> : null}
                 {section === "panchangam" ? <Panchangam /> : null}
                 {section === "festivals" ? <FestivalWishes /> : null}
-                {section === "services" ? <ServicePosts onNavigate={navigate} /> : null}
-                {section === "instagram" ? <InstagramSuite /> : null}
-                {section === "facebook" ? <FacebookSuite /> : null}
+                {section === "social" ? <SocialSuite /> : null}
                 {section === "calendar" ? <ContentCalendar /> : null}
                 {section === "hashtags" ? <HashtagLab /> : null}
                 {section === "mockups" ? <Mockups /> : null}

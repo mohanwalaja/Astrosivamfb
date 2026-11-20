@@ -797,7 +797,7 @@ a{color:#e8ce96}.foot{margin-top:18px;padding-top:13px;border-top:1px solid rgba
       <div><label for="login_password">New login password</label><input id="login_password" name="login_password" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Leave blank to keep current password"><small>Use 8 to 1,024 characters. Leave blank unless changing it.</small></div>
       <div><label for="login_password_confirm">Confirm new login password</label><input id="login_password_confirm" name="login_password_confirm" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Re-enter the new password"><small>Must match the new password above.</small></div>
     </div>
-    <div class="actions"><button type="submit" class="primary">Save Meta API and login settings</button><a class="secondary" href="/#facebook">Back to studio</a></div>
+    <div class="actions"><button type="submit" class="primary">Save Meta API and login settings</button><a class="secondary" href="/#social">Back to studio</a></div>
   </form>
 
   <h2>Copy these generated values into the Meta app</h2>

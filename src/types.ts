@@ -35,48 +35,12 @@ export type DeityKey =
   | "ayyappa"
   | "meenakshi";
 
-/**
- * Headline faces. The first four are the Poster Studio's curated set; the last
- * three remain valid so festival presets and saved posters keep rendering.
- */
+/** Headline faces. The last three remain valid so festival cards keep rendering. */
 export type DisplayFontKey = "cinzel" | "cormorant" | "playfair" | "inter" | "marcellus" | "baloo" | "jakarta";
-/** Tamil + Hindi pairings. `serif`, `sans` and `festive` are the studio set; the rest are legacy aliases. */
+/** Tamil + Hindi pairings. `classic`, `rounded` and `bold` are legacy aliases. */
 export type ScriptFontKey = "serif" | "sans" | "festive" | "classic" | "rounded" | "bold";
 
-export type PosterLayout = "portrait-arch" | "full-bleed" | "split" | "medallion" | "type-only";
 export type ImageFit = "arch" | "circle" | "full" | "square";
-
-/**
- * Poster compositions. Each template is a different piece of design work — a
- * different grid, typographic hierarchy, image treatment and CTA — not a recolour
- * of the same layout. `legacyLayoutFor` maps the old layout names onto them so
- * every existing caller keeps working.
- */
-export type PosterTemplate =
-  | "hero" | "editorial" | "asymmetric" | "mandala" | "diagonal" | "cosmic"
-  | "split" | "story" | "minimal" | "infographic" | "collage" | "devotional"
-  | "mandapam"
-  | "gallery"
-  | "manifesto"
-  | "nocturne"
-  | "lesson"
-  | "offer"
-  | "blessing"
-  | "sequence";
-
-export interface TemplateMeta {
-  key: PosterTemplate;
-  name: string;
-  family: "Editorial" | "Heritage" | "Modern" | "Campaign" | "Immersive" | "Geometric" | "Narrative" | "Information";
-  tagline: string;
-  description: string;
-  bestFor: string;
-  /** What makes the composition different, in one line. */
-  composition: string;
-  usesImage: boolean;
-  defaultTheme: ThemeKey;
-  defaultLayout: PosterLayout;
-}
 
 /**
  * The twelve art directions. Six heritage systems rooted in Tamil visual
@@ -295,6 +259,13 @@ export interface CreativeContent {
   chips: string[];
   price: string;
   cta: string;
+  /** Daily-panchangam poster extras: the sun/moon strip and the day's windows. */
+  panchangam?: {
+    place: string;
+    sunMoon: Array<{ label: string; value: string }>;
+    good: string[];
+    avoid: string[];
+  };
 }
 
 export interface CalendarEntry {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -8,6 +8,7 @@ import {
   Loader2,
   Moon,
   RotateCcw,
+  Sun,
   Sunrise,
   Sunset,
   ChevronLeft,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { LIMBS, PANCHANGAM_ROWS, PLANET_NAMES, type LimbKey } from "../data/panchangam";
 import { CHENNAI, OBSERVERS, computePanchangam, durationText, timeText, type Panchangam as Day } from "../lib/panchang";
-import { cardChips, cardDateLine, cardSubline } from "../lib/panchangCard";
+import { cardChips, cardDateLine, cardSubline, cardTimings } from "../lib/panchangCard";
 import { renderCreative } from "../lib/templates";
 import { downloadCanvas, exportFileName } from "../lib/export";
 import { brandPostCaptions } from "../lib/publishCaptions";
@@ -93,6 +94,57 @@ const LimbRow: React.FC<{ day: Day; limbKey: LimbKey }> = ({ day, limbKey }) => 
   );
 };
 
+/**
+ * The day on one axis, Brahma Muhurta to Godhuli: green where the almanac
+ * smiles, saffron where it warns, gold ticks for sunrise and sunset.
+ */
+const DayTimeline: React.FC<{ day: Day }> = ({ day }) => {
+  const axisStart = day.sunrise.getTime() - 96 * 60000;
+  const axisEnd = day.sunset.getTime() + 12 * 60000;
+  const span = Math.max(1, axisEnd - axisStart);
+  const pct = (date: Date) => Math.min(100, Math.max(0, ((date.getTime() - axisStart) / span) * 100));
+  const block = (start: Date, end: Date) => ({ left: `${pct(start)}%`, width: `${Math.max(0.8, pct(end) - pct(start))}%` });
+
+  return (
+    <div>
+      <div className="relative h-10 overflow-hidden rounded-md border border-line bg-[#F7F1E4]/[0.03]">
+        {day.auspicious.map((w) => (
+          <div
+            key={w.label}
+            className="absolute inset-y-0 border-x border-jade/40 bg-jade/15"
+            style={block(w.start, w.end)}
+            title={`${w.label} · ${timeText(w.start)} – ${timeText(w.end)}`}
+          />
+        ))}
+        {day.inauspicious.map((w) => (
+          <div
+            key={w.label}
+            className="absolute inset-y-0 border-x border-saffron/40 bg-saffron/20"
+            style={block(w.start, w.end)}
+            title={`${w.label} · ${timeText(w.start)} – ${timeText(w.end)}`}
+          />
+        ))}
+        <div className="absolute inset-y-0 w-px bg-gold" style={{ left: `${pct(day.sunrise)}%` }} title={`Sunrise ${timeText(day.sunrise)}`} />
+        <div className="absolute inset-y-0 w-px bg-gold/70" style={{ left: `${pct(day.sunset)}%` }} title={`Sunset ${timeText(day.sunset)}`} />
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] text-[#A2937D]">
+        <span>
+          <span className="text-gold-soft">{timeText(day.sunrise)}</span> sunrise
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-[2px] bg-jade/50" /> auspicious
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-[2px] bg-saffron/50" /> avoid beginnings
+        </span>
+        <span className="ml-auto">
+          sunset <span className="text-gold-soft">{timeText(day.sunset)}</span>
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export const Panchangam: React.FC = () => {
   const toast = useToast();
   const [iso, setIso] = useState(() => ISO(today()));
@@ -108,7 +160,7 @@ export const Panchangam: React.FC = () => {
 
   const chips = useMemo(() => cardChips(day), [day]);
 
-  const renderPanchangamCard = () => renderCreative({
+  const renderPanchangamCard = (scale = 1) => renderCreative({
     format: FORMAT_MAP["panchangam-card"],
     style: "signature",
     service: getService("panchangam"),
@@ -119,12 +171,47 @@ export const Panchangam: React.FC = () => {
       chips,
       price: "Free",
       cta: "astrosivam.com",
+      panchangam: cardTimings(day),
     },
-    scale: 1,
+    scale,
   });
 
+  // The preview is the real poster at half scale, redrawn whenever the day or
+  // the city changes — what is approved here is what downloads.
+  const previewRef = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    let live = true;
+    renderPanchangamCard(0.5)
+      .then((canvas) => {
+        const target = previewRef.current;
+        if (!live || !target) return;
+        target.width = canvas.width;
+        target.height = canvas.height;
+        target.getContext("2d")?.drawImage(canvas, 0, 0);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [iso, place]);
+
+  const rahuWindow = day.inauspicious.find((w) => w.label === "Rahu Kalam");
+  const abhijitWindow = day.auspicious.find((w) => w.label === "Abhijit Muhurta");
   const panchangamCaptions = brandPostCaptions(
-    `Daily Panchangam · ${longDate(day.date)} · ${place}\n\n${cardSubline(day)}`,
+    [
+      `Daily Panchangam · ${longDate(day.date)} · ${place}`,
+      "",
+      `${day.tamilDate.month.en} ${day.tamilDate.day} · ${day.limbs.samvatsara.primary.en} year · ${day.limbs.paksham.primary.en.split(" (")[0]}`,
+      `Tithi ${day.limbs.tithi.primary.en} · Nakshatra ${day.limbs.nakshatram.primary.en} · Yoga ${day.limbs.yogam.primary.en} · Karana ${day.limbs.karanam.primary.en}`,
+      `Sunrise ${timeText(day.sunrise)} · Sunset ${timeText(day.sunset)}`,
+      rahuWindow ? `Rahu Kalam ${timeText(rahuWindow.start)} – ${timeText(rahuWindow.end)}` : "",
+      abhijitWindow
+        ? `Abhijit Muhurta ${timeText(abhijitWindow.start)} – ${timeText(abhijitWindow.end)}`
+        : "Abhijit Muhurta is not counted on a Wednesday.",
+    ]
+      .filter(Boolean)
+      .join("\n"),
   );
 
   const downloadCard = async () => {
@@ -241,8 +328,47 @@ export const Panchangam: React.FC = () => {
         </div>
       </Panel>
 
-      {/* ------------------------- sun, moon and the ten ------------------------ */}
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      {/* ------------------------------- timeline ------------------------------ */}
+      <Panel className="mb-4">
+        <SectionLabel right={<span className="text-[10px] text-[#A2937D]">Brahma Muhurta → Godhuli</span>}>
+          <span className="inline-flex items-center gap-2">
+            <Sun className="h-4 w-4 text-gold" />
+            The day at a glance · {place}
+          </span>
+        </SectionLabel>
+        <DayTimeline day={day} />
+      </Panel>
+
+      {/* ------------------------- poster and the ten limbs ------------------------- */}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <Panel>
+          <SectionLabel right={<span className="text-[10px] text-[#A2937D]">1080 × 1350</span>}>
+            <span className="inline-flex items-center gap-2">
+              <Sunrise className="h-4 w-4 text-gold" />
+              Poster preview
+            </span>
+          </SectionLabel>
+          <canvas ref={previewRef} className="h-auto w-full rounded-lg border border-line" aria-label={`Panchangam poster for ${longDate(day.date)} in ${place}`} />
+          <div className="mt-3 flex flex-wrap gap-2">
+            <PublishCanvasButton
+              render={renderPanchangamCard}
+              filename={`${exportFileName(["astrosivam", "panchangam", iso, place])}_${FORMAT_MAP["panchangam-card"].width}x${FORMAT_MAP["panchangam-card"].height}.png`}
+              captions={panchangamCaptions}
+              sourceLabel={`Daily Panchangam · ${place} · ${iso}`}
+              disabled={busy}
+              label="Publish"
+            />
+            <button type="button" className="btn btn-ghost" onClick={downloadCard} disabled={busy}>
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              Download PNG
+            </button>
+          </div>
+          <p className="mt-2.5 text-[10.5px] leading-relaxed text-[#A2937D]">
+            The preview is the real renderer at half scale. The Tamil month and day, the sunrise–sunset strip and the
+            good/avoid windows are composed into the poster itself, with {place} printed in the footer.
+          </p>
+        </Panel>
+
         <Panel>
           <SectionLabel
             right={
@@ -263,9 +389,12 @@ export const Panchangam: React.FC = () => {
             ))}
           </ul>
         </Panel>
+      </div>
 
-        <div className="space-y-4">
-          <Panel>
+      {/* ------------------------------ sun and moon ------------------------------ */}
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+
+        <Panel>
             <SectionLabel right={<Sunrise className="h-3.5 w-3.5 text-gold" />}>The day</SectionLabel>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-[12px]">
               {[
@@ -318,7 +447,6 @@ export const Panchangam: React.FC = () => {
               </ul>
             </div>
           </Panel>
-        </div>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -362,6 +490,12 @@ export const Panchangam: React.FC = () => {
               <li>
                 <span className="text-gold-soft">Sunrise-based.</span> Each limb is read at sunrise, the way a printed
                 panchangam reckons the day, then given the time it ends.
+              </li>
+              <li>
+                <span className="text-gold-soft">Cross-checked.</span> Values are verified against published Lahiri
+                panchangams (Drik Panchang / Prokerala): sunrise, tithi, nakshatra, yoga and karana end-times land
+                within a few minutes, and the Rahu/Yama/Gulika segments match exactly. A few minutes of difference
+                between almanacs is normal — they do not all share an ephemeris.
               </li>
               {day.caveats.map((caveat) => (
                 <li key={caveat}>{caveat}</li>

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { ArrowRight, CalendarDays, Clapperboard, PenLine, Sparkles } from "lucide-react";
-import { festivalCaption, type Festival } from "../data/festivals";
+import { ArrowRight, CalendarDays, Sparkles } from "lucide-react";
+import { festivalCaption } from "../data/festivals";
 import {
   DATE_COVERAGE,
   nextFestival,
@@ -8,7 +8,6 @@ import {
   upcomingFestivals,
   type UpcomingEvent,
 } from "../data/festivalDates";
-import { presetFromFestival, requestStudio } from "../lib/studioState";
 import { Badge, Button, CopyButton, EmptyState, SectionLabel } from "./ui";
 
 /**
@@ -16,8 +15,8 @@ import { Badge, Button, CopyButton, EmptyState, SectionLabel } from "./ui";
  *
  * The festival library is sorted by month, which is fine for browsing and
  * useless when Dhanteras is six days away. This reads the panchang table and
- * shows the next fortnight, with every card able to hand a finished poster to
- * the studio in one click.
+ * shows the next fortnight, with every card linking to the festival card
+ * library where the finished card can be rendered.
  */
 
 interface Props {
@@ -40,11 +39,6 @@ const countdown = (days: number) => {
 const dateLabel = (iso: string) => {
   const date = parseCalendarDate(iso);
   return `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}`;
-};
-
-const openInStudio = (festival: Festival, onNavigate: (section: string) => void) => {
-  requestStudio(presetFromFestival(festival));
-  onNavigate("poster");
 };
 
 const DayLeaf: React.FC<{ iso: string; soon: boolean }> = ({ iso, soon }) => {
@@ -103,11 +97,10 @@ const EventCard: React.FC<{ event: UpcomingEvent; onNavigate: (section: string) 
         <Button
           variant="gold"
           size="sm"
-          icon={<PenLine className="h-3.5 w-3.5" />}
-          onClick={() => openInStudio(festival, onNavigate)}
-          aria-label={`Open ${festival.name} preloaded in the poster studio`}
+          onClick={() => onNavigate("festivals")}
+          aria-label={`Open ${festival.name} in the festival card library`}
         >
-          Open in studio
+          Festival cards
         </Button>
         <CopyButton text={festivalCaption(festival, "instagram")} label="Caption" compact />
       </div>
@@ -166,8 +159,7 @@ export const UpcomingFestivals: React.FC<Props> = ({ onNavigate, window = 14, no
               <Button
                 variant="gold"
                 size="sm"
-                icon={<PenLine className="h-3.5 w-3.5" />}
-                onClick={() => openInStudio(next.festival, onNavigate)}
+                onClick={() => onNavigate("festivals")}
               >
                 Start {next.festival.name} early
               </Button>
@@ -186,10 +178,6 @@ export const UpcomingFestivals: React.FC<Props> = ({ onNavigate, window = 14, no
             {provisional === 1 ? "One card is" : `${provisional} cards are`} awaiting a final panchang check this fortnight.
           </span>
         ) : null}
-        <span className="inline-flex items-center gap-1 text-[#A2937D]">
-          <Clapperboard className="h-3 w-3" />
-          Each card opens in the studio and can be recorded as a 15 s reel.
-        </span>
       </p>
     </section>
   );

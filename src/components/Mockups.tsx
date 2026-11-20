@@ -17,7 +17,7 @@ import {
 import { BRAND } from "../data/brand";
 import { FORMATS } from "../data/formats";
 import { getService } from "../data/services";
-import { fbCaption, igCaption } from "../lib/pack";
+import { fbCaption, igCaption } from "../lib/packs";
 import { defaultContent } from "../lib/templates";
 import { CreativeCanvas } from "./CreativeCanvas";
 import { CopyButton, PageHeader, Panel, SectionLabel, Segmented } from "./ui";

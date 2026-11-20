@@ -1,6 +1,6 @@
-import type { Panchangam } from "./panchang";
+import type { Panchangam, Window } from "./panchang";
 import { timeText } from "./panchang";
-import { RASI_NAMES } from "../data/panchangam";
+import { RASI_NAMES, TAMIL_MONTHS } from "../data/panchangam";
 
 /**
  * Turns a computed panchangam into the ten strings the poster prints.
@@ -20,16 +20,23 @@ export function cardChips(panchangam: Panchangam): string[] {
 
   const till = (date: Date | null | undefined) => (date ? `till ${timeText(date)}` : "");
 
-  // Ritu spans two signs: "Tula – Vrischika".
-  const signIndex = RASI_NAMES.findIndex((rasi) => rasi.en === panchangam.sunSign.en);
+  // Calendar signs follow the month reckoning, not the sunrise sign: on
+  // Tamil New Year the Sun crosses into Mesha mid-morning, and the card must
+  // not print "Vasanta · Kumbha – Meena" next to "Chithirai 1".
+  const monthSign = TAMIL_MONTHS.findIndex((month) => month.en === limbs.masam.primary.en);
+  // Ritu spans two signs, counted from the season's first sign: with the Sun
+  // in Vrischika the season is still "Tula – Vrischika", not "Vrischika –
+  // Dhanus" (the pair used to start at the Sun's own sign, which put every
+  // second month of a season one sign ahead).
+  const rituStart = monthSign >= 0 ? monthSign - (monthSign % 2) : -1;
   const rituSigns =
-    signIndex >= 0
-      ? `${RASI_NAMES[signIndex].en.split(" (")[0]} – ${RASI_NAMES[(signIndex + 1) % 12].en.split(" (")[0]}`
+    rituStart >= 0
+      ? `${RASI_NAMES[rituStart].en.split(" (")[0]} – ${RASI_NAMES[(rituStart + 1) % 12].en.split(" (")[0]}`
       : "";
 
   const rows: Array<[string, string]> = [
     [limbs.samvatsara.primary.en, limbs.samvatsara.detail ?? ""],
-    [limbs.ayana.primary.en, `Sun in ${panchangam.sunSign.en.split(" (")[0]}`],
+    [limbs.ayana.primary.en, monthSign >= 0 ? `Sun in ${RASI_NAMES[monthSign].en.split(" (")[0]}` : ""],
     [limbs.ritu.primary.en, rituSigns],
     [limbs.masam.primary.en, `day ${tamilDate.day}`],
     [shortName(limbs.paksham.primary.en), limbs.paksham.primary.en.includes("waxing") ? "to Purnima" : "to Amavasya"],
@@ -59,7 +66,32 @@ export function cardDateLine(panchangam: Panchangam): string {
   }).format(calendarDay);
 }
 
-/** The sub-line: "Aippasi 7 · Chennai · Saturday". */
+/** The sub-line: "Aippasi 7 · Parabhava · Saturday" (place rides in the timings). */
 export function cardSubline(panchangam: Panchangam): string {
-  return `${panchangam.tamilDate.month.en} ${panchangam.tamilDate.day} · ${panchangam.observer.name ?? "Chennai"} · ${panchangam.limbs.vasaram.primary.en}`;
+  return `${panchangam.tamilDate.month.en} ${panchangam.tamilDate.day} · ${panchangam.limbs.samvatsara.primary.en} · ${panchangam.limbs.vasaram.primary.en}`;
+}
+
+/** Everything beyond the ten limbs that the redesigned poster prints. */
+export interface CardTimings {
+  place: string;
+  sunMoon: Array<{ label: string; value: string }>;
+  /** "Abhijit Muhurta · 11:31 AM – 12:17 PM" */
+  good: string[];
+  avoid: string[];
+}
+
+const windowLine = (w: Window) => `${w.label} · ${timeText(w.start)} – ${timeText(w.end)}`;
+
+export function cardTimings(panchangam: Panchangam): CardTimings {
+  return {
+    place: panchangam.observer.name ?? "Chennai",
+    sunMoon: [
+      { label: "Sunrise", value: timeText(panchangam.sunrise) },
+      { label: "Sunset", value: timeText(panchangam.sunset) },
+      { label: "Moonrise", value: timeText(panchangam.moonrise) },
+      { label: "Moonset", value: timeText(panchangam.moonset) },
+    ],
+    good: panchangam.auspicious.map(windowLine),
+    avoid: panchangam.inauspicious.map(windowLine),
+  };
 }

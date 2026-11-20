@@ -5,16 +5,14 @@ installCanvasEnv();
 const { renderPoster } = await import("../src/lib/poster.ts");
 const { getDesignAudit } = await import("../src/lib/compositionRender.ts");
 const { DESIGN_BRIEFS, COMPOSITIONS, getOccasion } = await import("../src/data/designBriefs.ts");
-const { selectDesign } = await import("../src/lib/designSelector.ts");
 const { planSignature } = await import("../src/lib/compositionPlan.ts");
 const OUT = ".samples/design-upgrade";
 mkdirSync(OUT, { recursive: true });
 const samples = [];
-let history = [];
 const base = (brief, occasion, width = 1080, height = 1350) => ({
-  width, height, themeKey: brief.theme, style: brief.style, display: brief.display, script: "serif", layout: "split",
-  category: brief.key, occasion: occasion.key, image: occasion.image ?? brief.image, imageIsLibrary: true, imageFit: "full",
-  kicker: occasion.copy.kicker, serviceTitle: occasion.copy.serviceTitle, headline: occasion.copy.headline, tamil: "", hindi: "",
+  width, height, themeKey: brief.theme, style: brief.style, display: brief.display,
+  category: brief.key, occasion: occasion.key, image: occasion.image ?? brief.image, imageIsLibrary: true,
+  kicker: occasion.copy.kicker, serviceTitle: occasion.copy.serviceTitle, headline: occasion.copy.headline,
   subline: occasion.copy.subline, facts: occasion.copy.facts, cta: occasion.copy.cta, footer: "astrosivam.com", showLogo: true,
 });
 async function render(name, options) {
@@ -32,17 +30,16 @@ async function render(name, options) {
 }
 for (const brief of DESIGN_BRIEFS) {
   for (const occasion of brief.occasions) {
-    const selection = selectDesign({ category: brief.key, occasion: occasion.key, width: 1080, height: 1350, headline: occasion.copy.headline, subline: occasion.copy.subline, seed: 1000 + samples.length * 73 }, history);
-    history = [...history, { composition: selection.composition, category: brief.key, seed: selection.seed, at: samples.length }];
-    await render(`${String(samples.length + 1).padStart(2, "0")}-${brief.key}-${occasion.key}`, { ...base(brief, occasion), template: selection.composition, seed: selection.seed });
+    // Deterministic rotation: every composition system is exercised in turn.
+    const composition = COMPOSITIONS[samples.length % COMPOSITIONS.length].key;
+    await render(`${String(samples.length + 1).padStart(2, "0")}-${brief.key}-${occasion.key}`, { ...base(brief, occasion), template: composition, seed: 1000 + samples.length * 73 });
   }
 }
 // Extra format proofs.
 for (const [briefKey, occasionKey, width, height] of [["birth", "discover", 1200, 628], ["wedding", "matching", 1080, 1080], ["murugan", "devotion", 1080, 1920]]) {
   const brief = DESIGN_BRIEFS.find((b) => b.key === briefKey), occasion = getOccasion(briefKey, occasionKey);
-  const selection = selectDesign({ category: briefKey, occasion: occasionKey, width, height, seed: 5000 + samples.length }, history);
-  history = [...history, { composition: selection.composition, category: briefKey, seed: selection.seed, at: samples.length }];
-  await render(`${String(samples.length + 1).padStart(2, "0")}-${briefKey}-${width}x${height}`, { ...base(brief, occasion, width, height), template: selection.composition, seed: selection.seed });
+  const composition = COMPOSITIONS[samples.length % COMPOSITIONS.length].key;
+  await render(`${String(samples.length + 1).padStart(2, "0")}-${briefKey}-${width}x${height}`, { ...base(brief, occasion, width, height), template: composition, seed: 5000 + samples.length });
 }
 // Every composition system, same brief, to compare structure rather than colour.
 const brief = DESIGN_BRIEFS[0], occasion = brief.occasions[0];

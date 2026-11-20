@@ -20,11 +20,11 @@ import {
   carouselFileName,
   highlightFileName,
   serviceImageFileName,
-} from "../src/lib/packBuilder.ts";
+} from "../src/lib/packs.ts";
 import { FORMATS, FORMAT_MAP } from "../src/data/formats.ts";
 import { SERVICES } from "../src/data/services/index.ts";
 import { IG_HIGHLIGHTS } from "../src/data/instagram.ts";
-import { fbCaption, igCaption, fullIgCaption } from "../src/lib/pack.ts";
+import { fbCaption, igCaption, fullIgCaption } from "../src/lib/packs.ts";
 import { CARD_FORMATS } from "../src/lib/festivalCreative.ts";
 import type { DownloadFile } from "../src/types.ts";
 import { readFileSync } from "node:fs";
@@ -437,10 +437,10 @@ test("every render entry point awaits the webfonts before it paints", () => {
   // A missing await here is invisible in the browser until a Tamil headline lays
   // out in a fallback face — which then overflows in the full-resolution export.
   const ROOT = new URL("..", import.meta.url).pathname;
+  // The Facebook/Instagram await lives in the shared renderer core.
   const modules = [
     "src/lib/templates.ts",
-    "src/lib/fbCreative.ts",
-    "src/lib/igCreative.ts",
+    "src/lib/socialCreative.ts",
     "src/lib/serviceAds.ts",
     "src/lib/festivalCreative.ts",
     "src/lib/poster.ts",

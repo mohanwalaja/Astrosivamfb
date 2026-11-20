@@ -22,7 +22,7 @@ import { HERITAGE_STYLES, MODERN_STYLES, STYLES, STYLE_MAP, STYLE_TAG_SETS, THEM
 import { buildMix, type MixKind } from "../data/hashtags";
 import type { CreativeContent, DownloadFile, Service, StyleKey } from "../types";
 import { defaultContent, renderCreative } from "../lib/templates";
-import { fbCaption, fullIgCaption, igCaption } from "../lib/pack";
+import { fbCaption, fullIgCaption, igCaption } from "../lib/packs";
 import { canvasToBytesAndRelease, downloadCanvas, downloadZip, slugify } from "../lib/export";
 import { servicePublishCaptions } from "../lib/publishCaptions";
 import { CreativeCanvas } from "./CreativeCanvas";
@@ -33,6 +33,8 @@ import { ScriptText } from "./ScriptText";
 
 interface Props {
   onNavigate: (section: string) => void;
+  /** Switch to the Assets view of the Creative Studio (internal, not a section). */
+  onOpenAssets?: () => void;
 }
 
 const TABS = [
@@ -91,7 +93,7 @@ const storyContent = (service: Service, index: number): CreativeContent => {
 const fileFor = (service: Service, style: StyleKey, formatId: string) =>
   `astrosivam_${slugify(service.id)}_${style}_${formatId}.png`;
 
-export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
+export const ServicePosts: React.FC<Props> = ({ onNavigate, onOpenAssets }) => {
   const toast = useToast();
   const [serviceId, setServiceId] = useState("jathagam");
   const [tab, setTab] = useState("facebook");
@@ -281,7 +283,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                 <Button variant="ghost" size="sm" icon={<LayoutGrid className="h-3 w-3" />} onClick={downloadSheet} loading={busy === "sheet"} disabled={busy !== null}>
                   Contact sheet
                 </Button>
-                <button type="button" className="copy-inline ml-auto" onClick={() => onNavigate("assets")}>
+                <button type="button" className="copy-inline ml-auto" onClick={() => onOpenAssets?.()}>
                   Edit copy <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
@@ -426,7 +428,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <CopyButton text={service.carousel.slides.map((slide, index) => `${index + 1}. ${slide.headline}\n${slide.body}`).join("\n\n")} label="Copy script" />
-                    <Button variant="gold" icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />} onClick={() => onNavigate("assets")}>
+                    <Button variant="gold" icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />} onClick={() => onOpenAssets?.()}>
                       Export {service.carousel.slides.length} slides
                     </Button>
                   </div>
@@ -513,7 +515,7 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                   <div className="border-t border-line px-3 py-2 text-[10.5px] text-[#B4A58F]">1080 × 1920 · cover stays legible in the grid crop</div>
                 </Panel>
                 <div className="mt-3">
-                  <Callout title="Reels rule">Never re-upload a file with a watermark from another app. Export the cover from the Asset Studio, film vertically, and keep every on-screen line inside the middle third.</Callout>
+                  <Callout title="Reels rule">Never re-upload a file with a watermark from another app. Export the cover from the Assets view, film vertically, and keep every on-screen line inside the middle third.</Callout>
                 </div>
               </div>
             </div>
@@ -669,25 +671,6 @@ export const ServicePosts: React.FC<Props> = ({ onNavigate }) => {
                 </div>
               </Panel>
 
-              <Panel>
-                <SectionLabel right={<button type="button" className="copy-inline" onClick={() => onNavigate("styles")}>Open style engine <ArrowRight className="h-3 w-3" /></button>}>
-                  {service.shortName} in all twelve systems
-                </SectionLabel>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-                  {STYLES.map((item, index) => (
-                    <button key={item.key} type="button" onClick={() => setStyle(item.key)} aria-pressed={item.key === style} className={`choice overflow-hidden p-0 text-left ${item.key === style ? "choice-active" : ""}`}>
-                      <CreativeCanvas format={FORMAT_MAP["ig-post"]} themeKey={item.defaultTheme} style={item.key} service={service} content={defaultContent(FORMAT_MAP["ig-post"], service)} previewWidth={300} />
-                      <div className="px-2 py-1.5">
-                        <div className="truncate text-[10px] font-semibold text-cream">
-                          <span className="mr-1 text-gold">{String(index + 1).padStart(2, "0")}</span>
-                          {item.name}
-                        </div>
-                        <div className="truncate text-[9px] uppercase tracking-[0.1em] text-[#A2937D]">{item.family}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </Panel>
             </div>
           ) : null}
 

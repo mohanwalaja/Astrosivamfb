@@ -118,7 +118,7 @@ export const ExportLibrary: React.FC<Props> = ({ refreshKey }) => {
         <EmptyState
           icon={<ImageIcon className="h-5 w-5" aria-hidden="true" />}
           title="No exports on this device yet"
-          description="Downloaded PNGs and recorded Poster Studio reels appear here when the browser allows local storage, so a recent file can be found again without rendering it twice."
+          description="Downloaded PNGs appear here when the browser allows local storage, so a recent file can be found again without rendering it twice."
         />
       ) : (
         <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">

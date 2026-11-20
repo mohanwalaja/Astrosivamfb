@@ -12,7 +12,7 @@ import {
 } from "../data/hashtags";
 import { STYLE_TAG_SETS, STYLES } from "../data/brand";
 import { SERVICES, getService } from "../data/services";
-import { hashtagMarkdown } from "../lib/pack";
+import { hashtagMarkdown } from "../lib/packs";
 import { copyText, downloadText } from "../lib/export";
 import { Button, Callout, CopyButton, EmptyState, PageHeader, Panel, SectionLabel, Segmented, useToast } from "./ui";
 

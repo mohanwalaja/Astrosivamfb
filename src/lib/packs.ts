@@ -11,7 +11,8 @@ import {
   FB_PINNED_POST,
   FB_REVIEW_TEMPLATES,
 } from "../data/facebook";
-import { FORMATS } from "../data/formats";
+import { FORMATS, FORMAT_MAP } from "../data/formats";
+import { FESTIVALS, type Festival } from "../data/festivals";
 import {
   HASHTAG_MISTAKES,
   HASHTAG_RULES,
@@ -34,7 +35,29 @@ import {
 } from "../data/instagram";
 import { KPI_TARGETS, LAUNCH_CHECKLIST, NEVER_DO, QUOTES, REVIEWS, VERIFIED_FACTS } from "../data/launch";
 import { SERVICES, getService } from "../data/services";
-import type { Service } from "../types";
+import type { CreativeContent, DisplayFontKey, DownloadFile, ScriptFontKey, Service, StyleKey, ThemeKey } from "../types";
+import { canvasToBytes, canvasToBytesAndRelease, exportFileName } from "./export";
+import { CARD_FORMATS, renderFestivalCard, type BrandLockupSettings, type CardFormat, type CardLanguage, type FestivalStyle, type LogoPlacement, type PictureSettings } from "./festivalCreative";
+import { captionWarnings, festivalArt, festivalCaptions, festivalCopy, festivalDateView, skinFor, type FestivalDateView } from "./festivalKit";
+import { defaultContent, renderCreative } from "./templates";
+
+/**
+ * The one pack module.
+ *
+ * Three pack builders used to live side by side — copy packs (`pack.ts`),
+ * ZIP file packs for the creative formats (`packBuilder.ts`) and festival
+ * packs (`festivalPack.ts`) — and Export Center had to know all three.
+ * Everything that assembles a downloadable pack now lives here:
+ *
+ *  - copy:      captions, service markdown, CSVs, the full pack markdown
+ *  - creative:  brand pack, per-service pack, text pack (ZIP file lists)
+ *  - festival:  one festival in every format, or the whole festival year
+ *
+ * Builders return file lists; saving the ZIP stays with the caller
+ * (`downloadZip` / `buildZip` in `./export`).
+ */
+
+/* ================================ copy packs ================================ */
 
 export function fbCaption(service: Service): string {
   return [
@@ -476,4 +499,353 @@ export function fullPackMarkdown(): string {
   lines.push(`Prepared for ${BRAND.name} · ${BRAND.website}`);
   lines.push("");
   return lines.join("\n");
+}
+
+/* =============================== creative packs ============================== */
+
+/** The brand pack's fixed contents, in ZIP order. */
+export const BRAND_FORMAT_IDS = ["fb-profile", "ig-profile", "fb-cover", "fb-cover-statement", "link-card", "style-sheet"];
+/** The service pack's fixed contents, in ZIP order. */
+export const SERVICE_FORMAT_IDS = [
+  "fb-post",
+  "ig-post",
+  "ig-square",
+  "fb-story",
+  "ig-story",
+  "ig-reel-cover",
+  "panchangam-card",
+  "quote-card",
+  "offer-card",
+  "review-card",
+];
+
+const encoder = new TextEncoder();
+
+/* ------------------------------ file naming ------------------------------- */
+/*
+ * Every image name carries the format id as well as its pixels. Sizes alone are
+ * ambiguous — fb-post/ig-square are both 1200x1500, and ig-story, fb-story and
+ * ig-reel-cover are all 1080x1920 — so a size-only name put two or three files
+ * under the same name in one ZIP and extractors silently kept the first.
+ */
+
+export const brandImageFileName = (formatId: string): string => {
+  const format = FORMAT_MAP[formatId];
+  return `${exportFileName([format.label, formatId])}_${format.width}x${format.height}.png`;
+};
+
+export const highlightFileName = (index: number): string => {
+  const format = FORMAT_MAP["ig-highlights"];
+  const highlight = IG_HIGHLIGHTS[index];
+  return `instagram_highlight_${exportFileName([highlight.label], String(index + 1))}_${format.width}x${format.height}.png`;
+};
+
+export const serviceImageFileName = (service: Service, formatId: string): string => {
+  const format = FORMAT_MAP[formatId];
+  return `${exportFileName([service.shortName, formatId])}_${format.width}x${format.height}.png`;
+};
+
+export const carouselFileName = (index: number): string => {
+  const format = FORMAT_MAP["ig-carousel"];
+  return `carousel_${String(index + 1).padStart(2, "0")}_${format.width}x${format.height}.png`;
+};
+
+const bytesFor = async (formatId: string, options: {
+  themeKey: ThemeKey;
+  style?: StyleKey;
+  service: Service;
+  content?: CreativeContent;
+  slideIndex?: number;
+  highlightIndex?: number;
+}) => {
+  const format = FORMAT_MAP[formatId];
+  const canvas = await renderCreative({
+    format,
+    themeKey: options.themeKey,
+    style: options.style,
+    service: options.service,
+    content: options.content ?? defaultContent(format, options.service),
+    scale: 1,
+    slideIndex: options.slideIndex,
+    highlightIndex: options.highlightIndex,
+  });
+  return { format, bytes: await canvasToBytesAndRelease(canvas) };
+};
+
+export async function brandPackFiles(
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ files: DownloadFile[]; total: number }> {
+  const total = BRAND_FORMAT_IDS.length + IG_HIGHLIGHTS.length + 1;
+  const files: DownloadFile[] = [];
+  const service = getService("jathagam");
+
+  for (const id of BRAND_FORMAT_IDS) {
+    const { bytes } = await bytesFor(id, { themeKey: service.theme, service });
+    files.push({ name: brandImageFileName(id), data: bytes });
+    onProgress?.(files.length, total);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  for (let index = 0; index < IG_HIGHLIGHTS.length; index += 1) {
+    const highlight = IG_HIGHLIGHTS[index];
+    const { bytes } = await bytesFor("ig-highlights", {
+      themeKey: highlight.theme,
+      service,
+      highlightIndex: index,
+    });
+    files.push({ name: highlightFileName(index), data: bytes });
+    onProgress?.(files.length, total);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  files.push({
+    name: "READ-ME.txt",
+    data: encoder.encode(
+      [
+        "ASTRO SIVAM — BRAND PACK",
+        "=========================",
+        `Generated ${new Date().toISOString()}`,
+        "",
+        "Contents",
+        "• Facebook profile photo — 1080×1080",
+        "• Instagram profile photo — 1080×1080",
+        "• Facebook cover (lockup) — 1640×624",
+        "• Facebook cover (statement) — 1640×624",
+        "• Link share card — 1200×630",
+        "• Twelve-style contact sheet",
+        "• Seven Instagram highlight covers — 1080×1080",
+        "",
+        "Upload notes",
+        "1. Facebook cover: keep the mark and wordmark inside the central 820×312 area.",
+        "2. Profile photos are square; both platforms crop them to a circle.",
+        "3. Highlight covers are symbol-only — Instagram renders the label itself.",
+        "4. Do not recolour, outline or rotate the logo.",
+        "",
+        "Palette: #05070E · #0D1930 · #C9962C · #D9AE5F · #F3DCA9 · #F8F2E5",
+        "Type: Cinzel (display) · Plus Jakarta Sans (UI) · Tiro Tamil (Tamil)",
+        "",
+        "astrosivam.com",
+      ].join("\n"),
+    ),
+  });
+  onProgress?.(files.length, total);
+
+  return { files, total };
+}
+
+export async function servicePackFiles(
+  service: Service,
+  themeKey: ThemeKey,
+  content?: CreativeContent,
+  onProgress?: (done: number, total: number) => void,
+  style?: StyleKey,
+): Promise<{ files: DownloadFile[]; total: number }> {
+  const slides = service.carousel.slides.length;
+  const total = SERVICE_FORMAT_IDS.length + slides + 2;
+  const files: DownloadFile[] = [];
+
+  for (const id of SERVICE_FORMAT_IDS) {
+    const { bytes } = await bytesFor(id, {
+      themeKey,
+      style,
+      service,
+      content: content && id === "ig-post" ? content : undefined,
+    });
+    files.push({ name: serviceImageFileName(service, id), data: bytes });
+    onProgress?.(files.length, total);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  for (let index = 0; index < slides; index += 1) {
+    const format = FORMAT_MAP["ig-carousel"];
+    const canvas = await renderCreative({
+      format,
+      themeKey,
+      style,
+      service,
+      content: defaultContent(format, service),
+      scale: 1,
+      slideIndex: index,
+    });
+    files.push({ name: carouselFileName(index), data: await canvasToBytesAndRelease(canvas) });
+    onProgress?.(files.length, total);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  files.push({ name: "COPY.md", data: encoder.encode(serviceMarkdown(service)) });
+  files.push({ name: "instagram-caption.txt", data: encoder.encode(fullIgCaption(service)) });
+  onProgress?.(files.length, total);
+
+  return { files, total };
+}
+
+export function textPackFiles(): DownloadFile[] {
+  return [
+    { name: "astrosivam-social-suite.md", data: encoder.encode(fullPackMarkdown()) },
+    { name: "service-captions.txt", data: encoder.encode(igCaption(getService("jathagam"))) },
+  ];
+}
+
+export const PACK_SUMMARY = {
+  brand: BRAND_FORMAT_IDS.length + IG_HIGHLIGHTS.length + 1,
+  service: SERVICE_FORMAT_IDS.length + 7 + 2,
+};
+
+/* =============================== festival packs ============================== */
+
+export interface FestivalPackConfig {
+  style: FestivalStyle;
+  language: CardLanguage;
+  format: CardFormat;
+  /** null = use the style's own palette seeded by the festival. */
+  theme: ThemeKey | null;
+  display: DisplayFontKey | null;
+  script: ScriptFontKey | null;
+  logo: LogoPlacement | null;
+  brandLockup?: BrandLockupSettings;
+  /** A user-uploaded data URL; overrides the bundled deity art. */
+  artOverride: string | null;
+  pictureSettings?: PictureSettings;
+  year: number | "next";
+}
+
+export const DEFAULT_PACK: FestivalPackConfig = {
+  style: "traditional",
+  language: "en",
+  format: "ig-post",
+  theme: null,
+  display: null,
+  script: null,
+  logo: null,
+  artOverride: null,
+  year: "next",
+};
+
+function packTheme(festival: Festival, config: FestivalPackConfig, format: CardFormat): ThemeKey {
+  const skin = skinFor(config.style, festival, format);
+  return config.theme ?? skin.theme;
+}
+
+export function captionFileText(festival: Festival, date: FestivalDateView, page: { facebook: string; instagram: string }): string {
+  return [
+    `${festival.name} · ${festival.tamil} · ${festival.hindi}`,
+    `Verified date: ${date.label ?? "not on file"}${date.confidence ? ` (${date.confidence})` : ""}`,
+    `Traditional: ${festival.when}`,
+    "",
+    "FACEBOOK",
+    page.facebook,
+    "",
+    "INSTAGRAM",
+    page.instagram,
+    "",
+    "TAMIL WISH",
+    festival.wish.ta,
+    "",
+    "HINDI WISH",
+    festival.wish.hi,
+    "",
+    "HASHTAGS",
+    festival.hashtags.join(" "),
+  ].join("\n");
+}
+
+export async function festivalPackFiles(
+  festival: Festival,
+  config: FestivalPackConfig,
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ files: DownloadFile[]; warnings: string[] }> {
+  const date = festivalDateView(festival.id, config.year === "next" ? undefined : config.year);
+  const copy = festivalCopy(festival, date);
+  const skin = skinFor(config.style, festival, config.format);
+  const files: DownloadFile[] = [];
+  const warnings: string[] = [];
+
+  for (const [index, format] of CARD_FORMATS.entries()) {
+    const out = await renderFestivalCard({
+      style: config.style,
+      format: format.key,
+      theme: packTheme(festival, config, format.key),
+      display: config.display ?? skin.display,
+      script: config.script ?? skin.script,
+      logo: config.logo ?? skinFor(config.style, festival, format.key).logo,
+      brandLockup: config.brandLockup,
+      language: config.language,
+      copy,
+      art: config.artOverride ?? festivalArt(festival),
+      pictureSettings: config.pictureSettings,
+    });
+    warnings.push(...out.warnings);
+    files.push({
+      name: `${exportFileName([festival.name, config.style])}_${format.width}x${format.height}.png`,
+      data: await canvasToBytesAndRelease(out.canvas),
+    });
+    onProgress?.(index + 1, CARD_FORMATS.length + 1);
+  }
+
+  const captions = festivalCaptions(festival, {
+    date,
+    language: config.language,
+    dateLine: date.label ?? festival.when,
+  });
+  warnings.push(...captionWarnings(captions));
+  files.push({
+    name: "CAPTIONS.txt",
+    data: new TextEncoder().encode(captionFileText(festival, date, captions)),
+  });
+  // The last step still reports, so the progress bar reaches 100% instead of stopping at 4/5.
+  onProgress?.(files.length, CARD_FORMATS.length + 1);
+  return { files, warnings };
+}
+
+/** One card per festival, for the year pack. */
+export async function festivalYearFiles(
+  config: FestivalPackConfig,
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ files: DownloadFile[]; warnings: string[]; undated: string[] }> {
+  const files: DownloadFile[] = [];
+  const warnings: string[] = [];
+  const undated: string[] = [];
+
+  for (const [index, festival] of FESTIVALS.entries()) {
+    const date = festivalDateView(festival.id, config.year === "next" ? undefined : config.year);
+    if (!date.label) undated.push(festival.name);
+    const copy = festivalCopy(festival, date);
+    const skin = skinFor(config.style, festival, "ig-post");
+    const out = await renderFestivalCard({
+      style: config.style,
+      format: "ig-post",
+      theme: config.theme ?? skin.theme,
+      display: config.display ?? skin.display,
+      script: config.script ?? skin.script,
+      logo: config.logo ?? skin.logo,
+      brandLockup: config.brandLockup,
+      language: config.language,
+      copy,
+      art: festivalArt(festival),
+    });
+    warnings.push(...out.warnings);
+    files.push({
+      name: `${String(index + 1).padStart(2, "0")}_${exportFileName([festival.id, festival.name])}.png`,
+      data: await canvasToBytesAndRelease(out.canvas),
+    });
+    onProgress?.(index + 1, FESTIVALS.length + 1);
+  }
+
+  const calendar = [
+    "# Astro Sivam — festival wishes",
+    "",
+    `Style: ${config.style} · Language: ${config.language}`,
+    "Dates come from the verified calendar only; anything without one says so.",
+    "",
+    ...FESTIVALS.map((festival) => {
+      const date = festivalDateView(festival.id, config.year === "next" ? undefined : config.year);
+      const when = date.label
+        ? `${date.label}${date.confidence === "provisional" ? " (provisional — confirm on the panchang)" : ""}`
+        : `No civil date on file — ${festival.when}`;
+      return `## ${festival.name}\n\n${when}\n\n${festival.wish.en}\n\nTags: ${festival.hashtags.join(" ")}\n`;
+    }),
+  ].join("\n");
+  files.push({ name: "FESTIVAL-CALENDAR.md", data: new TextEncoder().encode(calendar) });
+  onProgress?.(files.length, FESTIVALS.length + 1);
+  return { files, warnings, undated };
 }

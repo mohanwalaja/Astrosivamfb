@@ -483,7 +483,7 @@ export const MODERN_STYLES = STYLES.filter((style) => style.family === "Modern")
 /**
  * The studio palette set: twelve palettes, one per art direction, in the two
  * style families. Every palette picker in the suite reads this list so the
- * Poster Studio, Asset Studio and gallery never disagree about what is on offer.
+ * Asset Studio and the service screens never disagree about what is on offer.
  */
 export const STYLE_PALETTES: Array<{ family: StyleFamily; entries: Array<{ style: StyleMeta; theme: Theme }> }> = [
   { family: "Heritage", entries: HERITAGE_STYLES.map((style) => ({ style, theme: THEMES[style.defaultTheme] })) },

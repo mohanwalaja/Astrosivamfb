@@ -15,10 +15,9 @@ import { SERVICES } from "../data/services";
 import { THEMES } from "../data/brand";
 import type { DownloadFile, ThemeKey } from "../types";
 import { buildZip, downloadText, downloadZip, saveBlob, slugify } from "../lib/export";
-import { assetsCsv, calendarCsv, fbCaption, fullPackMarkdown, hashtagMarkdown, igCaption } from "../lib/pack";
-import { PACK_SUMMARY, brandPackFiles, servicePackFiles } from "../lib/packBuilder";
+import { PACK_SUMMARY, assetsCsv, brandPackFiles, calendarCsv, fbCaption, festivalPackFiles, festivalYearFiles, fullPackMarkdown, hashtagMarkdown, igCaption, servicePackFiles } from "../lib/packs";
 import { CARD_LANGUAGES, CARD_STYLES, type CardLanguage, type FestivalStyle } from "../lib/festivalCreative";
-import { festivalPackFiles, festivalYearFiles } from "../lib/festivalPack";
+
 import { FESTIVALS, getFestival } from "../data/festivals";
 import { festivalDateView } from "../lib/festivalKit";
 import { Callout, CopyButton, ExportProgress, PageHeader, Panel, SectionLabel, useToast } from "./ui";
@@ -42,6 +41,8 @@ const zipAndSave = (files: DownloadFile[], filename: string) => {
   return { bytes: blob.size, count: files.length };
 };
 
+type Progress = (done: number, total: number) => void;
+
 export const ExportCenter: React.FC = () => {
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
@@ -50,102 +51,98 @@ export const ExportCenter: React.FC = () => {
   const [festivalStyle, setFestivalStyle] = useState<FestivalStyle>("traditional");
   const festivalLanguage: CardLanguage = "en";
 
-  const runBrand = async () => {
-    setBusy("brand");
-    setProgress({ label: "Building brand pack", done: 0, total: 1 });
+  /** One runner for every pack: build the file list, zip it, toast the result. */
+  const runPack = async (args: {
+    busyKey: string;
+    label: string;
+    total: number;
+    build: (onProgress?: Progress) => Promise<{ files: DownloadFile[]; warnings?: string[] } & object>;
+    zipName: string;
+    done: string;
+    /** Failure toast reads `${failed} — ${reason}. ${failedHint}`. */
+    failed: string;
+    failedHint: string;
+  }) => {
+    setBusy(args.busyKey);
+    setProgress({ label: args.label, done: 0, total: args.total });
     try {
-      const { files } = await brandPackFiles((done, total) => setProgress({ label: "Building brand pack", done, total }));
-      const { count, bytes } = zipAndSave(files, `astrosivam_brand-pack_${stamp()}.zip`);
-      toast(`Brand pack downloaded · ${count} files · ${megabytes(bytes)}`);
+      const built = await args.build((done, total) => setProgress({ label: args.label, done, total }));
+      const { count, bytes } = zipAndSave(built.files, args.zipName);
+      toast(`${args.done} · ${count} files · ${megabytes(bytes)}`);
+      if (built.warnings?.length) toast(built.warnings[0], "error");
     } catch (error) {
-      toast(`Brand pack failed — ${reason(error)}. Try one format from the Asset Studio.`, "error");
+      toast(`${args.failed} — ${reason(error)}. ${args.failedHint}`, "error");
     } finally {
       setBusy(null);
       setProgress(null);
     }
   };
 
-  const runService = async (serviceId: string) => {
+  const runBrand = () =>
+    runPack({
+      busyKey: "brand",
+      label: "Building brand pack",
+      total: 1,
+      build: (onProgress) => brandPackFiles(onProgress),
+      zipName: `astrosivam_brand-pack_${stamp()}.zip`,
+      done: "Brand pack downloaded",
+      failed: "Brand pack failed",
+      failedHint: "Try one format from the Creative Studio.",
+    });
+
+  const runService = (serviceId: string) => {
     const service = SERVICES.find((item) => item.id === serviceId);
     if (!service) return;
-    setBusy(serviceId);
-    const label = `Building ${service.shortName} pack`;
-    setProgress({ label, done: 0, total: 1 });
-    try {
-      const { files } = await servicePackFiles(service, service.theme, undefined, (done, total) =>
-        setProgress({ label, done, total }),
-      );
-      const { count, bytes } = zipAndSave(files, `astrosivam_${slugify(service.shortName)}-pack_${stamp()}.zip`);
-      toast(`${service.name} pack downloaded · ${count} files · ${megabytes(bytes)}`);
-    } catch (error) {
-      toast(`${service.name} pack failed — ${reason(error)}. Try again, or download one format from the Asset Studio.`, "error");
-    } finally {
-      setBusy(null);
-      setProgress(null);
-    }
+    return runPack({
+      busyKey: serviceId,
+      label: `Building ${service.shortName} pack`,
+      total: 1,
+      build: (onProgress) => servicePackFiles(service, service.theme, undefined, onProgress),
+      zipName: `astrosivam_${slugify(service.shortName)}-pack_${stamp()}.zip`,
+      done: `${service.name} pack downloaded`,
+      failed: `${service.name} pack failed`,
+      failedHint: "Try again, or download one format from the Creative Studio.",
+    });
   };
 
-  const runFestival = async () => {
+  /** The festival pack config Export Center renders with. */
+  const festivalConfig: Parameters<typeof festivalPackFiles>[1] = {
+    style: festivalStyle,
+    language: festivalLanguage,
+    format: "ig-post",
+    theme: null,
+    display: null,
+    script: null,
+    logo: null,
+    artOverride: null,
+    year: "next",
+  };
+
+  const runFestival = () => {
     const festival = getFestival(festivalId);
-    setBusy(`festival-${festival.id}`);
-    setProgress({ label: `Rendering ${festival.name}`, done: 0, total: 5 });
-    try {
-      const { files, warnings } = await festivalPackFiles(
-        festival,
-        {
-          style: festivalStyle,
-          language: festivalLanguage,
-          format: "ig-post",
-          theme: null,
-          display: null,
-          script: null,
-          logo: null,
-          artOverride: null,
-          year: "next",
-        },
-        (done, total) => setProgress({ label: `Rendering ${festival.name}`, done, total }),
-      );
-      const { count, bytes } = zipAndSave(files, `astrosivam_${slugify(festival.id)}_${festivalStyle}_festival.zip`);
-      toast(`${festival.name} pack downloaded · ${count} files · ${megabytes(bytes)}`);
-      if (warnings.length) toast(warnings[0], "error");
-    } catch (error) {
-      toast(`Festival pack failed — ${reason(error)}. Try again.`, "error");
-    } finally {
-      setBusy(null);
-      setProgress(null);
-    }
+    return runPack({
+      busyKey: `festival-${festival.id}`,
+      label: `Rendering ${festival.name}`,
+      total: 5,
+      build: (onProgress) => festivalPackFiles(festival, festivalConfig, onProgress),
+      zipName: `astrosivam_${slugify(festival.id)}_${festivalStyle}_festival.zip`,
+      done: `${festival.name} pack downloaded`,
+      failed: "Festival pack failed",
+      failedHint: "Try again.",
+    });
   };
 
-  const runFestivalYear = async () => {
-    setBusy("festival-year");
-    setProgress({ label: "Rendering the festival year", done: 0, total: FESTIVALS.length + 1 });
-    try {
-      const { files } = await festivalYearFiles(
-        {
-          style: festivalStyle,
-          language: festivalLanguage,
-          format: "ig-post",
-          theme: null,
-          display: null,
-          script: null,
-          logo: null,
-          artOverride: null,
-          year: "next",
-        },
-        (done, total) => setProgress({ label: "Rendering the festival year", done, total }),
-      );
-      const { count, bytes } = zipAndSave(files, `astrosivam_festival-year_${festivalStyle}.zip`);
-      toast(`Festival year downloaded · ${count} files · ${megabytes(bytes)}`);
-    } catch (error) {
-      toast(
-        `Festival year failed — ${reason(error)}. The year pack is large; close other tabs and try again.`,
-        "error",
-      );
-    } finally {
-      setBusy(null);
-      setProgress(null);
-    }
-  };
+  const runFestivalYear = () =>
+    runPack({
+      busyKey: "festival-year",
+      label: "Rendering the festival year",
+      total: FESTIVALS.length + 1,
+      build: (onProgress) => festivalYearFiles(festivalConfig, onProgress),
+      zipName: `astrosivam_festival-year_${festivalStyle}.zip`,
+      done: "Festival year downloaded",
+      failed: "Festival year failed",
+      failedHint: "The year pack is large; close other tabs and try again.",
+    });
 
   const download = (content: string, filename: string, type: string, message: string) => {
     downloadText(content, filename, type);

@@ -1,5 +1,4 @@
 import type { StyleKey, ThemeKey } from "../types";
-import { englishCopy, englishText } from "./englishCopy";
 import {
   type ImageOptions,
   type ImageBox,
@@ -14,7 +13,6 @@ import {
   drawLogoMark,
   drawMedallionRing,
   drawToran,
-  fontsFor,
   frameFor,
   hairline,
   mutedOn,
@@ -22,15 +20,13 @@ import {
   paintStyledGround,
   roundRect,
   styleMotif,
-  themeFor,
   toBullets,
-  tracked,
   withAlpha,
 } from "./posterKit";
 import { brandSize, brandSpot, drawGlobalLockup } from "./brandPlacement";
-import { ensureFonts, loadImageSource, loadLogo } from "./canvas";
-import { TypeLog, auditLegibility, LEGIBILITY_MINIMUMS, type TypedDraw, type TypeRole } from "./legibility";
-import { ellipsize, lineHop, wrapAll as wrapAllShared } from "./typeset";
+import { drawSocialText, renderSocialCreative, type SocialScene } from "./socialCreative";
+import { auditLegibility, LEGIBILITY_MINIMUMS, type TypedDraw, type TypeRole } from "./legibility";
+import { ellipsize, fontPx as px, lineHop, wrapAll as wrapAllShared } from "./typeset";
 
 // Re-exported so existing imports keep working; the implementation lives in the
 // shared module now that the Instagram renderer measures the same way.
@@ -169,65 +165,18 @@ export interface FbRender {
 }
 
 /* --------------------------------- shared -------------------------------- */
+/* Scene, the logged text painter and the render entry point live in
+   `socialCreative.ts`, shared with the Instagram renderer. */
 
-interface Scene {
-  ctx: CanvasRenderingContext2D;
-  W: number;
-  H: number;
-  theme: ReturnType<typeof themeFor>;
-  fonts: ReturnType<typeof fontsFor>;
-  content: FbContent;
-  art: HTMLImageElement | null;
-  logo: HTMLImageElement | null;
-  log: TypeLog;
-  style: StyleKey;
-  /** Editor-only crop guide; suppressed on export. */
-  showSafeArea: boolean;
-  /** Copy decisions the painter had to make, surfaced to the editor. */
-  warnings: string[];
-}
-
-const drawText = (
-  scene: Scene,
-  role: TypeRole,
-  text: string,
-  x: number,
-  y: number,
-  font: string,
-  color: string,
-  options: { align?: CanvasTextAlign; baseline?: CanvasTextBaseline; tracking?: number } = {},
-) => {
-  const { ctx } = scene;
-  ctx.save();
-  ctx.font = font;
-  ctx.fillStyle = color;
-  ctx.textAlign = options.align ?? "left";
-  ctx.textBaseline = options.baseline ?? "top";
-  const size = Number(/(\d+(?:\.\d+)?)px/.exec(font)?.[1] ?? 0);
-  if (options.tracking) {
-    tracked(ctx, text, x, y, options.tracking, options.align ?? "left");
-  } else {
-    ctx.fillText(text, x, y);
-  }
-  ctx.restore();
-  scene.log.add(role, size, text);
-};
-
-const px = (font: string) => Number(/(\d+(?:\.\d+)?)px/.exec(font)?.[1] ?? 0);
+type Scene = SocialScene<FbContent>;
+const drawText = drawSocialText;
 
 /**
- * Wrap by measured width, never dropping a word.
- *
- * The earlier version stopped at `maxLines` and silently discarded the rest —
- * "Ten poruthams, one honest answer." lost "answer." and still passed the
- * legibility audit, because the audit measures the type that was drawn. This
- * returns every line; `fitHeadline` then finds a size that fits the cap.
+ * Find a headline size that fits the line cap without dropping a word.
+ * Wrapping returns every line; this then shrinks until they fit — the earlier
+ * clip-at-maxLines version silently discarded the tail and still passed the
+ * legibility audit, because the audit measures only the type that was drawn.
  */
-function wrapAll(ctx: CanvasRenderingContext2D, text: string, width: number): string[] {
-  return wrapAllShared(ctx, text, width);
-}
-
-/** Chords that must stay together, so a fit never leaves an orphan word. */
 function fitHeadline(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -241,7 +190,7 @@ function fitHeadline(
   ctx.save();
   for (;;) {
     ctx.font = font(size);
-    const lines = wrapAll(ctx, text, width);
+    const lines = wrapAllShared(ctx, text, width);
     if (lines.length <= maxLines || size <= min) {
       ctx.restore();
       return { size, lines };
@@ -881,60 +830,31 @@ const PAINTERS: Record<FbLayout, (scene: Scene) => void> = {
 
 /* --------------------------------- render -------------------------------- */
 
-export async function renderFbCreative(input: FbCreativeInput): Promise<FbRender> {
-  input = { ...input, content: englishCopy(input.content) };
-  // Fonts must be resident before the first measurement: `fitLines` and
-  // `measureText` are what decide the size, and a face that arrives late makes
-  // every wrapped line the wrong length — which shows up as overflow in export.
-  await ensureFonts();
-  const meta = FB_LAYOUT_MAP[input.layout] ?? FB_LAYOUT_MAP["service-promo"];
-  const scale = input.scale ?? 1;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(meta.width * scale);
-  canvas.height = Math.round(meta.height * scale);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("This browser cannot render the creative.");
-  if (scale !== 1) ctx.scale(scale, scale);
-
-  const theme = themeFor(input.themeKey);
-  const logo = await loadLogo().catch(() => null);
-  const art = input.art ? await loadImageSource(input.art).catch(() => null) : null;
-  const log = new TypeLog();
-  const warnings: string[] = [];
-
-  const scene: Scene = {
-    ctx,
-    W: meta.width,
-    H: meta.height,
-    theme,
-    fonts: fontsFor("classic"),
-    content: input.content,
-    art,
-    logo,
-    log,
-    style: input.style,
-    showSafeArea: false,
-    warnings,
-  };
-  (PAINTERS[meta.key] ?? servicePromo)(scene);
-
-  // Safe-area overlay is an editor aid only; it must never reach an export.
-  if (input.showSafeArea && meta.safeArea) {
-    const { x, y, w, h, label } = meta.safeArea;
-    ctx.save();
-    ctx.setLineDash([meta.width * 0.012, meta.width * 0.01]);
-    ctx.strokeStyle = "rgba(120,220,190,0.75)";
-    ctx.lineWidth = Math.max(2, meta.width * 0.0022);
-    if (meta.crop === "circle") {
-      ctx.beginPath();
-      ctx.arc(meta.width / 2, meta.height / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
-    } else {
-      ctx.rect(x, y, w, h);
-    }
-    ctx.stroke();
-    ctx.restore();
-    void label;
+/** Editor-only crop guide for the Facebook layouts; never reaches an export. */
+const paintFbSafeArea = (ctx: CanvasRenderingContext2D, meta: FbLayoutMeta) => {
+  if (!meta.safeArea) return;
+  const { x, y, w, h } = meta.safeArea;
+  ctx.save();
+  ctx.setLineDash([meta.width * 0.012, meta.width * 0.01]);
+  ctx.strokeStyle = "rgba(120,220,190,0.75)";
+  ctx.lineWidth = Math.max(2, meta.width * 0.0022);
+  if (meta.crop === "circle") {
+    ctx.beginPath();
+    ctx.arc(meta.width / 2, meta.height / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
+  } else {
+    ctx.rect(x, y, w, h);
   }
+  ctx.stroke();
+  ctx.restore();
+};
 
-  return { canvas, layout: meta, typography: log.entries, warnings };
+export async function renderFbCreative(input: FbCreativeInput): Promise<FbRender> {
+  const out = await renderSocialCreative({
+    input,
+    layouts: FB_LAYOUT_MAP,
+    fallback: "service-promo",
+    painters: PAINTERS,
+    paintSafeArea: (ctx, meta) => paintFbSafeArea(ctx, FB_LAYOUT_MAP[meta.key]),
+  });
+  return { canvas: out.canvas, layout: FB_LAYOUT_MAP[out.layout.key], typography: out.typography, warnings: out.warnings };
 }

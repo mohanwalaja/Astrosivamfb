@@ -41,7 +41,7 @@ export const FacebookSuite: React.FC = () => {
   return (
     <div>
       <PageHeader
-        eyebrow="Facebook suite"
+        eyebrow="Social suite · Facebook"
         title="A page that answers questions before they are asked."
         description="Facebook is where families research before they trust. Compose a post, check it at phone size, prepare the profile and cover, then publish — with Meta's own responses on screen, never a simulated success."
         actions={
@@ -54,7 +54,7 @@ export const FacebookSuite: React.FC = () => {
 
       <div className="mb-4">
         <Segmented
-          label="Facebook suite section"
+          label="Social suite · Facebook section"
           value={view}
           onChange={setView}
           options={SUITE_VIEWS.map((item) => ({ value: item.value, label: item.label }))}

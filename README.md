@@ -36,63 +36,20 @@ one palette family and one component grammar across every screen:
 
 - **Brand system** — logo usage, palette (9 themes grouped into five families), type, voice,
   boilerplate, the six design styles, seasonal overlays, handle strategy and safe areas.
-- **Profile & covers** — the identity set: two profile photos, two Facebook covers, the link card and
-  seven highlight covers, each downloadable on its own with the mobile crop drawn on.
-- **Asset Studio** — 18 formats rendered on canvas: profile photos, two Facebook covers, link card,
-  feed posts, a 7-slide carousel, stories, reel covers, seven highlight covers, panchangam card,
-  quote card, offer card, review card and the twelve-style contact sheet. Download a single PNG or a ZIP pack.
-- **Style gallery** — 12 art directions in two families, each with its own post layout, backdrop,
-  frame, palette and hashtag set, rendered side by side for every service:
-  - *Heritage* — Signature Gold, Thanjavur Court, Kolam Morning, Kanchipuram Silk, Gopuram Dusk,
-    Karthigai Deepam
-  - *Modern* — Mono Editorial, Paper Studio, Ephemeris, Aurum Minimal, Glass Nocturne, Orbit
-
-  Each carries its own ornament vocabulary, palette and hashtag set. Export one PNG, a ZIP of all of
-  them, or the contact sheet for sign-off.
-- **Poster studio** — a category-aware social design studio. Pick one of seven service identities
-  (Birth Jathagam, Wedding Matching, Baby Naming Letters, Subha Muhurtham, Navagraha, Festival
-  Greetings, Murugan Devotional), each with three occasion briefs, then edit the kicker, service
-  title, headline, supporting line, three facts, CTA and footer. **Posters are English-only** — the
-  renderer strips Tamil/Hindi at every canvas boundary and the language selectors were removed.
-  Choose from **twelve structurally distinct composition systems**, six formats (Instagram portrait
-  and square, Facebook portrait, landscape, story/reel and A4 print), four headline faces and six
-  curated palettes. All fonts are bundled locally. The canvas re-renders live, previews a 15-second
-  layered motion graphic, and exports a print-resolution PNG or an MP4/WebM clip. Switching
-  composition changes the layout only — copy, art, palette and fonts are kept.
-
-  The twelve systems are separate painters with their own geometry, not twelve recolours of one
-  skeleton. A pure planner (`compositionPlan.ts`) lays out safe areas, art shapes and text boxes per
-  format; a measured fitter (`compositionRender.ts`) sizes every line and throws rather than clip;
-  and a scored selector (`designSelector.ts`) never repeats a composition consecutively and never
-  uses one family three times in a row:
-
-  | System | Structure | Family |
-  | --- | --- | --- |
-  | Hero illustration | Full-bleed art, bottom scrim, lower-left type | Immersive |
-  | Type-led editorial | Rules, folio and a left type column, small art inset | Editorial |
-  | Asymmetric luxury | Off-centre colour block, art plate, right type column | Editorial |
-  | Mandala centrepiece | Concentric rings and 24 dots around a centred art medallion | Geometric |
-  | Diagonal geometry | Hard diagonal wedge splitting art and type | Geometric |
-  | Cosmic astrology | Dark atlas, orbits and particles, forced dark palette | Immersive |
-  | Split screen | Two fields — art above/beside, type below/beside | Narrative |
-  | Illustrated story | Arched art panel with a captioned story block | Narrative |
-  | Minimal luxury | Generous whitespace, small art stamp, centred type | Editorial |
-  | Infographic | Numbered fact rows with an art inset | Information |
-  | Layered collage | Rotated paper plates, shadow and a type band | Narrative |
-  | Cinematic devotional | Letterboxed art band, refined devotional type | Immersive |
-
-  The eight legacy templates (Temple Mandapam, Gallery Plate, Manifesto, Glass Nocturne, Guide Slide,
-  Offer Card, Festival Blessing, Series Cover) and the old five layouts still render, so saved
-  presets and the other screens keep working. `npm run samples` renders the legacy set;
-  `npx tsx tools/design-samples.mjs` renders 36 audited posters (24 category/occasion/format proofs
-  plus one per composition system) with a legibility/overflow report and two contact sheets.
-  `node tools/browser-audit.mjs` drives the real app in Chromium on desktop and Android viewports and
-  downloads a real PNG and motion file from each.
-
-  Every category brief also states the service plainly: the kicker says what happens
-  (`A written report, by email`), the subline says what you send and what arrives, and the call to
-  action names the purchase (`Order your jathagam`). The hook can still be beautiful — the
-  explanation underneath it is not allowed to be vague.
+- **Creative studio** — one surface with three views over the shared creative engine
+  (`src/lib/templates.ts` + `src/data/brand.ts`); there are no separate Asset Studio, Identity
+  set or Service Posts screens, and no style-gallery screen:
+  - *Assets* — 18 formats rendered on canvas: profile photos, two Facebook covers, link card,
+    feed posts, a 7-slide carousel, stories, reel covers, seven highlight covers, panchangam card,
+    quote card, offer card, review card and the twelve-style contact sheet. Download a single PNG
+    or a ZIP pack, with the content editor, art direction and palette controls beside the preview.
+  - *Identity set* — two profile photos, two Facebook covers, the link card and seven highlight
+    covers, each downloadable on its own (or as one identity-set ZIP) with the mobile crop drawn on.
+  - *Service posts* — the per-service desk described below, in the same studio.
+- **Poster compositions** — the twelve composition systems (planner `compositionPlan.ts`,
+  renderer `compositionRender.ts`, entry point `lib/poster.ts`) are the single poster engine,
+  used by the Plain-words campaign below. There is no freeform poster-studio screen; the legacy
+  template painters and the motion/reel exporter were removed with it.
 - **Plain-words campaign** — twelve posters written for a first-time reader. Astro Sivam is a new
   service, so each plate answers three questions before it decorates anything: what it is, why
   someone who cannot reach their own priest should use it, and what happens after they pay.
@@ -104,9 +61,8 @@ one palette family and one component grammar across every screen:
   *Marriage matching, explained in plain words.*, *Need a date? We check six months for you.*, *You
   can ask questions after the report arrives.* and *The right report for every age.*
 
-  The screen (`Plain-words posters`) renders every plate live, exports a 1080 × 1350 PNG, hands any
-  plate to the poster studio with one click, and keeps the Facebook caption and the Instagram cut
-  beside it. `npx tsx tools/plain-words.mjs` writes the same set to `posters/plain-words/` — twelve
+  The screen (`Plain-words posters`) renders every plate live, exports a 1080 × 1350 PNG, and keeps
+  the Facebook caption and the Instagram cut beside it. `npx tsx tools/plain-words.mjs` writes the same set to `posters/plain-words/` — twelve
   feed PNGs, the two lead hooks re-cut at 1080 × 1920 for stories, a contact sheet, a captions file
   and a legibility/overflow audit. Those files are deliverables and are committed on purpose.
   `tests/plain-words.test.ts` holds the contract: English-only, three facts at most, no headline over
@@ -143,14 +99,15 @@ one palette family and one component grammar across every screen:
 - **Deity art** — twelve painted deity portraits (Ganesha, Shiva, Murugan, Lakshmi, Saraswati, Durga,
   Krishna, Rama, Hanuman, Venkateswara, Ayyappa, Meenakshi) at 1200 px with 360 px thumbnails. Any of
   them can be turned on or off per poster; you can also upload your own image.
-- **Service posts** — Birth Jathagam, Kids Jathagam, Students Jathagam, Marriage Compatibility
+- **Service posts** (Creative studio → Service posts) — Birth Jathagam, Kids Jathagam, Students Jathagam, Marriage Compatibility
   (10 Poruthams), Baby Naming, Subha Muhurtham, Daily Panchangam, Rasi Palan, Transits & Sade Sati,
   and Samples & Trust. Each has a Facebook caption, Instagram caption, first comment, alt text,
   carousel script, reel script, three story frames and six hashtag mixes. Rasi Palan covers all
   12 Moon signs and Daily, Weekly, Monthly and Yearly readings; evergreen creative explains the
   service and deliberately does not freeze a date-specific forecast or rating.
-- **Instagram suite** — seven surfaces behind one tab bar, built on the same measurement discipline as
-  the Facebook suite:
+- **Social suite** — Facebook and Instagram behind one platform switch (there are no separate
+  Facebook/Instagram suite screens). *Instagram* — seven surfaces behind one tab bar, built on the same
+  measurement discipline as the Facebook view:
   - **Profile** — the 390 × 844 phone mockup with the real nine tiles, the seven seals and blank
     follower counts, beside the name field (30 characters), three bio options (150), the link stack and
     the profile-photo workflow (shown at 110 px and 32 px, uploaded in the app because the API cannot
@@ -184,7 +141,7 @@ one palette family and one component grammar across every screen:
   cover at the 124 px grid thumbnail and a highlight at 64 px. `tests/ig-creative.test.ts` pins the
   canvas sizes, safe zones and audit maths, and `npx tsx tmp/igsheet.mjs` renders all 21 assets and
   fails if any line falls below its role's floor.
-- **Facebook suite** — four sections behind one tab bar:
+  *Facebook* (Social suite) — four sections behind one tab bar:
   - **Post studio** — ready posts across four content categories (service, education, festival,
     trust), each with a distinct composition rather than one skeleton recoloured: a *service promo*
     (header band, type column, price panel, ticked deliverables, flat CTA), an *educational guide*
@@ -208,6 +165,13 @@ one palette family and one component grammar across every screen:
   (`auditWidth`, which is 640 px for a cropped cover rather than its full 1640 px), every painter logs
   the type it draws, and `auditLegibility` fails the build if any line falls below its role's floor.
   `tests/fb-legibility.test.ts` renders all five layouts and enforces that audit.
+
+  Both social renderers share one core (`src/lib/socialCreative.ts`): the scene, the logged text painter
+  and the render entry point. The platform files keep only their layout tables and painters,
+  because a Facebook cover cropped to 640 × 360 and an Instagram story with app-owned UI bands are
+  different compositions — the Facebook painter still returns copy warnings, the Instagram one
+  still declares its UI zones. Downloadable packs likewise live in one module (`src/lib/packs.ts`):
+  copy packs, creative ZIP packs and festival packs, all returning file lists for the caller to zip.
 - **Content calendar** — 30 days across four phases, filterable, exportable as CSV, plus a festival
   lane that reads the same verified date table as the greeting cards (provisional days marked, undated
   festivals deliberately absent) and exports its own CSV.
@@ -306,7 +270,7 @@ fields and grid order have no API. The **Instagram → API limits** tab lists al
 the daily publish cap is read from `content_publishing_limit` rather than assumed, because Meta's own
 documentation quotes both 50 and 100 posts per 24 hours.
 
-After setup, connect the Meta account once and select the Page. In **Service Posts**, **Festival Wishes**, **Poster Studio**, **Style Gallery**, the Facebook/Instagram feed composers, service ads, and Panchangam cards, tap **Publish now** beside a supported single-image design. That one click renders the selected artwork, loads its separate Facebook/Instagram captions and hashtags, validates the media, and publishes immediately—no download, copy/paste, or second confirmation. It targets the saved Facebook Page and its linked Instagram professional account when the design and account support Instagram; unsupported aspect ratios and vertical art default to Facebook only. If Meta is not connected or a check blocks the image, the publisher opens with the next required step; after first-time authorization, return to the design and tap Publish now again. PNG is converted to JPEG in the browser for Instagram. You can still open the general **Publish** composer to manually upload an image; manual uploads keep a review confirmation. This integration publishes one image at a time; it does not publish Reels, Stories, carousels, scheduled posts, or text-only posts. When both platforms are selected, Meta handles them separately, so one may succeed if the other fails; results are shown per platform. `/api/health` is public and returns only basic health/version information.
+After setup, connect the Meta account once and select the Page. In **Service Posts**, **Festival Wishes**, the Facebook/Instagram feed composers, service ads, and Panchangam cards, tap **Publish now** beside a supported single-image design. That one click renders the selected artwork, loads its separate Facebook/Instagram captions and hashtags, validates the media, and publishes immediately—no download, copy/paste, or second confirmation. It targets the saved Facebook Page and its linked Instagram professional account when the design and account support Instagram; unsupported aspect ratios and vertical art default to Facebook only. If Meta is not connected or a check blocks the image, the publisher opens with the next required step; after first-time authorization, return to the design and tap Publish now again. PNG is converted to JPEG in the browser for Instagram. You can still open the general **Publish** composer to manually upload an image; manual uploads keep a review confirmation. This integration publishes one image at a time; it does not publish Reels, Stories, carousels, scheduled posts, or text-only posts. When both platforms are selected, Meta handles them separately, so one may succeed if the other fails; results are shown per platform. `/api/health` is public and returns only basic health/version information.
 
 On Facebook, a photo upload alone only files the image in the Page's **Photos** tab; it does not create a distributed feed story. The publisher therefore uploads the image with `published=false`, then creates a Page post with `POST /{page-id}/feed` and `attached_media[0]` pointing at that photo. The returned feed post ID is what appears on the Page timeline and in followers' feeds. After publishing, the app reads the post back and reports `is_published`, `is_hidden` and `timeline_visibility`, repairing an unpublished or hidden post when Meta allows it. `GET /api/health` returns `publisher: facebook-feed-v2` so the operator can confirm the new PHP publisher is deployed. Instagram continues to use its own `/media` → `/media_publish` flow.
 
@@ -329,7 +293,7 @@ eight hours; a server restart signs existing sessions out.
 ## Notes
 
 - Creatives are drawn with the Canvas API at native resolution — no upscaling. The identity set is
-  generated in the app (Profile & covers → Download identity set), so exported files always match the
+  generated in the app (Creative studio → Identity set → Download identity set), so exported files always match the
   current brand data.
 - Brand fonts (Cinzel, Marcellus, Plus Jakarta Sans, Tiro Tamil, Baloo Thambi 2, Noto Sans Devanagari,
   Yatra One) are self-hosted WOFF2 files; canvas font loading has a timeout and uses system fallbacks.

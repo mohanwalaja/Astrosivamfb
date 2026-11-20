@@ -3,7 +3,7 @@ import { CalendarDays, Download, Filter, Sunrise } from "lucide-react";
 import { CALENDAR, CALENDAR_WEEKS, PILLARS } from "../data/calendar";
 import { FORMAT_MAP } from "../data/formats";
 import { getService } from "../data/services";
-import { calendarCsv } from "../lib/pack";
+import { calendarCsv } from "../lib/packs";
 import { datedFestivals } from "../lib/festivalKit";
 import { downloadText } from "../lib/export";
 import { Badge, Button, CopyButton, PageHeader, Panel, SectionLabel, Segmented, Toolbar, useToast } from "./ui";

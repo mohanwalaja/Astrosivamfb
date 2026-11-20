@@ -34,7 +34,7 @@ export const DEVA = (size: number, weight = 500) =>
   `${weight} ${size}px "Noto Sans Devanagari", "Noto Sans Devanagari Latin", "Plus Jakarta Sans", "Tiro Tamil", "Tiro Tamil Latin", ui-sans-serif, sans-serif`;
 export const TAMIL = (size: number, weight = 400) =>
   `${weight} ${size}px "Tiro Tamil", "Tiro Tamil Latin", "Baloo Thambi 2", "Baloo Thambi 2 Latin", "Noto Sans Devanagari", serif`;
-/* Poster Studio curated set. Each stack ends in the Indic faces so a mixed line never drops to .notdef. */
+/* Poster curated set. Each stack ends in the Indic faces so a mixed line never drops to .notdef. */
 export const CORMORANT = (size: number, weight = 600) =>
   `${weight} ${size}px "Cormorant Garamond", "Noto Serif Tamil", "Noto Serif Tamil Latin", "Noto Serif Devanagari", "Tiro Tamil", "Tiro Tamil Latin", Georgia, serif`;
 export const PLAYFAIR = (size: number, weight = 700) =>

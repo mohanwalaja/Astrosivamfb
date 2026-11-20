@@ -323,23 +323,3 @@ export async function renderComposition(options: CompositionRenderOptions): Prom
   audits.set(canvas, audit);
   return canvas;
 }
-export interface CompositionLayers { background: HTMLCanvasElement; art: HTMLCanvasElement; effects: HTMLCanvasElement; type: HTMLCanvasElement; brand: HTMLCanvasElement; audit: DesignAudit; width: number; height: number }
-export async function renderCompositionLayers(options: CompositionRenderOptions): Promise<CompositionLayers> {
-  const assets = await loadCompositionAssets(options);
-  const scale = options.scale ?? 1;
-  const make = (layer: SceneLayer) => { const { canvas, ctx } = createCanvas(options.width, options.height, scale); const audit = paintCompositionScene(ctx, { ...options, layer }, assets); return { canvas, audit }; };
-  const made: Array<{ canvas: HTMLCanvasElement }> = [];
-  const makeTracked = (layer: SceneLayer) => { const result = make(layer); made.push(result); return result; };
-  try {
-    const background = makeTracked("background"), art = makeTracked("art"), effects = makeTracked("effects"), type = makeTracked("type"), brand = makeTracked("brand");
-    const audit = type.audit;
-    audit.text = type.audit.text.concat(brand.audit.text);
-    audit.overflow.push(...brand.audit.overflow);
-    audit.logoBox = brand.audit.logoBox; audit.ctaBox = brand.audit.ctaBox;
-    if (audit.overflow.length) throw new Error(`This composition needs shorter copy (${audit.overflow[0]}).`);
-    return { background: background.canvas, art: art.canvas, effects: effects.canvas, type: type.canvas, brand: brand.canvas, audit, width: options.width, height: options.height };
-  } catch (error) {
-    for (const { canvas } of made) { canvas.width = 0; canvas.height = 0; }
-    throw error;
-  }
-}

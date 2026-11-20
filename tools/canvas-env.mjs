@@ -3,7 +3,7 @@
  *
  * The renderer is written against the DOM canvas API. This module maps that API
  * onto @napi-rs/canvas so the same layout code can be rendered to PNG in Node —
- * used by `npm run samples` and by the export/preview parity check. It is a
+ * used by the sample renderers and by the export/preview parity check. It is a
  * development tool only; nothing here is bundled into the app.
  */
 import { createCanvas, Image as SkiaImage, Path2D as SkiaPath2D, GlobalFonts } from "@napi-rs/canvas";

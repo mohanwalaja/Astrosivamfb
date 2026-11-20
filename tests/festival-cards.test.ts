@@ -10,7 +10,7 @@ import {
   DEFAULT_PACK,
   captionFileText,
   festivalPackFiles,
-} from "../src/lib/festivalPack.ts";
+} from "../src/lib/packs.ts";
 import {
   CAPTION_LIMITS,
   captionWarnings,

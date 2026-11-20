@@ -144,9 +144,7 @@ test("Facebook publishes a real Page feed post, not just a photo-library upload"
 test("single-image creative surfaces open the shared publisher with the rendered design", () => {
   for (const path of [
     "src/components/ServicePosts.tsx",
-    "src/components/StyleGallery.tsx",
     "src/components/FestivalWishes.tsx",
-    "src/components/PosterStudio.tsx",
     "src/components/ServiceAds.tsx",
     "src/components/Panchangam.tsx",
     "src/components/FbComposer.tsx",

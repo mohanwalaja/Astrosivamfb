@@ -500,7 +500,7 @@ export const BrandSystem: React.FC = () => {
                 </ul>
               </div>
               <div className="mt-4 rounded-lg border border-[rgba(143,191,165,0.2)] bg-[rgba(143,191,165,0.05)] p-3 text-[11px] leading-relaxed text-[#A8C6B6]">
-                The Asset Studio draws every file at native resolution, so there is no upscaling anywhere in this pack.
+                The Creative Studio draws every file at native resolution, so there is no upscaling anywhere in this pack.
               </div>
             </div>
           </Panel>

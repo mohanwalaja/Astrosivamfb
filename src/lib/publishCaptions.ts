@@ -1,6 +1,6 @@
 import { STYLE_TAG_SETS } from "../data/brand";
 import type { Service, StyleKey } from "../types";
-import { fbCaption, igCaption } from "./pack";
+import { fbCaption, igCaption } from "./packs";
 import type { PlatformCaptions } from "./publishContext";
 
 const TAG_PATTERN = /#[\p{L}\p{N}_]+/gu;

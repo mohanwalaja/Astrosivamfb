@@ -175,12 +175,51 @@ function lastSankranti(jd: number): number {
   return hi;
 }
 
-/** Sunrise on the civil day that contains `jd`, in the observer's zone. */
-function sunriseOf(jd: number, observer: Observer): Date | null {
-  return sunRiseSet(observerCivilDay(jdToDate(jd), observer), observer).rise;
+/** The moment the Sun next enters a new sidereal sign. */
+function nextSankranti(jd: number): number {
+  const sign = sunSignIndex(jd);
+  const step = 0.25; // six hours
+  let previous = jd;
+  let probe = jd;
+  for (let i = 0; i < 200; i += 1) {
+    probe += step;
+    if (sunSignIndex(probe) !== sign) {
+      let lo = previous;
+      let hi = probe;
+      for (let k = 0; k < 40; k += 1) {
+        const mid = (lo + hi) / 2;
+        if (sunSignIndex(mid) === sign) lo = mid;
+        else hi = mid;
+      }
+      return hi;
+    }
+    previous = probe;
+  }
+  return jd;
 }
 
 const startOfCivilDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+/**
+ * The civil day a Tamil solar month opens on, given its sankranti moment.
+ *
+ * Almanac convention: a sankranti that falls in the day's first three-fifths
+ * (before aparahna) opens the month that same day; a later sankranti opens
+ * it the next morning. This is the rule that reproduces the printed 2026
+ * Tamil dates — Thai 1 on 15 Jan (Makara sankranti mid-afternoon on the
+ * 14th), Chithirai 1 on 14 Apr (Mesha sankranti mid-morning) and Aani 1 on
+ * 15 Jun (Mithuna sankranti just past midday). A sunrise-only rule puts
+ * every morning sankranti a day late; a sunset-only rule puts Thai Pongal
+ * a day early. Vakkiya almanacs, whose sankranti moments themselves run
+ * later, can still differ by a day in some months.
+ */
+function monthStartDate(momentJd: number, observer: Observer): Date {
+  const civilDay = observerCivilDay(jdToDate(momentJd), observer);
+  const { rise, set } = sunRiseSet(civilDay, observer);
+  if (!rise || !set) return civilDay;
+  const aparahna = rise.getTime() + (set.getTime() - rise.getTime()) * 0.6;
+  return jdToDate(momentJd).getTime() <= aparahna ? civilDay : new Date(civilDay.getTime() + DAY_MS);
+}
 
 /**
  * Represent the observer's civil date as a local-midnight Date. Date inputs to
@@ -224,27 +263,30 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
   const karanaEnd = nextChange(jd, karanaIndex);
 
   const signIndex = sunSignIndex(jd);
-  const sankranti = lastSankranti(jd);
-  // The month's day is counted in sunrises: a sankranti before sunrise makes
-  // that day day 1, a sankranti after sunrise makes the next day day 1.
-  const sankrantiSunrise = sunriseOf(sankranti, observer);
-  let firstDay: Date;
-  if (!sankrantiSunrise) {
-    firstDay = observerCivilDay(jdToDate(sankranti), observer);
-  } else {
-    const sankrantiDay = observerCivilDay(sankrantiSunrise, observer);
-    firstDay =
-      sankranti <= julianDay(sankrantiSunrise)
-        ? sankrantiDay
-        : new Date(sankrantiDay.getTime() + DAY_MS);
+  let monthSign = signIndex;
+  let firstDay = monthStartDate(lastSankranti(jd), observer);
+  // The month can open later today: when this evening's sankranti (or this
+  // morning's, after sunrise) opens the new month today, today is day 1 of
+  // it — Tamil New Year is Chithirai 1 even though the Sun crosses mid-morning.
+  const upcomingStart = monthStartDate(nextSankranti(jd), observer);
+  if (day.getTime() >= upcomingStart.getTime()) {
+    monthSign = (signIndex + 1) % 12;
+    firstDay = upcomingStart;
   }
   const tamilDay = Math.round((day.getTime() - firstDay.getTime()) / DAY_MS) + 1;
 
-  // The Tamil year turns at Mesha sankranti, so the samvatsara is looked up from
-  // the Shaka year of the most recent Mesha crossing.
-  const meshaSankranti = lastMeshaSankranti(jd);
-  const yearStart = observerCivilDay(jdToDate(meshaSankranti), observer);
-  const shakaYear = yearStart.getFullYear() - 78;
+  // The Tamil year opens with Chithirai, so the samvatsara belongs to the
+  // Mesha sankranti whose month-opening day is the latest one not after
+  // today. (The Shaka year of that April gives the 60-year cycle slot.)
+  let meshaStart = monthStartDate(lastMeshaSankranti(jd), observer);
+  if (day.getTime() < meshaStart.getTime()) {
+    meshaStart = monthStartDate(lastMeshaSankranti(jd - 370), observer);
+  }
+  if (monthSign === 0 && firstDay.getTime() > meshaStart.getTime()) {
+    // Chithirai opened today on a sankranti that is still ahead of sunrise.
+    meshaStart = firstDay;
+  }
+  const shakaYear = meshaStart.getFullYear() - 78;
   const samvatsara = samvatsaraName(shakaYear);
 
   const vara = varaName(day.getDay());
@@ -259,11 +301,11 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
       counter: `${((shakaYear + 11) % 60) + 1} / 60`,
       detail: `Shaka ${shakaYear}`,
     },
-    ayana: { ...limb("ayana", AYANA_NAMES[ayanaIndex(signIndex)]), detail: RASI_NAMES[signIndex].en },
-    ritu: { ...limb("ritu", RITUS[rituIndex(signIndex)]), detail: "Two solar months" },
+    ayana: { ...limb("ayana", AYANA_NAMES[ayanaIndex(monthSign)]), detail: RASI_NAMES[monthSign].en },
+    ritu: { ...limb("ritu", RITUS[rituIndex(monthSign)]), detail: "Two solar months" },
     masam: {
-      ...limb("masam", TAMIL_MONTHS[signIndex]),
-      detail: `${RASI_NAMES[signIndex].en} · day ${tamilDay}`,
+      ...limb("masam", TAMIL_MONTHS[monthSign]),
+      detail: `${RASI_NAMES[monthSign].en} · day ${tamilDay}`,
       counter: `${tamilDay}`,
     },
     paksham: { ...limb("paksham", PAKSHA_NAMES[paksha]), detail: paksha === 0 ? "Waxing to Purnima" : "Waning to Amavasya" },
@@ -298,6 +340,7 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
   };
 
   /* ---- the day's windows ---- */
+  const weekday = day.getDay();
   const muhurta = dayLengthMs / 15;
   const segment = dayLengthMs / 8;
   const offset = (n: number) => new Date(sunrise.getTime() + n * segment);
@@ -306,7 +349,6 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
   const RAHU_SEGMENT = [7, 1, 6, 4, 5, 3, 2];
   const YAMA_SEGMENT = [4, 3, 2, 1, 0, 6, 5];
   const GULIKA_SEGMENT = [6, 5, 4, 3, 2, 1, 0];
-  const weekday = day.getDay();
 
   const inauspicious: Window[] = [
     {
@@ -340,14 +382,21 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
       end: new Date(sunrise.getTime() - 48 * MINUTE_MS),
       note: "The hour before dawn — japa, study and prayer.",
     },
-    {
-      label: "Abhijit Muhurta",
-      tamil: "அபிஜித் முஹூர்த்தம்",
-      // one muhurta wide, centred on noon: half of the 1/15th muhurta
-      start: new Date(midday.getTime() - muhurta / 2),
-      end: new Date(midday.getTime() + muhurta / 2),
-      note: "The eighth muhurta of the day — good for most beginnings.",
-    },
+    // Abhijit is the one muhurta almost every tradition trusts — except on a
+    // Wednesday, when it is not counted at all. Rather than print a window
+    // the almanacs would strike out, it is omitted and the caveats say why.
+    ...(weekday === 3
+      ? []
+      : [
+          {
+            label: "Abhijit Muhurta",
+            tamil: "அபிஜித் முஹூர்த்தம்",
+            // one muhurta wide, centred on noon: half of the 1/15th muhurta
+            start: new Date(midday.getTime() - muhurta / 2),
+            end: new Date(midday.getTime() + muhurta / 2),
+            note: "The eighth muhurta of the day — good for most beginnings.",
+          },
+        ]),
     {
       label: "Godhuli Muhurta",
       tamil: "கோதூளி முஹூர்த்தம்",
@@ -373,9 +422,9 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
     sunSign: RASI_NAMES[signIndex],
     moonSign: RASI_NAMES[Math.floor(moonSid / 30)],
     tamilDate: {
-      month: TAMIL_MONTHS[signIndex],
+      month: TAMIL_MONTHS[monthSign],
       day: tamilDay,
-      text: `${TAMIL_MONTHS[signIndex].ta} ${tamilDay}`,
+      text: `${TAMIL_MONTHS[monthSign].ta} ${tamilDay}`,
     },
     limbs,
     limbsInOrder: LIMBS.map((meta) => limbs[meta.key]),
@@ -384,22 +433,30 @@ export function computePanchangam(date: Date, observer: Observer = CHENNAI): Pan
     caveats: [
       `Lahiri ayanamsa ${ayanamsa.toFixed(4)}° used for all sidereal positions.`,
       "Durmuhurtam, Varjyam and Amrita Kalam are ghati-based and vary between traditions — not printed here rather than printed wrong.",
+      ...(weekday === 3
+        ? ["Abhijit Muhurta is not counted on a Wednesday, so no Abhijit window is printed today."]
+        : []),
+      "Tamil month dates follow the almanac rule — a sankranti before aparahna (three-fifths of the day) opens the month that day, a later one the next morning. Vakkiya almanacs can differ by a day.",
     ],
   };
 }
 
 /** The most recent Mesha (Aries) sankranti — the start of the Tamil year. */
 function lastMeshaSankranti(jd: number): number {
-  // Mesha sankranti is around 14 April. Walk back in days until the Sun's
-  // sidereal longitude is just under 0°, then bisect.
-  let probe = jd;
+  // Walk back a day at a time watching the sidereal longitude wrap from
+  // just past 0° (Mesha) to just under 360° (Meena), then bisect the wrap.
+  // Testing only "longitude > 180°" fired on the very first step for any
+  // date from Tula to Meena (mid-October to mid-April) and returned
+  // "yesterday" as the year start — which printed the *next* samvatsara
+  // for half the year.
+  let later = jd;
+  let laterSidereal = siderealSun(jd);
   for (let i = 0; i < 400; i += 1) {
-    probe -= 1;
-    const sidereal = siderealSun(probe);
-    if (sidereal > 180) {
-      // we have crossed back past Mesha into Meena
-      let lo = probe;
-      let hi = probe + 1;
+    const earlier = later - 1;
+    const earlierSidereal = siderealSun(earlier);
+    if (earlierSidereal > 180 && laterSidereal <= 180) {
+      let lo = earlier;
+      let hi = later;
       for (let k = 0; k < 40; k += 1) {
         const mid = (lo + hi) / 2;
         if (siderealSun(mid) > 180) lo = mid;
@@ -407,6 +464,8 @@ function lastMeshaSankranti(jd: number): number {
       }
       return hi;
     }
+    later = earlier;
+    laterSidereal = earlierSidereal;
   }
   return jd;
 }

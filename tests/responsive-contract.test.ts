@@ -12,8 +12,8 @@ const CREATIVE = read("src/components/CreativeCanvas.tsx");
 const IG = read("src/components/IgCanvas.tsx");
 
 const workflowSections = [
-  "launch", "brand", "profile-cover", "assets", "styles", "poster", "panchangam",
-  "festivals", "services", "instagram", "facebook", "calendar", "hashtags", "mockups", "export",
+  "launch", "brand", "creative", "plain-words", "panchangam",
+  "festivals", "social", "calendar", "hashtags", "mockups", "export",
 ];
 
 test("the app has narrow, tablet and desktop navigation modes with an accessible drawer", () => {
@@ -55,7 +55,6 @@ test("heavy creative canvases defer off-screen work and keep their preview footp
 });
 
 test("image galleries use small lazy-decoded thumbnails and uploads expose visible keyboard focus", () => {
-  assert.match(read("src/components/PosterStudio.tsx"), /loading="lazy" decoding="async"/);
   assert.match(read("src/components/FbComposer.tsx"), /loading="lazy" decoding="async"/);
   const publisher = read("src/components/Publisher.tsx");
   assert.match(publisher, /className="upload-label[\s\S]*?<input[\s\S]*?type="file"[\s\S]*?Choose an image for the post/);

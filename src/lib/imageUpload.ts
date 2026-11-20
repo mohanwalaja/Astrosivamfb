@@ -5,7 +5,7 @@ import { sniffImage } from "./imageValidate";
  * Posters are rendered at 1080–2048 px, so 2400 px on the long edge is plenty
  * and keeps the data URL small enough to keep in component state.
  *
- * The file is checked before it is decoded: the poster studio passes whatever the
+ * The file is checked before it is decoded: callers pass whatever the
  * file picker returned, and a 60 MB RAW file or a renamed text file used to be
  * handed straight to `FileReader`/`Image`, where it either froze the tab or failed
  * with no explanation.

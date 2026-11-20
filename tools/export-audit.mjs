@@ -27,8 +27,8 @@ const { renderFbCreative, FB_LAYOUTS } = await import("../src/lib/fbCreative.ts"
 const { renderIgCreative, IG_LAYOUTS } = await import("../src/lib/igCreative.ts");
 const { renderServiceAd, AD_LAYOUTS } = await import("../src/lib/serviceAds.ts");
 const { renderFestivalCard, CARD_FORMATS } = await import("../src/lib/festivalCreative.ts");
-const { brandPackFiles, servicePackFiles } = await import("../src/lib/packBuilder.ts");
-const { festivalPackFiles, festivalYearFiles } = await import("../src/lib/festivalPack.ts");
+const { brandPackFiles, servicePackFiles } = await import("../src/lib/packs.ts");
+const { festivalPackFiles, festivalYearFiles } = await import("../src/lib/packs.ts");
 const { getFestival } = await import("../src/data/festivals.ts");
 const { buildZip, slugify } = await import("../src/lib/export.ts");
 const { STYLES } = await import("../src/data/brand.ts");
@@ -646,7 +646,7 @@ const yearPack = await festivalYearFiles(
 );
 await auditPack("festival-year", yearPack.files, 2, yearProgress);
 
-// The style gallery zips one export per art direction.
+// The art-direction pack zips one export per style (the same set Asset Studio offers).
 const styleFiles = [];
 for (const style of STYLES) {
   const canvas = await renderCreative({
@@ -676,7 +676,7 @@ for (const name of [
   "…",
   "Sri Rāma — 2026",
 ]) {
-  // Exactly the expression the poster studio uses to name a download.
+  // Exactly the expression poster downloads use to name a file.
   push(
     `poster “${name}”`,
     `${exportFileName(["astrosivam", "poster", slugify(name).slice(0, 40), "ig-post"])}_1080x1350.png`,

@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Download, PenLine, ShieldCheck } from "lucide-react";
-import type { PosterOptions } from "../lib/poster";
-import { renderPoster } from "../lib/poster";
+import { Download, ShieldCheck } from "lucide-react";
+import { renderPoster, type PosterOptions } from "../lib/poster";
 import { downloadCanvas } from "../lib/export";
-import { requestStudio, type PosterState } from "../lib/studioState";
 import {
   PLAIN_WORDS,
   plainWordsCaption,
@@ -20,32 +18,27 @@ import { Button, Callout, CopyButton, PageHeader, Panel, PreviewFrame, SectionLa
    what is being sold. So this screen leads with the explanation, shows the
    twelve plates that carry it, and keeps the caption beside each plate.
 
-   Every plate here is the same renderer the poster studio uses — the preview,
-   the download and the studio hand-off all come from one `PosterState`, so the
-   plate you see is the file you post.
+   Every plate is rendered by the shared composition engine (lib/poster) —
+   the preview and the download come from one `PosterOptions`, so the plate
+   you see is the file you post.
    ========================================================================== */
 
 const PREVIEW_WIDTH = 340;
 
-const toState = (poster: PlainWordsPoster): PosterState => ({
+const toState = (poster: PlainWordsPoster): PosterOptions => ({
   width: poster.width,
   height: poster.height,
   themeKey: poster.theme,
   style: "signature",
-  layout: "split",
   template: poster.composition,
   display: poster.display,
-  script: "serif",
   image: poster.image,
   imageIsLibrary: true,
-  imageFit: "full",
   category: poster.category,
   occasion: poster.occasion,
   serviceTitle: poster.copy.serviceTitle,
   kicker: poster.copy.kicker,
   headline: poster.copy.headline,
-  tamil: "",
-  hindi: "",
   subline: poster.copy.subline,
   facts: poster.copy.facts,
   cta: poster.copy.cta,
@@ -58,7 +51,7 @@ const toState = (poster: PlainWordsPoster): PosterState => ({
 const toOptions = (poster: PlainWordsPoster, scale: number): PosterOptions => ({ ...toState(poster), scale });
 
 /** One plate, rendered at the width it is shown at. */
-const Plate: React.FC<{ poster: PlainWordsPoster; onOpen: () => void }> = ({ poster, onOpen }) => {
+const Plate: React.FC<{ poster: PlainWordsPoster }> = ({ poster }) => {
   const toast = useToast();
   const holder = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<"idle" | "loading" | "ready" | "failed">("idle");
@@ -118,9 +111,6 @@ const Plate: React.FC<{ poster: PlainWordsPoster; onOpen: () => void }> = ({ pos
         <Button variant="gold" size="sm" onClick={download} loading={busy} icon={<Download className="h-3.5 w-3.5" />}>
           PNG
         </Button>
-        <Button variant="ghost" size="sm" onClick={onOpen} icon={<PenLine className="h-3.5 w-3.5" />}>
-          Open in studio
-        </Button>
         <CopyButton text={plainWordsCaption(poster)} label="Caption" />
       </div>
 
@@ -140,16 +130,7 @@ const Plate: React.FC<{ poster: PlainWordsPoster; onOpen: () => void }> = ({ pos
 
 const ONE_LINE = `${BRAND.name} prepares your jathagam online. You send your birth date, birth time and birth place. Our India-based priest team reviews the chart, and your PDF report and tax invoice arrive by email. Every report includes seven days of chat. Basic Birth Jathagam is US$5 (₹470), and your first order is free while we are in beta.`;
 
-export const PlainWords: React.FC<{ onNavigate?: (id: string) => void }> = ({ onNavigate }) => {
-  const open = (poster: PlainWordsPoster) => {
-    requestStudio({
-      state: toState(poster),
-      formatId: poster.height > 1500 ? "story" : "ig-post",
-      deityKey: null,
-      note: `“${poster.label}” loaded — edit the words, then export.`,
-    });
-    onNavigate?.("poster");
-  };
+export const PlainWords: React.FC = () => {
 
   return (
     <div>
@@ -162,11 +143,6 @@ export const PlainWords: React.FC<{ onNavigate?: (id: string) => void }> = ({ on
           </>
         }
         description="Astro Sivam is new, so the first job of a poster is not atmosphere — it is comprehension. Each plate below answers three questions before it decorates anything: what the service is, why someone who cannot reach their own priest should use it, and what happens after they pay. Prices and deliverables are quoted from the service records, never typed by hand."
-        actions={
-          <Button variant="quiet" onClick={() => onNavigate?.("poster")} icon={<PenLine className="h-3.5 w-3.5" />}>
-            Poster studio
-          </Button>
-        }
       />
 
       <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
@@ -201,7 +177,7 @@ export const PlainWords: React.FC<{ onNavigate?: (id: string) => void }> = ({ on
 
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {PLAIN_WORDS.map((poster) => (
-          <Plate key={poster.id} poster={poster} onOpen={() => open(poster)} />
+          <Plate key={poster.id} poster={poster} />
         ))}
       </div>
 
